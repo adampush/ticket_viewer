@@ -450,8 +450,10 @@ func TestRobotNextContractActionable(t *testing.T) {
 	bv := buildBvBinary(t)
 	env := t.TempDir()
 	// A is actionable and should be picked; B is blocked by A.
-	writeBeads(t, env, `{"id":"A","title":"Unblocker","status":"open","priority":1,"issue_type":"task"}
-{"id":"B","title":"Blocked","status":"open","priority":2,"issue_type":"task","dependencies":[{"issue_id":"B","depends_on_id":"A","type":"blocks"}]}`)
+	writeTickets(t, env, map[string]string{
+		"a.md": "---\nid: A\nstatus: open\npriority: 1\ntype: task\n---\n# Unblocker\n",
+		"b.md": "---\nid: B\nstatus: open\npriority: 2\ntype: task\ndeps: [A]\n---\n# Blocked\n",
+	})
 
 	var payload struct {
 		GeneratedAt string   `json:"generated_at"`
@@ -484,10 +486,10 @@ func TestRobotNextContractActionable(t *testing.T) {
 	if len(payload.Reasons) == 0 {
 		t.Fatalf("robot-next missing reasons")
 	}
-	if payload.ClaimCmd != "br update A --status=in_progress" {
+	if payload.ClaimCmd != "tk start A" {
 		t.Fatalf("unexpected claim_command: %q", payload.ClaimCmd)
 	}
-	if payload.ShowCmd != "br show A" {
+	if payload.ShowCmd != "tk show A" {
 		t.Fatalf("unexpected show_command: %q", payload.ShowCmd)
 	}
 }
@@ -596,7 +598,7 @@ func TestRobotUsageHintsPresent(t *testing.T) {
 	}
 }
 
-func TestRobotTriage_MixedSourcesAddsUsageHint(t *testing.T) {
+func TestRobotTriage_MixedSourcesNoLegacyHintInTKOnlyMode(t *testing.T) {
 	bv := buildBvBinary(t)
 	env := t.TempDir()
 
@@ -610,14 +612,9 @@ func TestRobotTriage_MixedSourcesAddsUsageHint(t *testing.T) {
 	}
 	runRobotJSON(t, bv, env, "--robot-triage", &payload)
 
-	found := false
 	for _, h := range payload.UsageHints {
 		if strings.Contains(h, "Both .tickets and Beads sources were detected") {
-			found = true
-			break
+			t.Fatalf("did not expect mixed-source beads hint in tk-only mode: %#v", payload.UsageHints)
 		}
-	}
-	if !found {
-		t.Fatalf("expected mixed-source usage hint, got: %#v", payload.UsageHints)
 	}
 }

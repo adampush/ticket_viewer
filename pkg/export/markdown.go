@@ -392,16 +392,37 @@ func generateQuickActions(issues []model.Issue, trackerMode ...string) string {
 	// Close in-progress items (most common action)
 	if len(inProgressIDs) > 0 {
 		sb.WriteString("# Close all in-progress items\n")
-		sb.WriteString(fmt.Sprintf("br close %s\n\n", strings.Join(inProgressIDs, " ")))
+		if isTK {
+			for _, id := range inProgressIDs {
+				sb.WriteString(fmt.Sprintf("tk close %s -r 'Completed'\n", id))
+			}
+			sb.WriteString("\n")
+		} else {
+			sb.WriteString(fmt.Sprintf("br close %s\n\n", strings.Join(inProgressIDs, " ")))
+		}
 	}
 
 	// Close open items
 	if len(openIDs) > 0 && len(openIDs) <= 10 {
 		sb.WriteString("# Close all open items\n")
-		sb.WriteString(fmt.Sprintf("br close %s\n\n", strings.Join(openIDs, " ")))
+		if isTK {
+			for _, id := range openIDs {
+				sb.WriteString(fmt.Sprintf("tk close %s -r 'Completed'\n", id))
+			}
+			sb.WriteString("\n")
+		} else {
+			sb.WriteString(fmt.Sprintf("br close %s\n\n", strings.Join(openIDs, " ")))
+		}
 	} else if len(openIDs) > 10 {
 		sb.WriteString(fmt.Sprintf("# Close open items (%d total, showing first 10)\n", len(openIDs)))
-		sb.WriteString(fmt.Sprintf("br close %s\n\n", strings.Join(openIDs[:10], " ")))
+		if isTK {
+			for _, id := range openIDs[:10] {
+				sb.WriteString(fmt.Sprintf("tk close %s -r 'Completed'\n", id))
+			}
+			sb.WriteString("\n")
+		} else {
+			sb.WriteString(fmt.Sprintf("br close %s\n\n", strings.Join(openIDs[:10], " ")))
+		}
 	}
 
 	// Bulk priority update for high-priority items

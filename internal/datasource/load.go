@@ -25,12 +25,8 @@ func LoadIssues(repoPath string) ([]model.Issue, error) {
 	if smartErr == nil {
 		return issues, nil
 	}
-	if meta != nil && meta.SelectedSource.Type == SourceTypeTicketsMarkdown {
-		return nil, smartErr
-	}
-
-	// Fall back to legacy JSONL-only loading
-	return loader.LoadIssues(repoPath)
+	_ = meta
+	return nil, smartErr
 }
 
 // LoadIssuesDetailed performs smart loading and returns source metadata.
@@ -85,7 +81,17 @@ func loadSmart(beadsDir, repoPath string) ([]model.Issue, *LoadMetadata, error) 
 		return nil, nil, fmt.Errorf("no valid sources discovered")
 	}
 
-	result, err := SelectBestSourceDetailed(sources, DefaultSelectionOptions())
+	ticketSources := make([]DataSource, 0, len(sources))
+	for _, source := range sources {
+		if source.Type == SourceTypeTicketsMarkdown {
+			ticketSources = append(ticketSources, source)
+		}
+	}
+	if len(ticketSources) == 0 {
+		return nil, nil, fmt.Errorf("no tk ticket sources discovered (.tickets/*.md)")
+	}
+
+	result, err := SelectBestSourceDetailed(ticketSources, DefaultSelectionOptions())
 	if err != nil {
 		return nil, nil, err
 	}

@@ -42,17 +42,17 @@ func TestFilterByRepo_CaseInsensitiveAndFlexibleSeparators(t *testing.T) {
 
 func TestRobotFlagsOutputJSON(t *testing.T) {
 	tmpDir := t.TempDir()
-	beads := `{"id":"A","title":"Root","status":"open","priority":1,"issue_type":"task"}
-{"id":"B","title":"Blocked","status":"blocked","priority":2,"issue_type":"task","dependencies":[{"depends_on_id":"A","type":"blocks"}]}`
-
-	if err := os.WriteFile(filepath.Join(tmpDir, ".beads.jsonl"), []byte(beads), 0644); err != nil {
-		t.Fatalf("write beads: %v", err)
+	ticketsDir := filepath.Join(tmpDir, ".tickets")
+	if err := os.MkdirAll(ticketsDir, 0o755); err != nil {
+		t.Fatalf("mkdir .tickets: %v", err)
 	}
-	if err := os.MkdirAll(filepath.Join(tmpDir, ".beads"), 0755); err != nil {
-		t.Fatalf("mkdir .beads: %v", err)
+	ticketA := "---\nid: A\nstatus: open\npriority: 1\ntype: task\n---\n# Root\n"
+	ticketB := "---\nid: B\nstatus: blocked\npriority: 2\ntype: task\ndeps: [A]\n---\n# Blocked\n"
+	if err := os.WriteFile(filepath.Join(ticketsDir, "a.md"), []byte(ticketA), 0o644); err != nil {
+		t.Fatalf("write ticket A: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(tmpDir, ".beads", "beads.jsonl"), []byte(beads), 0644); err != nil {
-		t.Fatalf("write beads dir: %v", err)
+	if err := os.WriteFile(filepath.Join(ticketsDir, "b.md"), []byte(ticketB), 0o644); err != nil {
+		t.Fatalf("write ticket B: %v", err)
 	}
 
 	// Build a temporary bv binary using the repo module

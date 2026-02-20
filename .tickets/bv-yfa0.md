@@ -1,6 +1,6 @@
 ---
 id: bv-yfa0
-status: open
+status: closed
 deps: [bv-n8vq]
 links: []
 created: 2026-02-20T21:43:08Z
@@ -71,3 +71,13 @@ Likely files:
 ## Artifacts
 
 - Runtime cutover notes and validation output in ticket notes.
+
+## Notes
+
+**2026-02-20T22:15:41Z**
+
+Implemented tk-only runtime cutover by removing implicit Beads fallback from datasource.LoadIssues and filtering smart source selection to tickets markdown sources only. Updated CLI load-path error messaging to require .tickets/*.md. Updated cmd tests to use .tickets fixtures instead of .beads fixtures for robot-plan/priority and TOON robot tests. Updated e2e contract expectation so tk-only mode no longer emits mixed-source Beads hint.
+
+**2026-02-20T22:15:49Z**
+
+Validation: go test ./internal/datasource/... passed; go test ./pkg/loader/... -run Tickets passed; go test ./cmd/bv/... passed; go test ./tests/e2e/... -run 'RobotNextContractActionableTK|RobotTriage_MixedSourcesNoLegacyHintInTKOnlyMode' passed; go build ./... passed; go vet ./... passed.

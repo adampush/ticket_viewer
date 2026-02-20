@@ -1287,7 +1287,7 @@ func main() {
 	loadStart := time.Now()
 	var issues []model.Issue
 	var beadsPath string
-	trackerMode := "beads"
+	trackerMode := "tk"
 	mixedSourceUsageHint := ""
 	var workspaceInfo *workspace.LoadSummary
 	var asOfResolved string // Resolved commit SHA when using --as-of (for robot output metadata)
@@ -1353,25 +1353,17 @@ func main() {
 		beadsDir := ""
 		var loadMeta *datasource.LoadMetadata
 		issues, loadMeta, err = datasource.LoadIssuesDetailed("")
-		if err != nil && (loadMeta == nil || loadMeta.SelectedSource.Type != datasource.SourceTypeTicketsMarkdown) {
-			issues, err = datasource.LoadIssues("")
-		}
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error loading issues: %v\n", err)
-			fmt.Fprintln(os.Stderr, "Make sure you are in a project initialized with tickets or beads data.")
+			fmt.Fprintln(os.Stderr, "Make sure you are in a project with .tickets/*.md files.")
 			os.Exit(1)
 		}
 		if loadMeta != nil {
-			if loadMeta.SelectedSource.Type == datasource.SourceTypeTicketsMarkdown {
-				trackerMode = "tk"
-			}
 			mixedSourceUsageHint = datasource.BuildMixedSourceUsageHint(loadMeta)
 		}
 		// Get beads file path for live reload (respects BEADS_DIR env var)
-		if trackerMode != "tk" {
-			beadsDir, _ = loader.GetBeadsDir("")
-			beadsPath, _ = loader.FindJSONLPath(beadsDir)
-		}
+		beadsDir = ""
+		beadsPath = ""
 
 		// Automatically ensure .bv/ is in .gitignore to prevent polluting git
 		// with search indexes, baselines, and other bv-specific files.
@@ -4894,7 +4886,7 @@ func main() {
 	}
 
 	if len(issues) == 0 {
-		fmt.Println("No issues found. Create some with 'br create'!")
+		fmt.Println("No issues found. Create some with 'tk create'!")
 		os.Exit(0)
 	}
 
@@ -7233,17 +7225,17 @@ func generateIdealLine(sprint *model.Sprint, totalIssues int) []model.BurndownPo
 }
 
 func claimCommandForTracker(id, trackerMode string) string {
-	if trackerMode == "tk" {
-		return fmt.Sprintf("tk start %s", id)
+	if trackerMode == "beads" {
+		return fmt.Sprintf("br update %s --status=in_progress", id)
 	}
-	return fmt.Sprintf("br update %s --status=in_progress", id)
+	return fmt.Sprintf("tk start %s", id)
 }
 
 func showCommandForTracker(id, trackerMode string) string {
-	if trackerMode == "tk" {
-		return fmt.Sprintf("tk show %s", id)
+	if trackerMode == "beads" {
+		return fmt.Sprintf("br show %s", id)
 	}
-	return fmt.Sprintf("br show %s", id)
+	return fmt.Sprintf("tk show %s", id)
 }
 
 // generateJQHelpers creates a markdown document with jq snippets for agent brief
