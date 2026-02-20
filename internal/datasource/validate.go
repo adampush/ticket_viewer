@@ -59,6 +59,8 @@ func ValidateSourceWithOptions(source *DataSource, opts ValidationOptions) error
 
 	var err error
 	switch source.Type {
+	case SourceTypeTicketsMarkdown:
+		err = validateTicketsMarkdown(source)
 	case SourceTypeSQLite:
 		err = validateSQLite(source, opts)
 	case SourceTypeJSONLLocal, SourceTypeJSONLWorktree:
@@ -75,6 +77,35 @@ func ValidateSourceWithOptions(source *DataSource, opts ValidationOptions) error
 
 	source.Valid = true
 	source.ValidationError = ""
+	return nil
+}
+
+func validateTicketsMarkdown(source *DataSource) error {
+	info, err := os.Stat(source.Path)
+	if err != nil {
+		return fmt.Errorf("cannot access path: %w", err)
+	}
+	if !info.IsDir() {
+		return fmt.Errorf("path is not a directory")
+	}
+
+	entries, err := os.ReadDir(source.Path)
+	if err != nil {
+		return fmt.Errorf("cannot read directory: %w", err)
+	}
+
+	count := 0
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".md") {
+			continue
+		}
+		count++
+	}
+	if count == 0 {
+		return fmt.Errorf("no ticket markdown files found")
+	}
+
+	source.IssueCount = count
 	return nil
 }
 

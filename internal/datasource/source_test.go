@@ -661,6 +661,164 @@ func TestFallbackChain_AllFail(t *testing.T) {
 	}
 }
 
+func TestDiscoverSources_TicketsOnly(t *testing.T) {
+	tmpDir := t.TempDir()
+	ticketsDir := filepath.Join(tmpDir, ".tickets")
+	if err := os.MkdirAll(ticketsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	content := "---\nid: tk-1\nstatus: open\npriority: 2\ntype: task\n---\n# Ticket 1\n"
+	if err := os.WriteFile(filepath.Join(ticketsDir, "tk-1.md"), []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	sources, err := DiscoverSources(DiscoveryOptions{
+		RepoPath:               tmpDir,
+		ValidateAfterDiscovery: true,
+	})
+	if err != nil {
+		t.Fatalf("DiscoverSources failed: %v", err)
+	}
+	if len(sources) == 0 {
+		t.Fatal("expected at least one source")
+	}
+	if sources[0].Type != SourceTypeTicketsMarkdown {
+		t.Fatalf("expected first source type %s, got %s", SourceTypeTicketsMarkdown, sources[0].Type)
+	}
+}
+
+func TestDiscoverSources_TicketsParentWalkFromNestedDir(t *testing.T) {
+	tmpDir := t.TempDir()
+	ticketsDir := filepath.Join(tmpDir, ".tickets")
+	if err := os.MkdirAll(ticketsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(ticketsDir, "tk-1.md"), []byte("---\nid: tk-1\nstatus: open\ntype: task\n---\n# T\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	nested := filepath.Join(tmpDir, "a", "b", "c")
+	if err := os.MkdirAll(nested, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	sources, err := DiscoverSources(DiscoveryOptions{
+		RepoPath:               nested,
+		ValidateAfterDiscovery: true,
+	})
+	if err != nil {
+		t.Fatalf("DiscoverSources failed: %v", err)
+	}
+	if len(sources) == 0 {
+		t.Fatal("expected sources from parent .tickets")
+	}
+	if sources[0].Type != SourceTypeTicketsMarkdown {
+		t.Fatalf("expected %s source, got %s", SourceTypeTicketsMarkdown, sources[0].Type)
+	}
+}
+
+func TestDiscoverSources_UsesTicketsDirEnvOverride(t *testing.T) {
+	tmpDir := t.TempDir()
+	ticketsDir := filepath.Join(tmpDir, "custom-tickets")
+	if err := os.MkdirAll(ticketsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(ticketsDir, "tk-1.md"), []byte("---\nid: tk-1\nstatus: open\ntype: task\n---\n# T\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("TICKETS_DIR", ticketsDir)
+
+	sources, err := DiscoverSources(DiscoveryOptions{
+		RepoPath:               tmpDir,
+		ValidateAfterDiscovery: true,
+	})
+	if err != nil {
+		t.Fatalf("DiscoverSources failed: %v", err)
+	}
+	if len(sources) == 0 {
+		t.Fatal("expected sources")
+	}
+	if sources[0].Type != SourceTypeTicketsMarkdown {
+		t.Fatalf("expected %s source, got %s", SourceTypeTicketsMarkdown, sources[0].Type)
+	}
+}
+
+func TestLoadIssues_TicketsOnlyRepoWithoutBeadsDir(t *testing.T) {
+	tmpDir := t.TempDir()
+	ticketsDir := filepath.Join(tmpDir, ".tickets")
+	if err := os.MkdirAll(ticketsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	content := "---\nid: tk-42\nstatus: open\npriority: 2\ntype: task\n---\n# Ticket 42\nThis is a test ticket.\n"
+	if err := os.WriteFile(filepath.Join(ticketsDir, "tk-42.md"), []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	issues, err := LoadIssues(tmpDir)
+	if err != nil {
+		t.Fatalf("LoadIssues failed: %v", err)
+	}
+	if len(issues) != 1 {
+		t.Fatalf("expected 1 issue, got %d", len(issues))
+	}
+	if issues[0].ID != "tk-42" {
+		t.Fatalf("expected tk-42, got %s", issues[0].ID)
+	}
+}
+
+func TestLoadIssues_MalformedTicketsDoNotFallbackToBeads(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	ticketsDir := filepath.Join(tmpDir, ".tickets")
+	if err := os.MkdirAll(ticketsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(ticketsDir, "bad.md"), []byte("# missing frontmatter\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	beadsDir := filepath.Join(tmpDir, ".beads")
+	if err := os.MkdirAll(beadsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	beadsContent := `{"id":"B-1","title":"Legacy","status":"open","issue_type":"task","created_at":"2026-01-01T00:00:00Z","updated_at":"2026-01-01T00:00:00Z"}` + "\n"
+	if err := os.WriteFile(filepath.Join(beadsDir, "issues.jsonl"), []byte(beadsContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := LoadIssues(tmpDir)
+	if err == nil {
+		t.Fatal("expected error when tickets are malformed")
+	}
+}
+
+func TestSelectBestSource_TicketsPrecedenceOverFresherBeads(t *testing.T) {
+	now := time.Now()
+	sources := []DataSource{
+		{
+			Type:     SourceTypeSQLite,
+			Path:     "/tmp/beads.db",
+			Priority: PrioritySQLite,
+			ModTime:  now,
+			Valid:    true,
+		},
+		{
+			Type:     SourceTypeTicketsMarkdown,
+			Path:     "/tmp/.tickets",
+			Priority: PriorityTicketsMarkdown,
+			ModTime:  now.Add(-2 * time.Hour),
+			Valid:    true,
+		},
+	}
+
+	selected, err := SelectBestSource(sources)
+	if err != nil {
+		t.Fatalf("SelectBestSource failed: %v", err)
+	}
+	if selected.Type != SourceTypeTicketsMarkdown {
+		t.Fatalf("expected tickets source precedence, got %s", selected.Type)
+	}
+}
+
 // Helper to create a test SQLite database with sample data
 func createTestSQLiteDB(t *testing.T, path string) {
 	db, err := sql.Open("sqlite", path)

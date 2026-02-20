@@ -48,3 +48,29 @@ func TestEmitScript_BashAndFish(t *testing.T) {
 		})
 	}
 }
+
+func TestEmitScript_TKCommands(t *testing.T) {
+	bv := buildBvBinary(t)
+	env := t.TempDir()
+	writeTickets(t, env, map[string]string{
+		"tk-a.md": "---\nid: A\nstatus: open\npriority: 1\ntype: task\n---\n# Unblocker\n",
+		"tk-b.md": "---\nid: B\nstatus: open\npriority: 2\ntype: task\ndeps: [A]\n---\n# Blocked\n",
+	})
+
+	cmd := exec.Command(bv, "--emit-script", "--script-limit=1", "--script-format=bash")
+	cmd.Dir = env
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("run failed: %v\n%s", err, out)
+	}
+	s := string(out)
+	if !strings.Contains(s, "tk show A") {
+		t.Fatalf("missing tk show command for A:\n%s", s)
+	}
+	if !strings.Contains(s, "# To claim: tk start A") {
+		t.Fatalf("missing tk claim command for A:\n%s", s)
+	}
+	if strings.Contains(s, "br show A") {
+		t.Fatalf("did not expect beads command in tk mode:\n%s", s)
+	}
+}

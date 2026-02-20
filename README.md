@@ -98,6 +98,24 @@ export BV_OUTPUT_FORMAT=toon
 bv --robot-help
 ```
 
+### Tracker Auto-Detection
+
+`bv` now supports both ticket sources and emits tracker-aware action commands in robot output.
+
+- If `.tickets/*.md` exists, `tk` mode is selected.
+- Otherwise Beads sources (`.beads/*.jsonl`, `beads.db`) are used.
+- If both are present, `.tickets` takes precedence and robot usage hints include a mixed-source diagnostic note.
+
+Examples:
+
+```bash
+# tk mode output includes `tk start <id>` / `tk show <id>`
+bv --robot-next
+
+# beads mode output includes `br update <id> --status=in_progress` / `br show <id>`
+bv --robot-next
+```
+
 **Output conventions**
 - stdout = JSON/TOON data only
 - stderr = diagnostics

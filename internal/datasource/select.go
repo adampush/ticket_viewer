@@ -90,6 +90,12 @@ func SelectBestSourceDetailed(sources []DataSource, opts SelectionOptions) (*Sel
 	if opts.PreferFreshest {
 		// Sort by: ModTime desc, then Priority desc
 		sort.Slice(valid, func(i, j int) bool {
+			if valid[i].Type == SourceTypeTicketsMarkdown && valid[j].Type != SourceTypeTicketsMarkdown {
+				return true
+			}
+			if valid[j].Type == SourceTypeTicketsMarkdown && valid[i].Type != SourceTypeTicketsMarkdown {
+				return false
+			}
 			if valid[i].ModTime.Equal(valid[j].ModTime) {
 				return valid[i].Priority > valid[j].Priority
 			}
@@ -98,6 +104,12 @@ func SelectBestSourceDetailed(sources []DataSource, opts SelectionOptions) (*Sel
 	} else {
 		// Sort by: Priority desc, then ModTime desc
 		sort.Slice(valid, func(i, j int) bool {
+			if valid[i].Type == SourceTypeTicketsMarkdown && valid[j].Type != SourceTypeTicketsMarkdown {
+				return true
+			}
+			if valid[j].Type == SourceTypeTicketsMarkdown && valid[i].Type != SourceTypeTicketsMarkdown {
+				return false
+			}
 			if valid[i].Priority == valid[j].Priority {
 				return valid[i].ModTime.After(valid[j].ModTime)
 			}
@@ -171,6 +183,8 @@ func buildSelectionReason(selected DataSource, candidates []DataSource, opts Sel
 
 	// Check source type
 	switch selected.Type {
+	case SourceTypeTicketsMarkdown:
+		reasons = append(reasons, "tk tickets markdown source")
 	case SourceTypeSQLite:
 		reasons = append(reasons, "SQLite is most authoritative")
 	case SourceTypeJSONLWorktree:
@@ -198,6 +212,12 @@ func SelectWithFallback(sources []DataSource, loadFunc func(DataSource) error, o
 
 	if opts.PreferFreshest {
 		sort.Slice(sorted, func(i, j int) bool {
+			if sorted[i].Type == SourceTypeTicketsMarkdown && sorted[j].Type != SourceTypeTicketsMarkdown {
+				return true
+			}
+			if sorted[j].Type == SourceTypeTicketsMarkdown && sorted[i].Type != SourceTypeTicketsMarkdown {
+				return false
+			}
 			if sorted[i].ModTime.Equal(sorted[j].ModTime) {
 				return sorted[i].Priority > sorted[j].Priority
 			}
@@ -205,6 +225,12 @@ func SelectWithFallback(sources []DataSource, loadFunc func(DataSource) error, o
 		})
 	} else {
 		sort.Slice(sorted, func(i, j int) bool {
+			if sorted[i].Type == SourceTypeTicketsMarkdown && sorted[j].Type != SourceTypeTicketsMarkdown {
+				return true
+			}
+			if sorted[j].Type == SourceTypeTicketsMarkdown && sorted[i].Type != SourceTypeTicketsMarkdown {
+				return false
+			}
 			if sorted[i].Priority == sorted[j].Priority {
 				return sorted[i].ModTime.After(sorted[j].ModTime)
 			}

@@ -303,6 +303,9 @@ type TriageOptions struct {
 
 	// History report for staleness analysis
 	History *correlation.HistoryReport
+
+	// TrackerMode controls command helper output. Supported values: "tk", "beads" (default).
+	TrackerMode string
 }
 
 // TrackRecommendationGroup groups recommendations by execution track (bv-87)
@@ -437,10 +440,10 @@ func ComputeTriageFromAnalyzer(analyzer *Analyzer, stats *GraphStats, issues []m
 	var recsByTrack []TrackRecommendationGroup
 	var recsByLabel []LabelRecommendationGroup
 	if opts.GroupByTrack {
-		recsByTrack = buildRecommendationsByTrack(recommendations, analyzer, unblocksMap)
+		recsByTrack = buildRecommendationsByTrack(recommendations, analyzer, unblocksMap, opts.TrackerMode)
 	}
 	if opts.GroupByLabel {
-		recsByLabel = buildRecommendationsByLabel(recommendations, unblocksMap)
+		recsByLabel = buildRecommendationsByLabel(recommendations, unblocksMap, opts.TrackerMode)
 	}
 
 	// Calculate staleness if history is available
@@ -475,7 +478,7 @@ func ComputeTriageFromAnalyzer(analyzer *Analyzer, stats *GraphStats, issues []m
 			Velocity:  projectVelocity,
 			Staleness: staleness,
 		},
-		Commands: buildCommands(topID),
+		Commands: buildCommands(topID, opts.TrackerMode),
 	}
 }
 
@@ -959,16 +962,26 @@ func buildGraphHealth(stats *GraphStats) GraphHealth {
 }
 
 // buildCommands constructs helper commands, handling empty topID gracefully
-func buildCommands(topID string) CommandHelpers {
+func buildCommands(topID, trackerMode string) CommandHelpers {
 	base := "CI=1 "
+	isTK := trackerMode == "tk"
 	listReady := base + "br ready --json"
 	listBlocked := base + "br blocked --json"
+	if isTK {
+		listReady = "tk ready"
+		listBlocked = "tk blocked"
+	}
 
 	claimTop := listReady + "  # No top pick available"
 	showTop := listReady + "  # No top pick available"
 	if topID != "" {
-		claimTop = fmt.Sprintf("%sbr update %s --status in_progress --json", base, topID)
-		showTop = fmt.Sprintf("%sbr show %s --json", base, topID)
+		if isTK {
+			claimTop = fmt.Sprintf("tk start %s", topID)
+			showTop = fmt.Sprintf("tk show %s", topID)
+		} else {
+			claimTop = fmt.Sprintf("%sbr update %s --status in_progress --json", base, topID)
+			showTop = fmt.Sprintf("%sbr show %s --json", base, topID)
+		}
 	}
 
 	return CommandHelpers{
@@ -1484,7 +1497,7 @@ func EnhanceRecommendationWithTriageReasons(rec *Recommendation, triageReasons T
 //
 // This differs from the previous connected-components approach which created
 // one track per disconnected work stream (issue #68).
-func buildRecommendationsByTrack(recs []Recommendation, analyzer *Analyzer, unblocksMap map[string][]string) []TrackRecommendationGroup {
+func buildRecommendationsByTrack(recs []Recommendation, analyzer *Analyzer, unblocksMap map[string][]string, trackerMode string) []TrackRecommendationGroup {
 	// Compute blocker depth for all recommendations.
 	// Depth 0 = actionable now (no blockers), Depth N = blocked by depth-(N-1) items.
 	blockerDepths := make(map[string]int, len(recs))
@@ -1568,7 +1581,7 @@ func buildRecommendationsByTrack(recs []Recommendation, analyzer *Analyzer, unbl
 				Reasons:  rec.Reasons,
 				Unblocks: len(unblocksMap[rec.ID]),
 			}
-			group.ClaimCommand = fmt.Sprintf("CI=1 br update %s --status in_progress --json", rec.ID)
+			group.ClaimCommand = claimCommandForTracker(rec.ID, trackerMode)
 		}
 	}
 
@@ -1602,7 +1615,7 @@ func layerReason(depth int, totalRecs int) string {
 }
 
 // buildRecommendationsByLabel groups recommendations by label
-func buildRecommendationsByLabel(recs []Recommendation, unblocksMap map[string][]string) []LabelRecommendationGroup {
+func buildRecommendationsByLabel(recs []Recommendation, unblocksMap map[string][]string, trackerMode string) []LabelRecommendationGroup {
 	groups := make(map[string]*LabelRecommendationGroup)
 
 	for _, rec := range recs {
@@ -1628,7 +1641,7 @@ func buildRecommendationsByLabel(recs []Recommendation, unblocksMap map[string][
 				Reasons:  rec.Reasons,
 				Unblocks: len(unblocksMap[rec.ID]),
 			}
-			group.ClaimCommand = fmt.Sprintf("CI=1 br update %s --status in_progress --json", rec.ID)
+			group.ClaimCommand = claimCommandForTracker(rec.ID, trackerMode)
 		}
 	}
 
@@ -1642,4 +1655,11 @@ func buildRecommendationsByLabel(recs []Recommendation, unblocksMap map[string][
 	})
 
 	return result
+}
+
+func claimCommandForTracker(id, trackerMode string) string {
+	if trackerMode == "tk" {
+		return fmt.Sprintf("tk start %s", id)
+	}
+	return fmt.Sprintf("CI=1 br update %s --status in_progress --json", id)
 }

@@ -70,8 +70,18 @@ func sanitizeMermaidText(text string) string {
 	return result
 }
 
+// MarkdownOptions configures tracker-specific command snippets in markdown exports.
+type MarkdownOptions struct {
+	TrackerMode string
+}
+
 // GenerateMarkdown creates a comprehensive markdown report of all issues
 func GenerateMarkdown(issues []model.Issue, title string) (string, error) {
+	return GenerateMarkdownWithOptions(issues, title, MarkdownOptions{})
+}
+
+// GenerateMarkdownWithOptions creates a comprehensive markdown report with options.
+func GenerateMarkdownWithOptions(issues []model.Issue, title string, opts MarkdownOptions) (string, error) {
 	var sb strings.Builder
 
 	// Header
@@ -105,7 +115,7 @@ func GenerateMarkdown(issues []model.Issue, title string) (string, error) {
 	sb.WriteString(fmt.Sprintf("| Closed | %d |\n\n", closed))
 
 	// Quick Actions Section
-	sb.WriteString(generateQuickActions(issues))
+	sb.WriteString(generateQuickActions(issues, opts.TrackerMode))
 
 	// Precompute stable, unique slugs for TOC anchors and headings.
 	slugCounts := make(map[string]int, len(issues))
@@ -223,7 +233,7 @@ func GenerateMarkdown(issues []model.Issue, title string) (string, error) {
 		}
 
 		// Per-issue command snippets
-		sb.WriteString(generateIssueCommands(i))
+		sb.WriteString(generateIssueCommands(i, opts.TrackerMode))
 
 		sb.WriteString("---\n\n")
 	}
@@ -313,6 +323,11 @@ func getPriorityLabel(priority int) string {
 
 // SaveMarkdownToFile writes the generated markdown to a file
 func SaveMarkdownToFile(issues []model.Issue, filename string) error {
+	return SaveMarkdownToFileWithOptions(issues, filename, MarkdownOptions{})
+}
+
+// SaveMarkdownToFileWithOptions writes generated markdown with tracker-aware options.
+func SaveMarkdownToFileWithOptions(issues []model.Issue, filename string, opts MarkdownOptions) error {
 	// Make a copy to avoid mutating the caller's slice
 	issuesCopy := make([]model.Issue, len(issues))
 	copy(issuesCopy, issues)
@@ -330,7 +345,7 @@ func SaveMarkdownToFile(issues []model.Issue, filename string) error {
 		return issuesCopy[i].CreatedAt.After(issuesCopy[j].CreatedAt)
 	})
 
-	content, err := GenerateMarkdown(issuesCopy, "Beads Export")
+	content, err := GenerateMarkdownWithOptions(issuesCopy, "Beads Export", opts)
 	if err != nil {
 		return err
 	}
@@ -338,8 +353,12 @@ func SaveMarkdownToFile(issues []model.Issue, filename string) error {
 }
 
 // generateQuickActions creates a Quick Actions section with bulk commands
-func generateQuickActions(issues []model.Issue) string {
+func generateQuickActions(issues []model.Issue, trackerMode ...string) string {
 	var sb strings.Builder
+	mode := ""
+	if len(trackerMode) > 0 {
+		mode = trackerMode[0]
+	}
 
 	// Collect non-closed issues for bulk operations
 	var openIDs, inProgressIDs, blockedIDs []string
@@ -367,6 +386,7 @@ func generateQuickActions(issues []model.Issue) string {
 
 	sb.WriteString("## Quick Actions\n\n")
 	sb.WriteString("Ready-to-run commands for bulk operations:\n\n")
+	isTK := mode == "tk"
 	sb.WriteString("```bash\n")
 
 	// Close in-progress items (most common action)
@@ -387,13 +407,26 @@ func generateQuickActions(issues []model.Issue) string {
 	// Bulk priority update for high-priority items
 	if len(highPriorityIDs) > 0 {
 		sb.WriteString("# View high-priority items (P0/P1)\n")
-		sb.WriteString(fmt.Sprintf("br show %s\n\n", strings.Join(highPriorityIDs, " ")))
+		if isTK {
+			for _, id := range highPriorityIDs {
+				sb.WriteString(fmt.Sprintf("tk show %s\n", id))
+			}
+			sb.WriteString("\n")
+		} else {
+			sb.WriteString(fmt.Sprintf("br show %s\n\n", strings.Join(highPriorityIDs, " ")))
+		}
 	}
 
 	// Unblock blocked items
 	if len(blockedIDs) > 0 {
 		sb.WriteString("# Update blocked items to in_progress when unblocked\n")
-		sb.WriteString(fmt.Sprintf("br update %s -s in_progress\n", strings.Join(blockedIDs, " ")))
+		if isTK {
+			for _, id := range blockedIDs {
+				sb.WriteString(fmt.Sprintf("tk start %s\n", id))
+			}
+		} else {
+			sb.WriteString(fmt.Sprintf("br update %s -s in_progress\n", strings.Join(blockedIDs, " ")))
+		}
 	}
 
 	sb.WriteString("```\n\n")
@@ -402,8 +435,12 @@ func generateQuickActions(issues []model.Issue) string {
 }
 
 // generateIssueCommands creates command snippets for a single issue
-func generateIssueCommands(issue model.Issue) string {
+func generateIssueCommands(issue model.Issue, trackerMode ...string) string {
 	var sb strings.Builder
+	mode := ""
+	if len(trackerMode) > 0 {
+		mode = trackerMode[0]
+	}
 
 	// Skip command snippets for closed issues
 	if isClosedLikeStatus(issue.Status) {
@@ -411,6 +448,7 @@ func generateIssueCommands(issue model.Issue) string {
 	}
 
 	escapedID := shellEscape(issue.ID)
+	isTK := mode == "tk"
 
 	sb.WriteString("<details>\n<summary>📋 Commands</summary>\n\n")
 	sb.WriteString("```bash\n")
@@ -419,24 +457,48 @@ func generateIssueCommands(issue model.Issue) string {
 	switch issue.Status {
 	case model.StatusOpen:
 		sb.WriteString("# Start working on this issue\n")
-		sb.WriteString(fmt.Sprintf("br update %s -s in_progress\n\n", escapedID))
+		if isTK {
+			sb.WriteString(fmt.Sprintf("tk start %s\n\n", escapedID))
+		} else {
+			sb.WriteString(fmt.Sprintf("br update %s -s in_progress\n\n", escapedID))
+		}
 	case model.StatusInProgress:
 		sb.WriteString("# Mark as complete\n")
-		sb.WriteString(fmt.Sprintf("br close %s\n\n", escapedID))
+		if isTK {
+			sb.WriteString(fmt.Sprintf("tk close %s -r 'Completed'\n\n", escapedID))
+		} else {
+			sb.WriteString(fmt.Sprintf("br close %s\n\n", escapedID))
+		}
 	case model.StatusBlocked:
 		sb.WriteString("# Unblock and start working\n")
-		sb.WriteString(fmt.Sprintf("br update %s -s in_progress\n\n", escapedID))
+		if isTK {
+			sb.WriteString(fmt.Sprintf("tk start %s\n\n", escapedID))
+		} else {
+			sb.WriteString(fmt.Sprintf("br update %s -s in_progress\n\n", escapedID))
+		}
 	}
 
 	// Common actions
 	sb.WriteString("# Add a comment\n")
-	sb.WriteString(fmt.Sprintf("br comment %s 'Your comment here'\n\n", escapedID))
+	if isTK {
+		sb.WriteString(fmt.Sprintf("tk add-note %s 'Your comment here'\n\n", escapedID))
+	} else {
+		sb.WriteString(fmt.Sprintf("br comment %s 'Your comment here'\n\n", escapedID))
+	}
 
 	sb.WriteString("# Change priority (0=Critical, 1=High, 2=Medium, 3=Low)\n")
-	sb.WriteString(fmt.Sprintf("br update %s -p 1\n\n", escapedID))
+	if isTK {
+		sb.WriteString(fmt.Sprintf("# Edit .tickets/%s*.md frontmatter priority to 1\n\n", escapedID))
+	} else {
+		sb.WriteString(fmt.Sprintf("br update %s -p 1\n\n", escapedID))
+	}
 
 	sb.WriteString("# View full details\n")
-	sb.WriteString(fmt.Sprintf("br show %s\n", escapedID))
+	if isTK {
+		sb.WriteString(fmt.Sprintf("tk show %s\n", escapedID))
+	} else {
+		sb.WriteString(fmt.Sprintf("br show %s\n", escapedID))
+	}
 
 	sb.WriteString("```\n\n")
 	sb.WriteString("</details>\n\n")

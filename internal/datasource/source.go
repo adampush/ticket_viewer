@@ -17,6 +17,8 @@ import (
 type SourceType string
 
 const (
+	// SourceTypeTicketsMarkdown is a tk .tickets markdown directory.
+	SourceTypeTicketsMarkdown SourceType = "tickets_markdown"
 	// SourceTypeSQLite is a SQLite database (beads.db)
 	SourceTypeSQLite SourceType = "sqlite"
 	// SourceTypeJSONLWorktree is a JSONL file from a git worktree
@@ -27,9 +29,10 @@ const (
 
 // Priority values for source types (higher = more authoritative)
 const (
-	PrioritySQLite        = 100
-	PriorityJSONLWorktree = 80
-	PriorityJSONLLocal    = 50
+	PriorityTicketsMarkdown = 200
+	PrioritySQLite          = 100
+	PriorityJSONLWorktree   = 80
+	PriorityJSONLLocal      = 50
 )
 
 // DataSource represents a potential source of beads data
@@ -66,6 +69,8 @@ func (s DataSource) String() string {
 type DiscoveryOptions struct {
 	// BeadsDir is the .beads directory path (optional, auto-detected if empty)
 	BeadsDir string
+	// TicketsDir is the .tickets directory path (optional, auto-detected if empty)
+	TicketsDir string
 	// RepoPath is the repository root path (optional, uses cwd if empty)
 	RepoPath string
 	// ValidateAfterDiscovery runs validation on each discovered source
@@ -83,6 +88,16 @@ func DiscoverSources(opts DiscoveryOptions) ([]DataSource, error) {
 	if opts.Logger == nil {
 		opts.Logger = func(string) {}
 	}
+	explicitRepoPath := strings.TrimSpace(opts.RepoPath) != ""
+
+	repoPath := opts.RepoPath
+	if repoPath == "" {
+		var err error
+		repoPath, err = os.Getwd()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get current directory: %w", err)
+		}
+	}
 
 	// Determine beads directory
 	beadsDir := opts.BeadsDir
@@ -91,16 +106,17 @@ func DiscoverSources(opts DiscoveryOptions) ([]DataSource, error) {
 		if envDir := os.Getenv("BEADS_DIR"); envDir != "" {
 			beadsDir = envDir
 		} else {
-			// Use repo path or current directory
-			repoPath := opts.RepoPath
-			if repoPath == "" {
-				var err error
-				repoPath, err = os.Getwd()
-				if err != nil {
-					return nil, fmt.Errorf("failed to get current directory: %w", err)
-				}
-			}
 			beadsDir = filepath.Join(repoPath, ".beads")
+		}
+	}
+
+	// Determine tickets directory
+	ticketsDir := opts.TicketsDir
+	if ticketsDir == "" {
+		if envDir := os.Getenv("TICKETS_DIR"); envDir != "" {
+			ticketsDir = envDir
+		} else if explicitRepoPath {
+			ticketsDir = findTicketsDir(repoPath)
 		}
 	}
 
@@ -109,6 +125,13 @@ func DiscoverSources(opts DiscoveryOptions) ([]DataSource, error) {
 	}
 
 	var sources []DataSource
+
+	// Discover tk ticket markdown source first.
+	ticketSources, err := discoverTicketsSources(ticketsDir, opts)
+	if err != nil && opts.Verbose {
+		opts.Logger(fmt.Sprintf("Ticket discovery warning: %v", err))
+	}
+	sources = append(sources, ticketSources...)
 
 	// Discover SQLite database
 	sqliteSources, err := discoverSQLiteSources(beadsDir, opts)
@@ -125,7 +148,7 @@ func DiscoverSources(opts DiscoveryOptions) ([]DataSource, error) {
 	sources = append(sources, localSources...)
 
 	// Discover worktree JSONL files
-	worktreeSources, err := discoverWorktreeSources(opts.RepoPath, opts)
+	worktreeSources, err := discoverWorktreeSources(repoPath, opts)
 	if err != nil && opts.Verbose {
 		opts.Logger(fmt.Sprintf("Worktree discovery warning: %v", err))
 	}
@@ -153,6 +176,12 @@ func DiscoverSources(opts DiscoveryOptions) ([]DataSource, error) {
 
 	// Sort by priority and mod time
 	sort.Slice(sources, func(i, j int) bool {
+		if sources[i].Type == SourceTypeTicketsMarkdown && sources[j].Type != SourceTypeTicketsMarkdown {
+			return true
+		}
+		if sources[j].Type == SourceTypeTicketsMarkdown && sources[i].Type != SourceTypeTicketsMarkdown {
+			return false
+		}
 		if sources[i].ModTime.Equal(sources[j].ModTime) {
 			return sources[i].Priority > sources[j].Priority
 		}
@@ -164,6 +193,74 @@ func DiscoverSources(opts DiscoveryOptions) ([]DataSource, error) {
 	}
 
 	return sources, nil
+}
+
+func findTicketsDir(startDir string) string {
+	if startDir == "" {
+		return ""
+	}
+
+	current := startDir
+	for {
+		candidate := filepath.Join(current, ".tickets")
+		if info, err := os.Stat(candidate); err == nil && info.IsDir() {
+			return candidate
+		}
+
+		parent := filepath.Dir(current)
+		if parent == current {
+			return ""
+		}
+		current = parent
+	}
+}
+
+func discoverTicketsSources(ticketsDir string, opts DiscoveryOptions) ([]DataSource, error) {
+	if ticketsDir == "" {
+		return nil, nil
+	}
+
+	entries, err := os.ReadDir(ticketsDir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read tickets directory: %w", err)
+	}
+
+	count := 0
+	var newest time.Time
+	var totalSize int64
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".md") {
+			continue
+		}
+		info, err := e.Info()
+		if err != nil {
+			continue
+		}
+		count++
+		totalSize += info.Size()
+		if info.ModTime().After(newest) {
+			newest = info.ModTime()
+		}
+	}
+
+	if count == 0 {
+		return nil, nil
+	}
+
+	source := DataSource{
+		Type:       SourceTypeTicketsMarkdown,
+		Path:       ticketsDir,
+		Priority:   PriorityTicketsMarkdown,
+		ModTime:    newest,
+		Size:       totalSize,
+		IssueCount: count,
+	}
+
+	if opts.Verbose {
+		opts.Logger(fmt.Sprintf("Found tickets markdown: %s (%d files)", ticketsDir, count))
+	}
+
+	return []DataSource{source}, nil
 }
 
 // discoverSQLiteSources finds SQLite databases in the beads directory

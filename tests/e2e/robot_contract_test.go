@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -17,6 +18,19 @@ func writeBeads(t *testing.T, dir, content string) {
 	}
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(content), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
+	}
+}
+
+func writeTickets(t *testing.T, dir string, files map[string]string) {
+	t.Helper()
+	ticketsDir := filepath.Join(dir, ".tickets")
+	if err := os.MkdirAll(ticketsDir, 0o755); err != nil {
+		t.Fatalf("mkdir tickets: %v", err)
+	}
+	for name, content := range files {
+		if err := os.WriteFile(filepath.Join(ticketsDir, name), []byte(content), 0o644); err != nil {
+			t.Fatalf("write ticket %s: %v", name, err)
+		}
 	}
 }
 
@@ -478,6 +492,32 @@ func TestRobotNextContractActionable(t *testing.T) {
 	}
 }
 
+func TestRobotNextContractActionableTK(t *testing.T) {
+	bv := buildBvBinary(t)
+	env := t.TempDir()
+	writeTickets(t, env, map[string]string{
+		"tk-a.md": "---\nid: A\nstatus: open\npriority: 1\ntype: task\n---\n# Unblocker\n",
+		"tk-b.md": "---\nid: B\nstatus: open\npriority: 2\ntype: task\ndeps: [A]\n---\n# Blocked\n",
+	})
+
+	var payload struct {
+		ID       string `json:"id"`
+		ClaimCmd string `json:"claim_command"`
+		ShowCmd  string `json:"show_command"`
+	}
+	runRobotJSON(t, bv, env, "--robot-next", &payload)
+
+	if payload.ID != "A" {
+		t.Fatalf("expected robot-next to pick A, got %q", payload.ID)
+	}
+	if payload.ClaimCmd != "tk start A" {
+		t.Fatalf("unexpected claim_command: %q", payload.ClaimCmd)
+	}
+	if payload.ShowCmd != "tk show A" {
+		t.Fatalf("unexpected show_command: %q", payload.ShowCmd)
+	}
+}
+
 // TestRobotEnvelopeConsistency verifies all robot commands include the
 // four standard envelope fields: generated_at, data_hash, output_format, version.
 // This is the acceptance test for bd-x1tm.
@@ -553,5 +593,31 @@ func TestRobotUsageHintsPresent(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestRobotTriage_MixedSourcesAddsUsageHint(t *testing.T) {
+	bv := buildBvBinary(t)
+	env := t.TempDir()
+
+	writeTickets(t, env, map[string]string{
+		"tk-a.md": "---\nid: A\nstatus: open\npriority: 1\ntype: task\n---\n# Ticket A\n",
+	})
+	writeBeads(t, env, `{"id":"B-1","title":"Legacy","status":"open","priority":1,"issue_type":"task"}`)
+
+	var payload struct {
+		UsageHints []string `json:"usage_hints"`
+	}
+	runRobotJSON(t, bv, env, "--robot-triage", &payload)
+
+	found := false
+	for _, h := range payload.UsageHints {
+		if strings.Contains(h, "Both .tickets and Beads sources were detected") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("expected mixed-source usage hint, got: %#v", payload.UsageHints)
 	}
 }
