@@ -1607,3 +1607,39 @@ func TestGenerateMarkdown_TombstoneIssueNoCommands(t *testing.T) {
 		t.Error("Tombstone issue should not have command snippets")
 	}
 }
+
+func TestGenerateMarkdownWithOptions_TKCommands(t *testing.T) {
+	now := time.Now()
+	issues := []model.Issue{
+		{ID: "TK-1", Title: "Ticket mode", Status: model.StatusOpen, Priority: 1, IssueType: model.TypeTask, CreatedAt: now, UpdatedAt: now},
+	}
+
+	md, err := GenerateMarkdownWithOptions(issues, "TK Test", MarkdownOptions{TrackerMode: "tk"})
+	if err != nil {
+		t.Fatalf("GenerateMarkdownWithOptions returned error: %v", err)
+	}
+	if !strings.Contains(md, "tk start TK-1") {
+		t.Fatalf("expected tk start command in markdown:\n%s", md)
+	}
+	if !strings.Contains(md, "tk show TK-1") {
+		t.Fatalf("expected tk show command in markdown:\n%s", md)
+	}
+	if strings.Contains(md, "br update TK-1") {
+		t.Fatalf("did not expect br update command in tk mode:\n%s", md)
+	}
+}
+
+func TestGenerateMarkdown_DefaultKeepsBeadsCommands(t *testing.T) {
+	now := time.Now()
+	issues := []model.Issue{
+		{ID: "B-1", Title: "Beads mode", Status: model.StatusOpen, Priority: 1, IssueType: model.TypeTask, CreatedAt: now, UpdatedAt: now},
+	}
+
+	md, err := GenerateMarkdown(issues, "Beads Test")
+	if err != nil {
+		t.Fatalf("GenerateMarkdown returned error: %v", err)
+	}
+	if !strings.Contains(md, "br update B-1") {
+		t.Fatalf("expected br update command by default:\n%s", md)
+	}
+}

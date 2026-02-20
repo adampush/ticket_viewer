@@ -5,8 +5,8 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	flag "github.com/spf13/pflag"
 	"fmt"
+	flag "github.com/spf13/pflag"
 	"html"
 	"io"
 	"io/fs"
@@ -215,7 +215,7 @@ func main() {
 	// Override pflag's default usage so -h/--help prints our custom header.
 	flag.Usage = func() {
 		fmt.Println("Usage: bv [options]")
-		fmt.Println("\nA TUI viewer for beads issue tracker.")
+		fmt.Println("\nA TUI viewer for ticket graphs.")
 		flag.PrintDefaults()
 	}
 	flag.Parse()
@@ -319,13 +319,13 @@ func main() {
 
 	if *help {
 		fmt.Println("Usage: bv [options]")
-		fmt.Println("\nA TUI viewer for beads issue tracker.")
+		fmt.Println("\nA TUI viewer for ticket graphs.")
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
 
 	if *robotHelp {
-		fmt.Println("bv (Beads Viewer) AI Agent Interface")
+		fmt.Println("bv AI Agent Interface")
 		fmt.Println("====================================")
 		fmt.Println("This tool provides structural analysis of the issue tracker graph (DAG).")
 		fmt.Println("Use these commands to understand project state without parsing raw JSONL.")
@@ -394,7 +394,7 @@ func main() {
 		fmt.Println("  --emit-script [--script-limit=N]")
 		fmt.Println("      Emits a shell script for top-N recommendations (default: 5).")
 		fmt.Println("      Includes hash/config header for deterministic ordering.")
-		fmt.Println("      Output: br show commands for each item, commented claim commands")
+		fmt.Println("      Output: tracker-aware show commands for each item, commented claim commands")
 		fmt.Println("      Options: --script-format=bash|fish|zsh, --script-limit=N")
 		fmt.Println("      Example: bv --emit-script > work.sh && bash work.sh")
 		fmt.Println("      Example: bv --emit-script --script-limit=3")
@@ -540,8 +540,8 @@ func main() {
 		fmt.Println("      Useful for agent workflows and automation.")
 		fmt.Println("      Output includes:")
 		fmt.Println("        - Header comment with data hash and generation time")
-		fmt.Println("        - br show commands for each recommended item")
-		fmt.Println("        - Commented br update commands to claim items")
+		fmt.Println("        - tracker-aware show commands for each recommended item")
+		fmt.Println("        - Commented tracker-aware claim commands")
 		fmt.Println("      Options:")
 		fmt.Println("        --script-limit=N      Number of items (default: 5)")
 		fmt.Println("        --script-format=X     Script format: bash, fish, zsh")
@@ -1287,6 +1287,8 @@ func main() {
 	loadStart := time.Now()
 	var issues []model.Issue
 	var beadsPath string
+	trackerMode := "beads"
+	mixedSourceUsageHint := ""
 	var workspaceInfo *workspace.LoadSummary
 	var asOfResolved string // Resolved commit SHA when using --as-of (for robot output metadata)
 
@@ -1348,21 +1350,36 @@ func main() {
 	} else {
 		// Load from single repo (original behavior)
 		var err error
-		issues, err = datasource.LoadIssues("")
+		beadsDir := ""
+		var loadMeta *datasource.LoadMetadata
+		issues, loadMeta, err = datasource.LoadIssuesDetailed("")
+		if err != nil && (loadMeta == nil || loadMeta.SelectedSource.Type != datasource.SourceTypeTicketsMarkdown) {
+			issues, err = datasource.LoadIssues("")
+		}
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error loading beads: %v\n", err)
-			fmt.Fprintln(os.Stderr, "Make sure you are in a project initialized with 'bd init'.")
+			fmt.Fprintf(os.Stderr, "Error loading issues: %v\n", err)
+			fmt.Fprintln(os.Stderr, "Make sure you are in a project initialized with tickets or beads data.")
 			os.Exit(1)
 		}
+		if loadMeta != nil {
+			if loadMeta.SelectedSource.Type == datasource.SourceTypeTicketsMarkdown {
+				trackerMode = "tk"
+			}
+			mixedSourceUsageHint = datasource.BuildMixedSourceUsageHint(loadMeta)
+		}
 		// Get beads file path for live reload (respects BEADS_DIR env var)
-		beadsDir, _ := loader.GetBeadsDir("")
-		beadsPath, _ = loader.FindJSONLPath(beadsDir)
+		if trackerMode != "tk" {
+			beadsDir, _ = loader.GetBeadsDir("")
+			beadsPath, _ = loader.FindJSONLPath(beadsDir)
+		}
 
 		// Automatically ensure .bv/ is in .gitignore to prevent polluting git
 		// with search indexes, baselines, and other bv-specific files.
 		// This is done silently and only in single-repo mode.
-		projectDir := filepath.Dir(beadsDir)
-		_ = loader.EnsureBVInGitignore(projectDir)
+		if beadsDir != "" {
+			projectDir := filepath.Dir(beadsDir)
+			_ = loader.EnsureBVInGitignore(projectDir)
+		}
 	}
 	loadDuration := time.Since(loadStart)
 
@@ -2937,6 +2954,7 @@ func main() {
 			WaitForPhase2: true, // Triage needs full graph metrics
 			UseFastConfig: true, // Use minimal Phase 2 config for robot mode (bv-t1js)
 			History:       historyReport,
+			TrackerMode:   trackerMode,
 		}
 		triage := analysis.ComputeTriageWithOptions(issues, opts)
 
@@ -2993,8 +3011,8 @@ func main() {
 				Score:         top.Score,
 				Reasons:       top.Reasons,
 				Unblocks:      top.Unblocks,
-				ClaimCmd:      fmt.Sprintf("br update %s --status=in_progress", top.ID),
-				ShowCmd:       fmt.Sprintf("br show %s", top.ID),
+				ClaimCmd:      claimCommandForTracker(top.ID, trackerMode),
+				ShowCmd:       showCommandForTracker(top.ID, trackerMode),
 			}
 
 			encoder := newRobotEncoder(os.Stdout)
@@ -3035,6 +3053,9 @@ func main() {
 				"jq '.triage.recommendations_by_label[].claim_command' - Claim commands per label",
 				"jq '.feedback.weight_adjustments' - View feedback-adjusted weights (bv-90)",
 			},
+		}
+		if mixedSourceUsageHint != "" {
+			output.UsageHints = append(output.UsageHints, mixedSourceUsageHint)
 		}
 		encoder := newRobotEncoder(os.Stdout)
 		if err := encoder.Encode(output); err != nil {
@@ -3211,9 +3232,9 @@ func main() {
 				}
 
 				// Claim command
-				sb.WriteString(fmt.Sprintf("# To claim: br update %s --status=in_progress\n", rec.ID))
+				sb.WriteString(fmt.Sprintf("# To claim: %s\n", claimCommandForTracker(rec.ID, trackerMode)))
 				// Show command
-				sb.WriteString(fmt.Sprintf("br show %s\n", rec.ID))
+				sb.WriteString(fmt.Sprintf("%s\n", showCommandForTracker(rec.ID, trackerMode)))
 				sb.WriteString("\n")
 			}
 
@@ -3221,12 +3242,12 @@ func main() {
 			sb.WriteString("# === Quick Actions ===\n")
 			sb.WriteString("# To claim the top pick:\n")
 			if len(recs) > 0 {
-				sb.WriteString(fmt.Sprintf("# br update %s --status=in_progress\n", recs[0].ID))
+				sb.WriteString(fmt.Sprintf("# %s\n", claimCommandForTracker(recs[0].ID, trackerMode)))
 			}
 			sb.WriteString("#\n")
 			sb.WriteString("# To claim all listed items (uncomment to enable):\n")
 			for _, rec := range recs {
-				sb.WriteString(fmt.Sprintf("# br update %s --status=in_progress\n", rec.ID))
+				sb.WriteString(fmt.Sprintf("# %s\n", claimCommandForTracker(rec.ID, trackerMode)))
 			}
 		}
 
@@ -4229,8 +4250,8 @@ func main() {
 		}
 		output := CausalityEnvelope{
 			CausalityResult: result,
-			OutputFormat:     robotOutputFormat,
-			Version:          version.Version,
+			OutputFormat:    robotOutputFormat,
+			Version:         version.Version,
 		}
 
 		encoder := newRobotEncoder(os.Stdout)
@@ -4850,7 +4871,7 @@ func main() {
 		}
 
 		// Perform the export
-		if err := export.SaveMarkdownToFile(issues, *exportFile); err != nil {
+		if err := export.SaveMarkdownToFileWithOptions(issues, *exportFile, export.MarkdownOptions{TrackerMode: trackerMode}); err != nil {
 			fmt.Printf("Error exporting: %v\n", err)
 			os.Exit(1)
 		}
@@ -6810,7 +6831,7 @@ func absInt(v int) int {
 // BurndownOutput represents the JSON output for --robot-burndown (bv-159)
 type BurndownOutput struct {
 	RobotEnvelope
-	SprintID string `json:"sprint_id"`
+	SprintID          string                `json:"sprint_id"`
 	SprintName        string                `json:"sprint_name"`
 	StartDate         time.Time             `json:"start_date"`
 	EndDate           time.Time             `json:"end_date"`
@@ -7135,7 +7156,7 @@ func calculateBurndownAt(sprint *model.Sprint, issues []model.Issue, now time.Ti
 	idealLine := generateIdealLine(sprint, totalIssues)
 
 	return BurndownOutput{
-		SprintID: sprint.ID,
+		SprintID:          sprint.ID,
 		SprintName:        sprint.Name,
 		StartDate:         sprint.StartDate,
 		EndDate:           sprint.EndDate,
@@ -7209,6 +7230,20 @@ func generateIdealLine(sprint *model.Sprint, totalIssues int) []model.BurndownPo
 	}
 
 	return points
+}
+
+func claimCommandForTracker(id, trackerMode string) string {
+	if trackerMode == "tk" {
+		return fmt.Sprintf("tk start %s", id)
+	}
+	return fmt.Sprintf("br update %s --status=in_progress", id)
+}
+
+func showCommandForTracker(id, trackerMode string) string {
+	if trackerMode == "tk" {
+		return fmt.Sprintf("tk show %s", id)
+	}
+	return fmt.Sprintf("br show %s", id)
 }
 
 // generateJQHelpers creates a markdown document with jq snippets for agent brief
@@ -7556,7 +7591,7 @@ func generateRobotDocs(topic string) map[string]interface{} {
 	}
 
 	guide := map[string]interface{}{
-		"description": "bv (Beads Viewer) provides structural analysis of the beads issue tracker DAG. It is the primary interface for AI agents to understand project state, plan work, and discover high-impact tasks.",
+		"description": "bv provides structural analysis of ticket dependency graphs. It is the primary interface for AI agents to understand project state, plan work, and discover high-impact tasks.",
 		"quickstart": []string{
 			"bv --robot-triage               # Full triage with recommendations",
 			"bv --robot-next                  # Single top pick for immediate work",
@@ -7565,7 +7600,7 @@ func generateRobotDocs(topic string) map[string]interface{} {
 			"bv --robot-triage-by-track       # Parallel work streams for multi-agent coordination",
 			"bv --robot-schema                # JSON Schema definitions for all commands",
 		},
-		"data_source": ".beads/issues.jsonl and git history (correlations)",
+		"data_source": "Auto-detected tracker sources (.tickets/*.md preferred, Beads JSONL/SQLite fallback) and git history (correlations)",
 		"output_modes": map[string]string{
 			"json": "Default structured output",
 			"toon": "Token-optimized notation (saves ~30-50% tokens)",

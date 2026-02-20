@@ -28,11 +28,12 @@ If I tell you to do something, even if it goes against what follows below, YOU M
 
 ---
 
-## Git Branch: ONLY Use `main`, NEVER `master`
+## Git Branching: `main` Default, `master` Forbidden
 
 **The default branch is `main`. The `master` branch exists only for legacy URL compatibility.**
 
-- **All work happens on `main`** — commits, PRs, feature branches all merge to `main`
+- **All integration lands on `main`** — day-to-day implementation may happen on feature branches
+- **Use one active feature branch per scoped effort** and merge back to `main` when complete
 - **Never reference `master` in code or docs** — if you see `master` anywhere, it's a bug that needs fixing
 - **The `master` branch must stay synchronized with `main`** — after pushing to `main`, also push to `master`:
   ```bash
@@ -230,28 +231,28 @@ If you aren't 100% sure how to use a third-party library, **SEARCH ONLINE** to f
 
 ## beads_viewer — This Project
 
-**This is the project you're working on.** beads_viewer (`bv`) is a graph-aware triage engine for Beads projects (`.beads/beads.jsonl`). It computes PageRank, betweenness, critical path, cycles, HITS, eigenvector, and k-core metrics deterministically. It provides both an interactive TUI and machine-readable `--robot-*` JSON outputs for AI agent consumption.
+**This is the project you're working on.** beads_viewer (`bv`) is a graph-aware triage engine for ticket graphs. It targets `tk` sources (`.tickets/*.md`). It computes PageRank, betweenness, critical path, cycles, HITS, eigenvector, and k-core metrics deterministically. It provides both an interactive TUI and machine-readable `--robot-*` JSON outputs for AI agent consumption.
 
 ### What It Does
 
-Analyzes Beads issue graphs to produce actionable triage recommendations, parallel execution plans, priority misalignment detection, and sprint forecasting. Combines graph-theoretic metrics with issue metadata to rank work items by impact, urgency, and unblocking potential.
+Analyzes issue graphs to produce actionable triage recommendations, parallel execution plans, priority misalignment detection, and sprint forecasting. Combines graph-theoretic metrics with issue metadata to rank work items by impact, urgency, and unblocking potential.
 
 ### Architecture
 
 ```
-.beads/beads.jsonl → Loader → Graph Build → ┬─ Phase 1 (instant): degree, topo sort, density
-                                              └─ Phase 2 (async, 500ms): PageRank, betweenness,
-                                                                          HITS, eigenvector, cycles
-                                                              │
-                                              ┌───────────────┴───────────────┐
-                                              ▼                               ▼
-                                    Robot JSON Output                  Interactive TUI
-                                    (--robot-* flags)              (bubbletea Elm arch)
-                                              │
-                                   ┌──────────┴──────────┐
-                                   ▼                      ▼
-                            Triage/Plan/             Search/Export/
-                            Insights/Alerts          Pages/Graph
+.tickets/*.md → Loader → Graph Build → ┬─ Phase 1 (instant): degree, topo sort, density
+                                        └─ Phase 2 (async, 500ms): PageRank, betweenness,
+                                                                    HITS, eigenvector, cycles
+                                                        │
+                                        ┌───────────────┴───────────────┐
+                                        ▼                               ▼
+                              Robot JSON Output                  Interactive TUI
+                              (--robot-* flags)              (bubbletea Elm arch)
+                                        │
+                             ┌──────────┴──────────┐
+                             ▼                      ▼
+                      Triage/Plan/             Search/Export/
+                      Insights/Alerts          Pages/Graph
 ```
 
 ### Project Structure
@@ -419,7 +420,7 @@ for item := range ch {
 
 A mail-like layer that lets coding agents coordinate asynchronously via MCP tools and resources. Provides identities, inbox/outbox, searchable threads, and advisory file reservations with human-auditable artifacts in Git.
 
-> **Note:** This section is optional. If you're operating as a single agent or using alternative coordination methods, skip to "Beads" below. If Agent Mail is not available and you need multi-agent coordination, flag to the user—they may need to start it with `am` alias or manually.
+> **Note:** This section is optional. If you're operating as a single agent or using alternative coordination methods, skip to `Ticket Workflow Integration` below. If Agent Mail is not available and you need multi-agent coordination, flag to the user—they may need to start it with `am` alias or manually.
 
 **Troubleshooting:** If Agent Mail fails with "Too many open files" (common on macOS), restart with higher limit: `ulimit -n 4096; python -m mcp_agent_mail.cli serve-http`
 
@@ -468,61 +469,15 @@ A mail-like layer that lets coding agents coordinate asynchronously via MCP tool
 
 ---
 
-## Beads (br) — Dependency-Aware Issue Tracking
+## Historical Note
 
-Beads provides a lightweight, dependency-aware issue database and CLI (`br` - beads_rust) for selecting "ready work," setting priorities, and tracking status. It complements MCP Agent Mail's messaging and file reservations.
-
-**Important:** `br` is non-invasive—it NEVER runs git commands automatically. You must manually commit changes after `br sync --flush-only`.
-
-### Conventions
-
-- **Single source of truth:** Beads for task status/priority/dependencies; Agent Mail for conversation and audit
-- **Shared identifiers:** Use Beads issue ID (e.g., `br-123`) as Mail `thread_id` and prefix subjects with `[br-123]`
-- **Reservations:** When starting a task, call `file_reservation_paths()` with the issue ID in `reason`
-
-### Typical Agent Flow
-
-1. **Pick ready work (Beads):**
-   ```bash
-   br ready --json  # Choose highest priority, no blockers
-   ```
-
-2. **Reserve edit surface (Mail):**
-   ```
-   file_reservation_paths(project_key, agent_name, ["pkg/**"], ttl_seconds=3600, exclusive=true, reason="br-123")
-   ```
-
-3. **Announce start (Mail):**
-   ```
-   send_message(..., thread_id="br-123", subject="[br-123] Start: <title>", ack_required=true)
-   ```
-
-4. **Work and update:** Reply in-thread with progress
-
-5. **Complete and release:**
-   ```bash
-   br close 123 --reason "Completed"
-   br sync --flush-only  # Export to JSONL (no git operations)
-   ```
-   ```
-   release_file_reservations(project_key, agent_name, paths=["pkg/**"])
-   ```
-   Final Mail reply: `[br-123] Completed` with summary
-
-### Mapping Cheat Sheet
-
-| Concept | Value |
-|---------|-------|
-| Mail `thread_id` | `br-###` |
-| Mail subject | `[br-###] ...` |
-| File reservation `reason` | `br-###` |
-| Commit messages | Include `br-###` for traceability |
+This project originally used Beads/`br` for task tracking. Current implementation workflow is `tk`-canonical.
 
 ---
 
 ## bv — Graph-Aware Triage Engine
 
-bv is a graph-aware triage engine for Beads projects (`.beads/beads.jsonl`). It computes PageRank, betweenness, critical path, cycles, HITS, eigenvector, and k-core metrics deterministically.
+bv is a graph-aware triage engine for ticket graphs. It currently targets `tk` sources (`.tickets/*.md`) and computes PageRank, betweenness, critical path, cycles, HITS, eigenvector, and k-core metrics deterministically.
 
 **Scope boundary:** bv handles *what to work on* (triage, priority, planning). For agent-to-agent coordination (messaging, work claiming, file reservations), use MCP Agent Mail.
 
@@ -589,7 +544,7 @@ bv --robot-triage --robot-triage-by-label    # Group by domain
 ### Understanding Robot Output
 
 **All robot JSON includes:**
-- `data_hash` — Fingerprint of source beads.jsonl
+- `data_hash` — Fingerprint of source ticket dataset
 - `status` — Per-metric state: `computed|approx|timeout|skipped` + elapsed ms
 - `as_of` / `as_of_commit` — Present when using `--as-of`
 
@@ -754,11 +709,11 @@ Returns structured results with file paths, line ranges, and extracted code snip
 
 ---
 
-## Beads Workflow Integration
+## Ticket Workflow Integration (`tk` Canonical)
 
-This project uses [beads_rust](https://github.com/Dicklesworthstone/beads_rust) (`br`) for issue tracking. Issues are stored in `.beads/` and tracked in git.
+This project uses `tk` as the canonical task tracker for implementation workflow. Ticket files in `.tickets/` are tracked in git.
 
-**Important:** `br` is non-invasive—it NEVER executes git commands. After `br sync --flush-only`, you must manually run `git add .beads/ && git commit`.
+**Important:** do not start implementation without an active ticket (`tk start <id>`). Every code change must map to a ticket ID.
 
 ### Essential Commands
 
@@ -767,30 +722,31 @@ This project uses [beads_rust](https://github.com/Dicklesworthstone/beads_rust) 
 bv
 
 # CLI commands for agents (use these instead)
-br ready              # Show issues ready to work (no blockers)
-br list --status=open # All open issues
-br show <id>          # Full issue details with dependencies
-br create --title="..." --type=task --priority=2
-br update <id> --status=in_progress
-br close <id> --reason "Completed"
-br close <id1> <id2>  # Close multiple issues at once
-br sync --flush-only  # Export to JSONL (NO git operations)
+tk ready                               # Show tickets ready to work (no blockers)
+tk list --status open                  # All open tickets
+tk show <id>                           # Full ticket details
+tk create "<title>" -t task -p 2      # Create a new task
+tk start <id>                          # Move ticket to in_progress
+tk close <id> -r "Completed"          # Close ticket with reason
+tk dep <ticket-id> <depends-on-id>     # Add dependency
+tk add-note <id> "Implementation ..." # Add implementation notes
 ```
 
 ### Workflow Pattern
 
-1. **Start**: Run `br ready` to find actionable work
-2. **Claim**: Use `br update <id> --status=in_progress`
+1. **Start**: Run `tk ready` to find actionable work
+2. **Claim**: Use `tk start <id>`
 3. **Work**: Implement the task
-4. **Complete**: Use `br close <id>`
-5. **Sync**: Run `br sync --flush-only` then manually commit
+4. **Document**: Add implementation notes via `tk add-note <id> "..."`
+5. **Complete**: Use `tk close <id> -r "Completed"`
+6. **Commit**: Create atomic commit(s) referencing ticket ID (example: `(tk: bv-1234)`)
 
 ### Key Concepts
 
-- **Dependencies**: Issues can block other issues. `br ready` shows only unblocked work.
+- **Dependencies**: Tickets can block other tickets. Use `tk dep`, `tk blocked`, and `tk ready`.
 - **Priority**: P0=critical, P1=high, P2=medium, P3=low, P4=backlog (use numbers, not words)
 - **Types**: task, bug, feature, epic, question, docs
-- **Blocking**: `br dep add <issue> <depends-on>` to add dependencies
+- **Execution discipline**: exactly one ticket should be `in_progress` while implementing.
 
 ### Session Protocol
 
@@ -799,19 +755,20 @@ br sync --flush-only  # Export to JSONL (NO git operations)
 ```bash
 git status              # Check what changed
 git add <files>         # Stage code changes
-br sync --flush-only    # Export beads to JSONL
-git add .beads/         # Stage beads changes
-git commit -m "..."     # Commit everything together
+tk add-note <id> "..."  # Record implementation decisions + validation
+git commit -m "(tk: <id>) ..."  # Atomic ticket-aligned commit
+git status --short       # Verify clean tree (or intentional follow-up only)
 git push                # Push to remote
 ```
 
 ### Best Practices
 
-- Check `br ready` at session start to find available work
-- Update status as you work (in_progress → closed)
-- Create new issues with `br create` when you discover tasks
+- Check `tk ready` at session start to find available work
+- Update status as you work (`start` -> `close`)
+- Create new tickets with `tk create` when you discover tasks
 - Use descriptive titles and set appropriate priority/type
-- Always `br sync --flush-only && git add .beads/` before ending session
+- Keep commits atomic and ticket-scoped; avoid mixing unrelated ticket work
+- Keep session notes in `DEVELOPMENT/sessions/YYYY-MM-DD.md`
 
 <!-- end-bv-agent-instructions -->
 
@@ -892,7 +849,7 @@ Treat cass as a way to avoid re-solving problems other agents already handled.
 1. **File issues for remaining work** - Create issues for anything that needs follow-up
 2. **Run quality gates** (if code changed) - Tests, linters, builds
 3. **Update issue status** - Close finished work, update in-progress items
-4. **Sync beads** - `br sync --flush-only` to export to JSONL
+4. **Update ticket artifacts** - `tk add-note`, then `tk close` for completed work
 5. **Hand off** - Provide context for next session
 
 ---
@@ -909,7 +866,7 @@ Unexpected changes (need guidance)
 Next steps (pick one)
 
 1. Decide how to handle the unrelated modified files above so we can resume cleanly.
-2. Triage beads_rust-orko (clippy/cargo warnings) and beads_rust-ydqr (rustfmt failures).
+2. Triage outstanding formatter/lint warnings in open ticket branches.
 3. If you want a full suite run later, fix conformance/clippy blockers and re-run cargo test --all.
 ```
 
@@ -919,4 +876,4 @@ NEVER EVER DO THAT AGAIN. The answer is literally ALWAYS the same: those are cha
 
 ## Note on Built-in TODO Functionality
 
-Also, if I ask you to explicitly use your built-in TODO functionality, don't complain about this and say you need to use beads. You can use built-in TODOs if I tell you specifically to do so. Always comply with such orders.
+Also, if I ask you to explicitly use your built-in TODO functionality, don't complain about this and say you need to use `tk`. You can use built-in TODOs if I tell you specifically to do so. Always comply with such orders.
