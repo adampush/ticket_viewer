@@ -1,6 +1,6 @@
 ---
 id: bv-n8vq
-status: open
+status: closed
 deps: []
 links: []
 created: 2026-02-20T21:43:08Z
@@ -65,3 +65,9 @@ The cutover has multiple policy forks (path/module/env/aliasing). Without explic
 ## Artifacts
 
 - Decision log artifact (ticket note or markdown) with per-decision rationale.
+
+## Notes
+
+**2026-02-20T22:02:06Z**
+
+Locked all pre-cutover decisions and recorded them in docs/tkv-cutover-decisions.md: cmd path stays cmd/bv; module rename deferred; BV_* envs retained; bead-* flag naming retained for now; updater/release target set to adampush/ticket_viewer; nix adds .#tkv with temporary .#bv alias; tooling fallback to CI evidence when goreleaser/nix absent; .bv and ~/.config/bv namespaces retained in this cutover.
