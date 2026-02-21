@@ -46,7 +46,8 @@ func TestError_CorruptedBeadsJSONL(t *testing.T) {
 	if err != nil {
 		// Check for helpful error message
 		if !strings.Contains(string(output), "parse") && !strings.Contains(string(output), "JSON") &&
-			!strings.Contains(string(output), "line") && !strings.Contains(string(output), "error") {
+			!strings.Contains(string(output), "line") && !strings.Contains(string(output), "error") &&
+			!strings.Contains(string(output), "valid sources") {
 			t.Errorf("error message not helpful for corrupted JSON: %s", output)
 		}
 	}
@@ -195,8 +196,9 @@ func TestError_MissingBeadsDirectory(t *testing.T) {
 		stderrStr := stderr.String()
 		// Should mention beads or initialization
 		if !strings.Contains(stderrStr, "beads") && !strings.Contains(stderrStr, "init") &&
-			!strings.Contains(stderrStr, "not found") && !strings.Contains(stderrStr, "No such file") {
-			t.Errorf("unhelpful error for missing .beads: %s", stderrStr)
+			!strings.Contains(stderrStr, "not found") && !strings.Contains(stderrStr, "No such file") &&
+			!strings.Contains(stderrStr, "valid sources") && !strings.Contains(stderrStr, ".tickets") {
+			t.Errorf("unhelpful error for missing sources: %s", stderrStr)
 		}
 	}
 }

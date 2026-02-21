@@ -27,6 +27,9 @@ func TestTUIPrioritySnapshot(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -71,6 +74,9 @@ func TestTUIBackgroundModeRapidWrites(t *testing.T) {
 `
 	if err := os.WriteFile(beadsPath, []byte(initial), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)

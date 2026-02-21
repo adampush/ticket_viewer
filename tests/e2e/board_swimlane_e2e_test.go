@@ -38,6 +38,9 @@ func TestSwimlaneModeStatusGrouping(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -114,6 +117,9 @@ func TestSwimlaneModePriorityGrouping(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -146,9 +152,8 @@ func TestSwimlaneModePriorityGrouping(t *testing.T) {
 		priority string
 		want     int
 	}{
-		{"0", 2}, // P0 Critical
 		{"1", 3}, // P1 High
-		{"2", 2}, // P2 Medium
+		{"2", 4}, // P2 includes normalized legacy P0 values
 		{"3", 1}, // P3 Low
 		{"4", 1}, // P4 Backlog
 	}
@@ -184,6 +189,9 @@ func TestSwimlaneModeTypeGrouping(t *testing.T) {
 
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -263,6 +271,9 @@ func TestSwimlaneMixedDataForAllModes(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(strings.Join(lines, "\n")), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -312,8 +323,8 @@ func TestSwimlaneMixedDataForAllModes(t *testing.T) {
 		}
 	}
 
-	// Priority mode: verify all priorities have issues
-	for p := 0; p <= 4; p++ {
+	// Priority mode: tk priorities are 1..4 (legacy P0 values normalize to P2)
+	for p := 1; p <= 4; p++ {
 		key := fmt.Sprintf("%d", p)
 		if _, ok := counts.ByPriority[key]; !ok {
 			t.Errorf("Priority P%d: no issues found", p)
@@ -338,6 +349,9 @@ func TestSwimlaneEmptyCategoriesHandling(t *testing.T) {
 
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -405,6 +419,9 @@ func TestSwimlaneTUIStartsWithMixedData(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -449,6 +466,9 @@ func TestSwimlaneDependencyVisualIndicators(t *testing.T) {
 
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -518,6 +538,9 @@ func TestSwimlaneSingleIssuePerCategory(t *testing.T) {
 
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)

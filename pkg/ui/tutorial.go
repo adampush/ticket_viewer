@@ -2010,7 +2010,7 @@ The output is **self-contained HTML** that works offline:
 
 ### CI/CD Integration
 
-` + "```yaml\n# .github/workflows/dashboard.yml\njobs:\n  deploy:\n    steps:\n      - run: bv --export-pages ./pages --pages-title \"${{ github.ref_name }}\"\n      - uses: peaceiris/actions-gh-pages@v3\n        with:\n          publish_dir: ./pages\n```" + `
+` + "```yaml\n# .github/workflows/dashboard.yml\njobs:\n  deploy:\n    steps:\n      - run: tkv --export-pages ./pages --pages-title \"${{ github.ref_name }}\"\n      - uses: peaceiris/actions-gh-pages@v3\n        with:\n          publish_dir: ./pages\n```" + `
 
 > Press **→** to continue.`
 
@@ -2163,7 +2163,7 @@ Regular bv is for humans. **Robot mode** is for agents:
 
 | Human | Agent |
 |-------|-------|
-| ` + "`bv`" + ` (interactive TUI) | ` + "`bv --robot-*`" + ` (JSON output) |
+| ` + "`tkv`" + ` (interactive TUI) | ` + "`tkv --robot-*`" + ` (JSON output) |
 | Visual navigation | Structured data parsing |
 | Keyboard shortcuts | Command flags |
 
@@ -2178,12 +2178,12 @@ Regular bv is for humans. **Robot mode** is for agents:
 ### Agent Workflow Example
 
 ` + "```" + `
-1. Agent calls: bv --robot-next
+1. Agent calls: tkv --robot-next
 2. Receives: { "id": "bv-abc1", "title": "Fix auth" }
 3. Agent runs: br update bv-abc1 --status=in_progress
 4. Agent does the work...
 5. Agent runs: br close bv-abc1
-6. Agent calls: bv --robot-next (repeat)
+6. Agent calls: tkv --robot-next (repeat)
 ` + "```" + `
 
 ### The br CLI (for Agents)
@@ -2524,7 +2524,7 @@ Click to see full details, dependencies, labels.
 
 For continuous visibility, add to CI/CD:
 
-` + "```yaml\n# .github/workflows/dashboard.yml\non:\n  push:\n    paths: ['.beads/**']\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: bv --export-pages ./pages\n      - uses: peaceiris/actions-gh-pages@v3\n        with:\n          publish_dir: ./pages\n```" + `
+` + "```yaml\n# .github/workflows/dashboard.yml\non:\n  push:\n    paths: ['.tickets/**']\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: tkv --export-pages ./pages\n      - uses: peaceiris/actions-gh-pages@v3\n        with:\n          publish_dir: ./pages\n```" + `
 
 Dashboard updates automatically when beads change!
 

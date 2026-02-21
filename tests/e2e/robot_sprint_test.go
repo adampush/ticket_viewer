@@ -21,6 +21,9 @@ func createSprintRepo(t *testing.T, sprintsJSONL string) string {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads.jsonl: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(repoDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	if sprintsJSONL != "" {
 		if err := os.WriteFile(filepath.Join(beadsDir, "sprints.jsonl"), []byte(sprintsJSONL), 0o644); err != nil {

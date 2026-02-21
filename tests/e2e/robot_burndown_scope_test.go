@@ -23,6 +23,9 @@ func TestRobotBurndownIncludesScopeChanges(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(issues), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(repoDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	now := time.Now().UTC()
 	start := now.Add(-24 * time.Hour).Format(time.RFC3339)

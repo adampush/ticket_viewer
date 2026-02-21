@@ -1,6 +1,6 @@
 ---
 id: bv-sds5
-status: open
+status: closed
 deps: [bv-a0uk, bv-8a55]
 links: []
 created: 2026-02-20T21:43:08Z
@@ -69,3 +69,9 @@ Likely files:
 ## Artifacts
 
 - Docs parity checklist evidence and allowlist notes.
+
+## Notes
+
+**2026-02-20T22:31:40Z**
+
+Completed docs/help alignment for tkv cutover: updated README identity + install links + robot quickstart to tkv/tk semantics, updated AGENTS command examples to tkv, updated cmd/bv robot-docs guide/examples/data-source wording, and updated UI tutorial/help strings (tutorial_content/tutorial/insights/update_modal) from bv to tkv. Validation: go build ./..., go vet ./..., go test ./cmd/bv, go test ./pkg/ui/..., go run ./cmd/bv --help, go run ./cmd/bv --robot-docs guide, go run ./cmd/bv --robot-docs commands. Note: deep historical README sections still contain legacy bv/beads references by design with explicit historical note at top.

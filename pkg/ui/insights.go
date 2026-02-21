@@ -1116,7 +1116,7 @@ func (m *InsightsModel) renderPriorityPanel(width, height int, t Theme) string {
 		emptyStyle := t.Renderer.NewStyle().
 			Foreground(t.Subtext).
 			Italic(true)
-		lines = append(lines, emptyStyle.Render("No priority recommendations available. Run 'bv --robot-triage' to generate."))
+		lines = append(lines, emptyStyle.Render("No priority recommendations available. Run 'tkv --robot-triage' to generate."))
 		return panelStyle.Render(lipgloss.JoinVertical(lipgloss.Left, lines...))
 	}
 
@@ -1378,7 +1378,7 @@ func (m *InsightsModel) renderHeatmapPanel(width, height int, t Theme) string {
 		emptyStyle := t.Renderer.NewStyle().
 			Foreground(t.Subtext).
 			Italic(true)
-		sb.WriteString(strings.TrimRight(emptyStyle.Render("No data available. Run 'bv --robot-triage' to generate."), "\n\r"))
+		sb.WriteString(strings.TrimRight(emptyStyle.Render("No data available. Run 'tkv --robot-triage' to generate."), "\n\r"))
 		return panelStyle.Render(sb.String())
 	}
 

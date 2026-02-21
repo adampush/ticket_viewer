@@ -1,12 +1,14 @@
-# Beads Viewer (bv)
+# Ticket Viewer (`tkv`)
 
-![Release](https://img.shields.io/github/v/release/Dicklesworthstone/beads_viewer?style=for-the-badge&color=bd93f9)
-![Go Version](https://img.shields.io/github/go-mod/go-version/Dicklesworthstone/beads_viewer?style=for-the-badge&color=6272a4)
+![Release](https://img.shields.io/github/v/release/adampush/ticket_viewer?style=for-the-badge&color=bd93f9)
+![Go Version](https://img.shields.io/github/go-mod/go-version/adampush/ticket_viewer?style=for-the-badge&color=6272a4)
 ![License](https://img.shields.io/badge/License-MIT-50fa7b?style=for-the-badge)
-![Build Status](https://img.shields.io/github/actions/workflow/status/Dicklesworthstone/beads_viewer/ci.yml?style=for-the-badge&logo=github)
-[![Coverage](https://codecov.io/gh/Dicklesworthstone/beads_viewer/branch/main/graph/badge.svg)](https://codecov.io/gh/Dicklesworthstone/beads_viewer)
+![Build Status](https://img.shields.io/github/actions/workflow/status/adampush/ticket_viewer/ci.yml?style=for-the-badge&logo=github)
+[![Coverage](https://codecov.io/gh/adampush/ticket_viewer/branch/main/graph/badge.svg)](https://codecov.io/gh/adampush/ticket_viewer)
 
-> **The elegant, keyboard-driven terminal interface for the [Beads](https://github.com/steveyegge/beads) issue tracker.**
+> **A graph-aware terminal triage engine and TUI for `tk` ticket graphs.**
+
+> Historical note: this project was originally `beads_viewer` with the `bv` binary. Some deep historical sections below still use legacy terms where intentionally preserved.
 
 <div align="center" style="margin: 1.2em 0;">
   <table>
@@ -38,7 +40,7 @@
 ### Recommended: Homebrew (macOS/Linux)
 
 ```bash
-brew install dicklesworthstone/tap/bv
+brew install adampush/tap/tkv
 ```
 
 This method provides:
@@ -49,18 +51,18 @@ This method provides:
 ### Windows: Scoop
 
 ```powershell
-scoop bucket add dicklesworthstone https://github.com/Dicklesworthstone/scoop-bucket
-scoop install dicklesworthstone/bv
+scoop bucket add adampush https://github.com/adampush/scoop-bucket
+scoop install adampush/tkv
 ```
 
 ### Alternative: Direct Download
 
 Download the latest release for your platform (tar.gz assets):
-- [Linux x86_64](https://github.com/Dicklesworthstone/beads_viewer/releases/latest/download/bv_0.13.0_linux_amd64.tar.gz)
-- [Linux ARM64](https://github.com/Dicklesworthstone/beads_viewer/releases/latest/download/bv_0.13.0_linux_arm64.tar.gz)
-- [macOS Intel](https://github.com/Dicklesworthstone/beads_viewer/releases/latest/download/bv_0.13.0_darwin_amd64.tar.gz)
-- [macOS ARM](https://github.com/Dicklesworthstone/beads_viewer/releases/latest/download/bv_0.13.0_darwin_arm64.tar.gz)
-- [Windows](https://github.com/Dicklesworthstone/beads_viewer/releases/latest/download/bv_0.13.0_windows_amd64.tar.gz)
+- [Linux x86_64](https://github.com/adampush/ticket_viewer/releases/latest/download/tkv_linux_amd64.tar.gz)
+- [Linux ARM64](https://github.com/adampush/ticket_viewer/releases/latest/download/tkv_linux_arm64.tar.gz)
+- [macOS Intel](https://github.com/adampush/ticket_viewer/releases/latest/download/tkv_darwin_amd64.tar.gz)
+- [macOS ARM](https://github.com/adampush/ticket_viewer/releases/latest/download/tkv_darwin_arm64.tar.gz)
+- [Windows](https://github.com/adampush/ticket_viewer/releases/latest/download/tkv_windows_amd64.tar.gz)
 
 > Note: Asset names include the release version. If a link 404s, open the latest release page and download the matching asset.
 
@@ -68,12 +70,12 @@ Download the latest release for your platform (tar.gz assets):
 
 **Linux/macOS:**
 ```bash
-curl -fsSL "https://raw.githubusercontent.com/Dicklesworthstone/beads_viewer/main/install.sh?$(date +%s)" | bash
+curl -fsSL "https://raw.githubusercontent.com/adampush/ticket_viewer/main/install.sh?$(date +%s)" | bash
 ```
 
 **Windows (PowerShell):**
 ```powershell
-irm "https://raw.githubusercontent.com/Dicklesworthstone/beads_viewer/main/install.ps1" | iex
+irm "https://raw.githubusercontent.com/adampush/ticket_viewer/main/install.ps1" | iex
 ```
 > **Note:** Windows requires Go 1.21+ ([download](https://go.dev/dl/)). For best display, use Windows Terminal with a [Nerd Font](https://www.nerdfonts.com/).
 
@@ -81,39 +83,30 @@ irm "https://raw.githubusercontent.com/Dicklesworthstone/beads_viewer/main/insta
 
 ## 🤖 Agent Quickstart (Robot Mode)
 
-⚠️ **Never run bare `bv` in an agent context** — it launches the interactive TUI. Always use `--robot-*`.
+⚠️ **Never run bare `tkv` in an agent context** — it launches the interactive TUI. Always use `--robot-*`.
 
 ```bash
 # 1) Start with triage (single-call mega-command)
-bv --robot-triage
+tkv --robot-triage
 
 # 2) Minimal mode: just the top pick + claim command
-bv --robot-next
+tkv --robot-next
 
 # 3) Token-optimized output (TOON)
-bv --robot-triage --format toon
+tkv --robot-triage --format toon
 export BV_OUTPUT_FORMAT=toon
 
 # 4) Full robot help
-bv --robot-help
+tkv --robot-help
 ```
 
-### Tracker Auto-Detection
+### Ticket Source
 
-`bv` now supports both ticket sources and emits tracker-aware action commands in robot output.
-
-- If `.tickets/*.md` exists, `tk` mode is selected.
-- Otherwise Beads sources (`.beads/*.jsonl`, `beads.db`) are used.
-- If both are present, `.tickets` takes precedence and robot usage hints include a mixed-source diagnostic note.
-
-Examples:
+`tkv` reads tickets from `.tickets/*.md` and emits `tk`-native commands in robot output.
 
 ```bash
-# tk mode output includes `tk start <id>` / `tk show <id>`
-bv --robot-next
-
-# beads mode output includes `br update <id> --status=in_progress` / `br show <id>`
-bv --robot-next
+# Output includes `tk start <id>` / `tk show <id>` guidance
+tkv --robot-next
 ```
 
 **Output conventions**
@@ -123,7 +116,7 @@ bv --robot-next
 
 ## 💡 TL;DR
 
-`bv` is a high-performance **Terminal User Interface (TUI)** for browsing and managing tasks in projects that use the **Beads** issue tracking system. 
+`tkv` is a high-performance **Terminal User Interface (TUI)** for browsing and managing tasks in projects that use `tk` ticket files (`.tickets/*.md`).
 
 **Why you'd care:**
 *   **Speed:** Browse thousands of issues instantly with zero network latency.
@@ -135,17 +128,17 @@ bv --robot-next
 
 ## 📖 The Core Experience
 
-At its heart, `bv` is about **viewing your work nicely**.
+At its heart, `tkv` is about **viewing your work nicely**.
 
 ### ⚡ Fast, Fluid Browsing
-No web page loads, no heavy clients. `bv` starts instantly and lets you fly through your issue backlog using standard Vim keys (`j`/`k`).
+No web page loads, no heavy clients. `tkv` starts instantly and lets you fly through your issue backlog using standard Vim keys (`j`/`k`).
 *   **Split-View Dashboard:** On wider screens, see your list on the left and full details on the right.
 *   **Markdown Rendering:** Issue descriptions, comments, and notes are beautifully rendered with syntax highlighting, headers, and lists.
 *   **Instant Filtering:** Zero-latency filtering. Press `o` for Open, `c` for Closed, or `r` for Ready (unblocked) tasks.
 *   **Live Reload:** Watches `.beads/beads.jsonl` and refreshes lists, details, and insights automatically when the file changes—no restart needed.
 
 ### 🔎 Rich Context
-Don't just read the title. `bv` gives you the full picture:
+Don't just read the title. `tkv` gives you the full picture:
 *   **Comments & History:** Scroll through the full conversation history of any task.
 *   **Metadata:** Instantly see Assignees, Labels, Priority badges, and creation dates.
 *   **Search:** Powerful fuzzy search (`/`) finds issues by ID, title, or content instantly.
@@ -159,7 +152,7 @@ Don't just read the title. `bv` gives you the full picture:
 
 ### 🛠️ Quick Actions
 *   **Export:** Press `E` to export all issues to a timestamped Markdown file with Mermaid diagrams.
-*   **Graph Export (CLI):** `bv --robot-graph` outputs the dependency graph as JSON, DOT (Graphviz), or Mermaid format. Use `--graph-format=dot` for rendering with Graphviz, or `--graph-root=ID --graph-depth=3` to extract focused subgraphs.
+*   **Graph Export (CLI):** `tkv --robot-graph` outputs the dependency graph as JSON, DOT (Graphviz), or Mermaid format. Use `--graph-format=dot` for rendering with Graphviz, or `--graph-root=ID --graph-depth=3` to extract focused subgraphs.
 *   **Copy:** Press `C` to copy the selected issue as formatted Markdown to your clipboard.
 *   **Edit:** Press `O` to open the `.beads/beads.jsonl` file in your preferred GUI editor.
 *   **Time-Travel:** Press `t` to compare against any git revision, or `T` for quick HEAD~5 comparison. Combined with History view (`h`), you can navigate to any commit and see exactly what changed.
@@ -172,17 +165,17 @@ Configure pre- and post-export hooks in `.bv/hooks.yaml` to run validations, not
 ## 🤖 Ready-made Blurb to Drop Into Your AGENTS.md or CLAUDE.md Files
 
 ```
-### Using bv as an AI sidecar
+### Using tkv as an AI sidecar
 
-bv is a graph-aware triage engine for Beads projects (.beads/beads.jsonl). Instead of parsing JSONL or hallucinating graph traversal, use robot flags for deterministic, dependency-aware outputs with precomputed metrics (PageRank, betweenness, critical path, cycles, HITS, eigenvector, k-core).
+tkv is a graph-aware triage engine for `tk` projects (`.tickets/*.md`). Instead of parsing ticket markdown or hand-computing graph traversal, use robot flags for deterministic, dependency-aware outputs with precomputed metrics (PageRank, betweenness, critical path, cycles, HITS, eigenvector, k-core).
 
-**Scope boundary:** bv handles *what to work on* (triage, priority, planning). For agent-to-agent coordination (messaging, work claiming, file reservations), use [MCP Agent Mail](https://github.com/Dicklesworthstone/mcp_agent_mail).
+**Scope boundary:** tkv handles *what to work on* (triage, priority, planning). For agent-to-agent coordination (messaging, work claiming, file reservations), use [MCP Agent Mail](https://github.com/Dicklesworthstone/mcp_agent_mail).
 
-**⚠️ CRITICAL: Use ONLY `--robot-*` flags. Bare `bv` launches an interactive TUI that blocks your session.**
+**⚠️ CRITICAL: Use ONLY `--robot-*` flags. Bare `tkv` launches an interactive TUI that blocks your session.**
 
 #### The Workflow: Start With Triage
 
-**`bv --robot-triage` is your single entry point.** It returns everything you need in one call:
+**`tkv --robot-triage` is your single entry point.** It returns everything you need in one call:
 - `quick_ref`: at-a-glance counts + top 3 picks
 - `recommendations`: ranked actionable items with scores, reasons, unblock info
 - `quick_wins`: low-effort high-impact items
@@ -190,13 +183,13 @@ bv is a graph-aware triage engine for Beads projects (.beads/beads.jsonl). Inste
 - `project_health`: status/type/priority distributions, graph metrics
 - `commands`: copy-paste shell commands for next steps
 
-bv --robot-triage        # THE MEGA-COMMAND: start here
-bv --robot-next          # Minimal: just the single top pick + claim command
+tkv --robot-triage       # THE MEGA-COMMAND: start here
+tkv --robot-next         # Minimal: just the single top pick + claim command
 
 # Token-optimized output (TOON) for lower LLM context usage:
-bv --robot-triage --format toon
+tkv --robot-triage --format toon
 export BV_OUTPUT_FORMAT=toon
-bv --robot-next
+tkv --robot-next
 
 #### Other Commands
 
@@ -232,17 +225,17 @@ bv --robot-next
 
 #### Scoping & Filtering
 
-bv --robot-plan --label backend              # Scope to label's subgraph
-bv --robot-insights --as-of HEAD~30          # Historical point-in-time
-bv --recipe actionable --robot-plan          # Pre-filter: ready to work (no blockers)
-bv --recipe high-impact --robot-triage       # Pre-filter: top PageRank scores
-bv --robot-triage --robot-triage-by-track    # Group by parallel work streams
-bv --robot-triage --robot-triage-by-label    # Group by domain
+tkv --robot-plan --label backend             # Scope to label's subgraph
+tkv --robot-insights --as-of HEAD~30         # Historical point-in-time
+tkv --recipe actionable --robot-plan         # Pre-filter: ready to work (no blockers)
+tkv --recipe high-impact --robot-triage      # Pre-filter: top PageRank scores
+tkv --robot-triage --robot-triage-by-track   # Group by parallel work streams
+tkv --robot-triage --robot-triage-by-label   # Group by domain
 
 #### Understanding Robot Output
 
 **All robot JSON includes:**
-- `data_hash` — Fingerprint of source beads.jsonl (verify consistency across calls)
+- `data_hash` — Fingerprint of source ticket dataset (verify consistency across calls)
 - `status` — Per-metric state: `computed|approx|timeout|skipped` + elapsed ms
 - `as_of` / `as_of_commit` — Present when using `--as-of`; contains ref and resolved SHA
 
@@ -254,23 +247,23 @@ bv --robot-triage --robot-triage-by-label    # Group by domain
 
 #### jq Quick Reference
 
-bv --robot-triage | jq '.quick_ref'                        # At-a-glance summary
-bv --robot-triage | jq '.recommendations[0]'               # Top recommendation
-bv --robot-plan | jq '.plan.summary.highest_impact'        # Best unblock target
-bv --robot-insights | jq '.status'                         # Check metric readiness
-bv --robot-insights | jq '.Cycles'                         # Circular deps (must fix!)
-bv --robot-label-health | jq '.results.labels[] | select(.health_level == "critical")'
+tkv --robot-triage | jq '.quick_ref'                       # At-a-glance summary
+tkv --robot-triage | jq '.recommendations[0]'              # Top recommendation
+tkv --robot-plan | jq '.plan.summary.highest_impact'       # Best unblock target
+tkv --robot-insights | jq '.status'                        # Check metric readiness
+tkv --robot-insights | jq '.Cycles'                        # Circular deps (must fix!)
+tkv --robot-label-health | jq '.results.labels[] | select(.health_level == "critical")'
 
 **Performance:** Phase 1 instant, Phase 2 async (500ms timeout). Prefer `--robot-plan` over `--robot-insights` when speed matters. Results cached by data hash.
 
-Use bv instead of parsing beads.jsonl—it computes PageRank, critical paths, cycles, and parallel tracks deterministically.
+Use tkv instead of parsing ticket markdown directly - it computes PageRank, critical paths, cycles, and parallel tracks deterministically.
 ```
 
 ### Automatic Integration
 
-`bv` can automatically add the above instructions to your project's agent file:
+`tkv` can automatically add the above instructions to your project's agent file:
 
-- **On first run**, bv checks for AGENTS.md (or similar files) and offers to inject the blurb if not present
+- **On first run**, tkv checks for AGENTS.md (or similar files) and offers to inject the blurb if not present
 - Choose **"Yes"** to add the instructions, **"No"** to skip, or **"Don't ask again"** to remember your preference
 - Preferences are stored per-project in `~/.config/bv/agent-prompts/`
 
@@ -283,11 +276,11 @@ Use bv instead of parsing beads.jsonl—it computes PageRank, critical paths, cy
 **Manual Control:**
 
 ```bash
-bv --agents-check             # Check if blurb is present in agent file
-bv --agents-add               # Add blurb to agent file (creates file if needed)
-bv --agents-remove            # Remove blurb from agent file
-bv --agents-update            # Update blurb to latest version
-bv --agents-dry-run           # Show what would happen without executing
+tkv --agents-check            # Check if blurb is present in agent file
+tkv --agents-add              # Add blurb to agent file (creates file if needed)
+tkv --agents-remove           # Remove blurb from agent file
+tkv --agents-update           # Update blurb to latest version
+tkv --agents-dry-run          # Show what would happen without executing
 ```
 
 **Version Tracking:**
@@ -299,13 +292,13 @@ The blurb uses HTML comment markers for version tracking:
 <!-- end-bv-agent-instructions -->
 ```
 
-When a new version of the blurb is released, `bv` can detect the outdated version and offer to update it.
+When a new version of the blurb is released, `tkv` can detect the outdated version and offer to update it.
 
 ---
 
 ## 📐 Architecture & Design
 
-`bv` treats your project as a **Directed Acyclic Graph (DAG)**, not just a list. This allows it to derive insights about what is *truly* important.
+`tkv` treats your project as a **Directed Acyclic Graph (DAG)**, not just a list. This allows it to derive insights about what is *truly* important.
 
 ```mermaid
 graph TD

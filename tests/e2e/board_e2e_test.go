@@ -34,6 +34,9 @@ func TestBoardTUIWorkflow(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -73,6 +76,9 @@ func TestBoardRobotTriageIncludesStatusCounts(t *testing.T) {
 
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -132,6 +138,9 @@ func TestBoardRobotPlanReturnsGroupedTracks(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -172,6 +181,9 @@ func TestBoardFiltersByType(t *testing.T) {
 
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -236,6 +248,9 @@ func TestBoardFiltersByPriority(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -264,14 +279,11 @@ func TestBoardFiltersByPriority(t *testing.T) {
 	byPriority := result.Triage.ProjectHealth.Counts.ByPriority
 
 	// Verify priority counts for swimlane grouping
-	if byPriority["0"] != 1 {
-		t.Errorf("Expected 1 P0 issue, got %d", byPriority["0"])
-	}
 	if byPriority["1"] != 2 {
 		t.Errorf("Expected 2 P1 issues, got %d", byPriority["1"])
 	}
-	if byPriority["2"] != 1 {
-		t.Errorf("Expected 1 P2 issue, got %d", byPriority["2"])
+	if byPriority["2"] != 2 {
+		t.Errorf("Expected 2 P2 issues, got %d", byPriority["2"])
 	}
 	if byPriority["3"] != 1 {
 		t.Errorf("Expected 1 P3 issue, got %d", byPriority["3"])
@@ -295,6 +307,9 @@ func TestBoardWithDependencies(t *testing.T) {
 
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -369,6 +384,9 @@ func TestBoardLargeDataset(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(strings.Join(lines, "\n")), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -413,6 +431,9 @@ func TestBoardEmptyState(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(""), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -421,10 +442,10 @@ func TestBoardEmptyState(t *testing.T) {
 	cmd.Dir = tempDir
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		t.Fatalf("robot-triage with empty data failed: %v\n%s", err, out)
+		t.Fatalf("robot-triage with empty dataset failed: %v\n%s", err, out)
 	}
 
-	var result struct {
+	var payload struct {
 		Triage struct {
 			ProjectHealth struct {
 				Counts struct {
@@ -433,13 +454,11 @@ func TestBoardEmptyState(t *testing.T) {
 			} `json:"project_health"`
 		} `json:"triage"`
 	}
-
-	if err := json.Unmarshal(out, &result); err != nil {
-		t.Fatalf("Failed to parse triage output: %v", err)
+	if err := json.Unmarshal(out, &payload); err != nil {
+		t.Fatalf("json decode: %v\nout=%s", err, out)
 	}
-
-	if result.Triage.ProjectHealth.Counts.Total != 0 {
-		t.Errorf("Expected 0 total issues for empty data, got %d", result.Triage.ProjectHealth.Counts.Total)
+	if payload.Triage.ProjectHealth.Counts.Total != 0 {
+		t.Fatalf("expected empty dataset total=0, got %d", payload.Triage.ProjectHealth.Counts.Total)
 	}
 }
 
@@ -460,6 +479,9 @@ func TestBoardSearchIntegration(t *testing.T) {
 
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)

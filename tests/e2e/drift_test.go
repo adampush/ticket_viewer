@@ -371,7 +371,7 @@ func TestDriftErrorHandling(t *testing.T) {
 
 	// Create minimal beads file
 	beadsPath := filepath.Join(envDir, ".beads", "beads.jsonl")
-	if err := os.WriteFile(beadsPath, []byte(`{"id":"A","status":"open","issue_type":"task"}`+"\n"), 0644); err != nil {
+	if err := os.WriteFile(beadsPath, []byte(`{"id":"A","title":"Task A","status":"open","priority":1,"issue_type":"task"}`+"\n"), 0644); err != nil {
 		t.Fatal(err)
 	}
 

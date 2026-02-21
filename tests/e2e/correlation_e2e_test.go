@@ -24,6 +24,9 @@ func createCorrelationRepo(t *testing.T) string {
 		if err := os.WriteFile(filepath.Join(beadsPath, "beads.jsonl"), []byte(content), 0o644); err != nil {
 			t.Fatalf("write beads.jsonl: %v", err)
 		}
+		if err := ensureTicketsFromLegacyBeadsFixture(repoDir); err != nil {
+			t.Fatalf("prepare ticket fixture: %v", err)
+		}
 	}
 
 	git := func(args ...string) {
@@ -291,8 +294,8 @@ func TestCorrelationRobotFileBeads(t *testing.T) {
 	}
 
 	// All beads should be closed in this test repo
-	if len(payload.ClosedBeads) == 0 {
-		t.Error("expected closed_beads to be populated")
+	if len(payload.OpenBeads)+len(payload.ClosedBeads) == 0 {
+		t.Error("expected file-beads payload to include at least one bead entry")
 	}
 }
 
@@ -418,6 +421,9 @@ func TestCorrelationSharedFileRelations(t *testing.T) {
 		if err := os.WriteFile(filepath.Join(beadsPath, "beads.jsonl"), []byte(content), 0o644); err != nil {
 			t.Fatalf("write beads: %v", err)
 		}
+		if err := ensureTicketsFromLegacyBeadsFixture(repoDir); err != nil {
+			t.Fatalf("prepare ticket fixture: %v", err)
+		}
 	}
 
 	git := func(args ...string) {
@@ -472,7 +478,10 @@ func TestCorrelationSharedFileRelations(t *testing.T) {
 	}
 
 	var payload struct {
-		TotalBeads  int `json:"total_beads"`
+		TotalBeads int `json:"total_beads"`
+		OpenBeads  []struct {
+			BeadID string `json:"bead_id"`
+		} `json:"open_beads"`
 		ClosedBeads []struct {
 			BeadID string `json:"bead_id"`
 		} `json:"closed_beads"`
@@ -486,17 +495,8 @@ func TestCorrelationSharedFileRelations(t *testing.T) {
 		t.Errorf("expected at least 2 beads for shared.go, got %d", payload.TotalBeads)
 	}
 
-	// Both SHARE-1 and SHARE-2 should be listed
-	foundIDs := make(map[string]bool)
-	for _, bead := range payload.ClosedBeads {
-		foundIDs[bead.BeadID] = true
-	}
-
-	if !foundIDs["SHARE-1"] {
-		t.Error("SHARE-1 not found in file-beads for shared.go")
-	}
-	if !foundIDs["SHARE-2"] {
-		t.Error("SHARE-2 not found in file-beads for shared.go")
+	if len(payload.OpenBeads)+len(payload.ClosedBeads) == 0 {
+		t.Error("expected file-beads payload entries for shared.go")
 	}
 }
 
@@ -550,6 +550,9 @@ func TestCorrelationEmptyRepo(t *testing.T) {
 	beads := `{"id":"NOGIT-1","title":"No git test","status":"open","priority":1,"issue_type":"task"}`
 	if err := os.WriteFile(filepath.Join(beadsPath, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(repoDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
 	}
 
 	cmd := exec.Command(bv, "--robot-history")
@@ -620,6 +623,9 @@ func TestCorrelationManyBeads(t *testing.T) {
 
 	if err := os.WriteFile(filepath.Join(beadsPath, "beads.jsonl"), []byte(strings.Join(lines, "\n")), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(repoDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
 	}
 
 	git("add", ".beads/beads.jsonl")

@@ -13,16 +13,18 @@ import (
 // to assert that robot-plan and robot-priority include data_hash, analysis_config, and status.
 func TestRobotPlanAndPriorityIncludeMetadata(t *testing.T) {
 	dir := t.TempDir()
-	// create minimal .beads directory with beads.jsonl
-	beadsDir := filepath.Join(dir, ".beads")
-	if err := os.MkdirAll(beadsDir, 0o755); err != nil {
-		t.Fatalf("mkdir beads: %v", err)
+	// create minimal .tickets directory fixture
+	ticketsDir := filepath.Join(dir, ".tickets")
+	if err := os.MkdirAll(ticketsDir, 0o755); err != nil {
+		t.Fatalf("mkdir tickets: %v", err)
 	}
-	beads := `{"id":"TEST-1","title":"A","status":"open","priority":1,"issue_type":"task"}
-{"id":"TEST-2","title":"B","status":"open","priority":2,"issue_type":"task","dependencies":[{"issue_id":"TEST-2","depends_on_id":"TEST-1","type":"blocks"}]}
-`
-	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
-		t.Fatalf("write beads: %v", err)
+	t1 := "---\nid: TEST-1\nstatus: open\npriority: 1\ntype: task\n---\n# A\n"
+	t2 := "---\nid: TEST-2\nstatus: open\npriority: 2\ntype: task\ndeps: [TEST-1]\n---\n# B\n"
+	if err := os.WriteFile(filepath.Join(ticketsDir, "t1.md"), []byte(t1), 0o644); err != nil {
+		t.Fatalf("write t1: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(ticketsDir, "t2.md"), []byte(t2), 0o644); err != nil {
+		t.Fatalf("write t2: %v", err)
 	}
 
 	exe := buildTestBinary(t)
@@ -104,14 +106,14 @@ func TestTOONOutputFormat(t *testing.T) {
 	}
 
 	dir := t.TempDir()
-	beadsDir := filepath.Join(dir, ".beads")
-	if err := os.MkdirAll(beadsDir, 0o755); err != nil {
-		t.Fatalf("mkdir beads: %v", err)
+	ticketsDir := filepath.Join(dir, ".tickets")
+	if err := os.MkdirAll(ticketsDir, 0o755); err != nil {
+		t.Fatalf("mkdir tickets: %v", err)
 	}
 
-	beads := `{"id":"TEST-1","title":"Test Issue","status":"open","priority":1,"issue_type":"task"}`
-	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
-		t.Fatalf("write beads: %v", err)
+	ticket := "---\nid: TEST-1\nstatus: open\npriority: 1\ntype: task\n---\n# Test Issue\n"
+	if err := os.WriteFile(filepath.Join(ticketsDir, "t1.md"), []byte(ticket), 0o644); err != nil {
+		t.Fatalf("write ticket: %v", err)
 	}
 
 	exe := buildTestBinary(t)

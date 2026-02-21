@@ -11,8 +11,10 @@ func TestEmitScript_BashAndFish(t *testing.T) {
 	env := t.TempDir()
 
 	// Ensure at least one actionable recommendation.
-	writeBeads(t, env, `{"id":"A","title":"Unblocker","status":"open","priority":1,"issue_type":"task"}
-{"id":"B","title":"Blocked","status":"open","priority":2,"issue_type":"task","dependencies":[{"issue_id":"B","depends_on_id":"A","type":"blocks"}]}`)
+	writeTickets(t, env, map[string]string{
+		"a.md": "---\nid: A\nstatus: open\npriority: 1\ntype: task\n---\n# Unblocker\n",
+		"b.md": "---\nid: B\nstatus: open\npriority: 2\ntype: task\ndeps: [A]\n---\n# Blocked\n",
+	})
 
 	tests := []struct {
 		name        string
@@ -39,8 +41,8 @@ func TestEmitScript_BashAndFish(t *testing.T) {
 			if tt.wantExtra != "" && !strings.Contains(s, tt.wantExtra) {
 				t.Fatalf("missing %q:\n%s", tt.wantExtra, s)
 			}
-			if !strings.Contains(s, "br show A") {
-				t.Fatalf("missing br show command for A:\n%s", s)
+			if !strings.Contains(s, "tk show A") {
+				t.Fatalf("missing tk show command for A:\n%s", s)
 			}
 			if !strings.Contains(s, "# Data hash:") {
 				t.Fatalf("missing data hash header:\n%s", s)

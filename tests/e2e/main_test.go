@@ -22,6 +22,9 @@ func TestEndToEndBuildAndRun(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(envDir, ".beads", "beads.jsonl"), []byte(jsonlContent), 0644); err != nil {
 		t.Fatal(err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(envDir); err != nil {
+		t.Fatal(err)
+	}
 
 	// 3. Run bv --version to verify it runs
 	runCmd := exec.Command(binPath, "--version")
@@ -47,6 +50,9 @@ func TestEndToEndRobotPlan(t *testing.T) {
 {"id": "subtask-1", "title": "Subtask", "status": "open", "priority": 2, "issue_type": "task", "dependencies": [{"target_id": "task-1", "type": "blocks"}]}`
 
 	if err := os.WriteFile(filepath.Join(envDir, ".beads", "beads.jsonl"), []byte(jsonlContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(envDir); err != nil {
 		t.Fatal(err)
 	}
 
@@ -108,6 +114,9 @@ func TestEndToEndRobotInsights(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(envDir, ".beads", "beads.jsonl"), []byte(jsonlContent), 0644); err != nil {
 		t.Fatal(err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(envDir); err != nil {
+		t.Fatal(err)
+	}
 
 	// 3. Run bv --robot-insights
 	runCmd := exec.Command(binPath, "--robot-insights")
@@ -146,6 +155,9 @@ func TestEndToEndRobotPriority(t *testing.T) {
 {"id": "DEP-1", "title": "Dependent 1", "status": "open", "issue_type": "task", "dependencies": [{"issue_id": "DEP-1", "depends_on_id": "IMP-1", "type": "blocks"}]}
 {"id": "DEP-2", "title": "Dependent 2", "status": "open", "issue_type": "task", "dependencies": [{"issue_id": "DEP-2", "depends_on_id": "IMP-1", "type": "blocks"}]}`
 	if err := os.WriteFile(filepath.Join(envDir, ".beads", "beads.jsonl"), []byte(jsonlContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(envDir); err != nil {
 		t.Fatal(err)
 	}
 

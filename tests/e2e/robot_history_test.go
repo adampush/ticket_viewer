@@ -23,6 +23,9 @@ func createHistoryRepo(t *testing.T) (string, string) {
 		if err := os.WriteFile(filepath.Join(beadsPath, "beads.jsonl"), []byte(content), 0o644); err != nil {
 			t.Fatalf("write beads.jsonl: %v", err)
 		}
+		if err := ensureTicketsFromLegacyBeadsFixture(repoDir); err != nil {
+			t.Fatalf("prepare ticket fixture: %v", err)
+		}
 	}
 
 	git := func(args ...string) {

@@ -1,7 +1,7 @@
-project_name: bv
+project_name: tkv
 builds:
   - main: ./cmd/bv
-    binary: bv
+    binary: tkv
     ldflags:
       - -s -w
       - -X github.com/Dicklesworthstone/beads_viewer/pkg/version.version=v{{.Version}}
@@ -39,37 +39,37 @@ changelog:
 
 # Homebrew tap publishing
 brews:
-  - name: bv
+  - name: tkv
     repository:
-      owner: Dicklesworthstone
+      owner: adampush
       name: homebrew-tap
       branch: main
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     directory: Formula
-    homepage: https://github.com/Dicklesworthstone/beads_viewer
-    description: "Graph-aware task management TUI for beads projects"
+    homepage: https://github.com/adampush/ticket_viewer
+    description: "Graph-aware task management TUI for tk ticket projects"
     license: "MIT"
     install: |
-      bin.install "bv"
+      bin.install "tkv"
     test: |
-      system "#{bin}/bv", "--version"
+      system "#{bin}/tkv", "--version"
     caveats: |
-      To get started with bv:
-        1. Initialize beads in your project: bd init
-        2. Launch the TUI: bv
+      To get started with tkv:
+        1. Create tickets in your project: tk create "My task" -t task -p 2
+        2. Launch the TUI: tkv
 
       For AI agent integration, use --robot-* flags:
-        bv --robot-triage     # Get prioritized recommendations
-        bv --robot-next       # Get single next action
+        tkv --robot-triage     # Get prioritized recommendations
+        tkv --robot-next       # Get single next action
 
 # Scoop bucket publishing
 scoops:
-  - name: bv
+  - name: tkv
     repository:
-      owner: Dicklesworthstone
+      owner: adampush
       name: scoop-bucket
       branch: main
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    homepage: https://github.com/Dicklesworthstone/beads_viewer
-    description: "Graph-aware task management TUI for beads projects"
+    homepage: https://github.com/adampush/ticket_viewer
+    description: "Graph-aware task management TUI for tk ticket projects"
     license: MIT

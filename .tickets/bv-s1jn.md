@@ -1,6 +1,6 @@
 ---
 id: bv-s1jn
-status: open
+status: closed
 deps: [bv-yfa0, bv-n8vq]
 links: []
 created: 2026-02-20T21:43:08Z
@@ -70,3 +70,13 @@ Likely files:
 ## Artifacts
 
 - Command normalization notes and test evidence in ticket notes.
+
+## Notes
+
+**2026-02-20T22:19:27Z**
+
+Normalized command outputs to tk for active runtime surfaces: robot-next claim/show now emit tk commands; emit-script output emits tk claim/show; e2e contract tests updated to tk fixtures and tk command expectations; cmd runtime no-issues message updated to tk create guidance. Export markdown tracker-aware tk commands remain enabled via MarkdownOptions tracker mode and CLI export path continues to pass tracker mode.
+
+**2026-02-20T22:19:36Z**
+
+Validation: go test ./pkg/analysis/... passed; go test ./pkg/export/... passed; go test ./cmd/bv/... passed; go test ./tests/e2e/... -run 'RobotNextContractActionable|RobotNextContractActionableTK|EmitScript' passed; go build ./... passed; go vet ./... passed.

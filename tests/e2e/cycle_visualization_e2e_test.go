@@ -525,6 +525,9 @@ func createNoCycleRepo(t *testing.T) string {
 	if err := os.WriteFile(filepath.Join(beadsPath, "beads.jsonl"), []byte(jsonl), 0644); err != nil {
 		t.Fatalf("write beads.jsonl: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(repoDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 	return repoDir
 }
 
@@ -543,6 +546,9 @@ func createTwoNodeCycleRepo(t *testing.T) string {
 
 	if err := os.WriteFile(filepath.Join(beadsPath, "beads.jsonl"), []byte(jsonl), 0644); err != nil {
 		t.Fatalf("write beads.jsonl: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(repoDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
 	}
 	return repoDir
 }
@@ -564,6 +570,9 @@ func createThreeNodeCycleRepo(t *testing.T) string {
 	if err := os.WriteFile(filepath.Join(beadsPath, "beads.jsonl"), []byte(jsonl), 0644); err != nil {
 		t.Fatalf("write beads.jsonl: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(repoDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 	return repoDir
 }
 
@@ -584,6 +593,9 @@ func createMultipleCyclesRepo(t *testing.T) string {
 
 	if err := os.WriteFile(filepath.Join(beadsPath, "beads.jsonl"), []byte(jsonl), 0644); err != nil {
 		t.Fatalf("write beads.jsonl: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(repoDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
 	}
 	return repoDir
 }
@@ -607,6 +619,9 @@ func createNestedCyclesRepo(t *testing.T) string {
 	if err := os.WriteFile(filepath.Join(beadsPath, "beads.jsonl"), []byte(jsonl), 0644); err != nil {
 		t.Fatalf("write beads.jsonl: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(repoDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 	return repoDir
 }
 
@@ -628,6 +643,9 @@ func createMixedCycleDAGRepo(t *testing.T) string {
 
 	if err := os.WriteFile(filepath.Join(beadsPath, "beads.jsonl"), []byte(jsonl), 0644); err != nil {
 		t.Fatalf("write beads.jsonl: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(repoDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
 	}
 	return repoDir
 }

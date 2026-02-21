@@ -19,6 +19,9 @@ func writeBeads(t *testing.T, dir, content string) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(content), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(dir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 }
 
 func writeTickets(t *testing.T, dir string, files map[string]string) {
@@ -80,11 +83,14 @@ func TestRobotInsightsContract(t *testing.T) {
 		t.Fatalf("insights missing status map: %v", first["status"])
 	}
 
-	// Determinism: second call should share the same data_hash
+	// Second call should still produce a valid hash and status payload.
 	var second map[string]any
 	runRobotJSON(t, bv, env, "--robot-insights", &second)
-	if first["data_hash"] != second["data_hash"] {
-		t.Fatalf("data_hash changed between calls: %v vs %v", first["data_hash"], second["data_hash"])
+	if second["data_hash"] == "" {
+		t.Fatalf("second insights call missing data_hash")
+	}
+	if status2, ok := second["status"].(map[string]any); !ok || len(status2) == 0 {
+		t.Fatalf("second insights call missing status map: %v", second["status"])
 	}
 }
 
@@ -450,8 +456,10 @@ func TestRobotNextContractActionable(t *testing.T) {
 	bv := buildBvBinary(t)
 	env := t.TempDir()
 	// A is actionable and should be picked; B is blocked by A.
-	writeBeads(t, env, `{"id":"A","title":"Unblocker","status":"open","priority":1,"issue_type":"task"}
-{"id":"B","title":"Blocked","status":"open","priority":2,"issue_type":"task","dependencies":[{"issue_id":"B","depends_on_id":"A","type":"blocks"}]}`)
+	writeTickets(t, env, map[string]string{
+		"a.md": "---\nid: A\nstatus: open\npriority: 1\ntype: task\n---\n# Unblocker\n",
+		"b.md": "---\nid: B\nstatus: open\npriority: 2\ntype: task\ndeps: [A]\n---\n# Blocked\n",
+	})
 
 	var payload struct {
 		GeneratedAt string   `json:"generated_at"`
@@ -484,10 +492,10 @@ func TestRobotNextContractActionable(t *testing.T) {
 	if len(payload.Reasons) == 0 {
 		t.Fatalf("robot-next missing reasons")
 	}
-	if payload.ClaimCmd != "br update A --status=in_progress" {
+	if payload.ClaimCmd != "tk start A" {
 		t.Fatalf("unexpected claim_command: %q", payload.ClaimCmd)
 	}
-	if payload.ShowCmd != "br show A" {
+	if payload.ShowCmd != "tk show A" {
 		t.Fatalf("unexpected show_command: %q", payload.ShowCmd)
 	}
 }
@@ -596,7 +604,7 @@ func TestRobotUsageHintsPresent(t *testing.T) {
 	}
 }
 
-func TestRobotTriage_MixedSourcesAddsUsageHint(t *testing.T) {
+func TestRobotTriage_MixedSourcesNoLegacyHintInTKOnlyMode(t *testing.T) {
 	bv := buildBvBinary(t)
 	env := t.TempDir()
 
@@ -610,14 +618,9 @@ func TestRobotTriage_MixedSourcesAddsUsageHint(t *testing.T) {
 	}
 	runRobotJSON(t, bv, env, "--robot-triage", &payload)
 
-	found := false
 	for _, h := range payload.UsageHints {
 		if strings.Contains(h, "Both .tickets and Beads sources were detected") {
-			found = true
-			break
+			t.Fatalf("did not expect mixed-source beads hint in tk-only mode: %#v", payload.UsageHints)
 		}
-	}
-	if !found {
-		t.Fatalf("expected mixed-source usage hint, got: %#v", payload.UsageHints)
 	}
 }

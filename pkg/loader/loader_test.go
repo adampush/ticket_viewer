@@ -1012,8 +1012,20 @@ func TestGetBeadsDir_EmptyRepoPath_UsesCwd(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
-	if result != expected {
-		t.Errorf("Empty repoPath should use cwd: got %s, want %s", result, expected)
+	resultEval := result
+	if eval, evalErr := filepath.EvalSymlinks(result); evalErr == nil {
+		resultEval = eval
+	}
+	expectedEval := expected
+	if eval, evalErr := filepath.EvalSymlinks(expected); evalErr == nil {
+		expectedEval = eval
+	}
+	if runtime.GOOS == "darwin" {
+		resultEval = strings.TrimPrefix(resultEval, "/private")
+		expectedEval = strings.TrimPrefix(expectedEval, "/private")
+	}
+	if resultEval != expectedEval {
+		t.Errorf("Empty repoPath should use cwd: got %s (eval %s), want %s (eval %s)", result, resultEval, expected, expectedEval)
 	}
 }
 
