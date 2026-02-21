@@ -1,6 +1,6 @@
 ---
 id: bv-a0uk
-status: open
+status: closed
 deps: [bv-s1jn]
 links: []
 created: 2026-02-20T21:43:08Z
@@ -66,3 +66,13 @@ Likely files:
 ## Artifacts
 
 - Rename behavior notes with alias/deprecation decision evidence.
+
+## Notes
+
+**2026-02-20T22:21:33Z**
+
+Implemented primary CLI identity rename surfaces to tkv while keeping cmd path policy at cmd/bv. Updated usage/help/version/update messaging in cmd/bv/main.go to reference tkv (e.g., Usage: tkv, tkv --update/--rollback, version banner tkv <version>).
+
+**2026-02-20T22:21:40Z**
+
+Validation: go test ./cmd/bv/... passed; go build ./... passed; go vet ./... passed.

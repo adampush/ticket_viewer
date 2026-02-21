@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_OWNER="Dicklesworthstone"
-REPO_NAME="beads_viewer"
-BIN_NAME="bv"
+REPO_OWNER="adampush"
+REPO_NAME="ticket_viewer"
+BIN_NAME="tkv"
+CMD_PATH="cmd/bv"
 
 TMP_DIRS=()
 
@@ -509,7 +510,7 @@ try_go_install() {
 
     local go_version
     if ! go_version=$(ensure_go); then
-        print_error "Go 1.21 or later is required for building from source."
+        print_error "Go 1.25 or later is required for building from source."
         exit 1
     fi
 
@@ -547,7 +548,7 @@ try_go_install() {
 
     print_info "Building $BIN_NAME from source..."
     build_output="$tmp_dir/$BIN_NAME"
-    if ! (cd "$src_dir" && GO111MODULE=on CGO_ENABLED=0 go build -o "$build_output" "./cmd/$BIN_NAME"); then
+    if ! (cd "$src_dir" && GO111MODULE=on CGO_ENABLED=0 go build -o "$build_output" "./$CMD_PATH"); then
         print_error "Go build failed."
         exit 1
     fi
@@ -582,10 +583,10 @@ main() {
     # First, try to download pre-built binary
     if try_binary_install "$platform"; then
         check_path_and_warn "$INSTALL_DIR"
-        print_info "Run '$BIN_NAME' in any beads project to view issues."
+        print_info "Run '$BIN_NAME' in any project with .tickets/*.md to view issues."
         echo ""
         echo "Tip: You can also install via Homebrew:"
-        echo "  brew install dicklesworthstone/tap/bv"
+        echo "  brew install adampush/tap/tkv"
         exit 0
     fi
 
@@ -594,10 +595,10 @@ main() {
     try_go_install
 
     check_path_and_warn "$INSTALL_DIR"
-    print_info "Run '$BIN_NAME' in any beads project to view issues."
+    print_info "Run '$BIN_NAME' in any project with .tickets/*.md to view issues."
     echo ""
     echo "Tip: You can also install via Homebrew:"
-    echo "  brew install dicklesworthstone/tap/bv"
+    echo "  brew install adampush/tap/tkv"
 }
 
 if [[ ${BASH_SOURCE+x} != x ]]; then

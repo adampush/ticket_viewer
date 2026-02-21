@@ -312,21 +312,21 @@ beads_viewer/
 
 ### Hybrid Semantic Search (CLI)
 
-`bv --search` supports hybrid ranking (text + graph metrics).
+`tkv --search` supports hybrid ranking (text + graph metrics).
 
 ```bash
 # Default (text-only)
-bv --search "login oauth"
+tkv --search "login oauth"
 
 # Hybrid mode with preset
-bv --search "login oauth" --search-mode hybrid --search-preset impact-first
+tkv --search "login oauth" --search-mode hybrid --search-preset impact-first
 
 # Hybrid with custom weights
-bv --search "login oauth" --search-mode hybrid \
+tkv --search "login oauth" --search-mode hybrid \
   --search-weights '{"text":0.4,"pagerank":0.2,"status":0.15,"impact":0.1,"priority":0.1,"recency":0.05}'
 
 # Robot JSON output (adds mode/preset/weights + component_scores for hybrid)
-bv --search "login oauth" --search-mode hybrid --robot-search
+tkv --search "login oauth" --search-mode hybrid --robot-search
 ```
 
 Env defaults:
@@ -340,10 +340,10 @@ Generate a static dashboard for non-technical stakeholders:
 
 ```bash
 # Interactive wizard (recommended)
-bv --pages
+tkv --pages
 
 # Or export locally
-bv --export-pages ./dashboard --pages-title "Sprint 42 Status"
+tkv --export-pages ./dashboard --pages-title "Sprint 42 Status"
 ```
 
 The output is a self-contained HTML/JS bundle that:
@@ -354,13 +354,13 @@ The output is a self-contained HTML/JS bundle that:
 - Requires no installation to view
 
 **Deployment options:**
-- `bv --pages` → Interactive wizard for GitHub Pages deployment
-- `bv --export-pages ./dir` → Local export for custom hosting
-- `bv --preview-pages ./dir` → Preview bundle locally
+- `tkv --pages` → Interactive wizard for GitHub Pages deployment
+- `tkv --export-pages ./dir` → Local export for custom hosting
+- `tkv --preview-pages ./dir` → Preview bundle locally
 
 **For CI/CD integration:**
 ```bash
-bv --export-pages ./bv-pages --pages-title "Nightly Build"
+tkv --export-pages ./bv-pages --pages-title "Nightly Build"
 # Then deploy ./bv-pages to your hosting of choice
 ```
 
@@ -481,11 +481,11 @@ bv is a graph-aware triage engine for ticket graphs. It currently targets `tk` s
 
 **Scope boundary:** bv handles *what to work on* (triage, priority, planning). For agent-to-agent coordination (messaging, work claiming, file reservations), use MCP Agent Mail.
 
-**CRITICAL: Use ONLY `--robot-*` flags. Bare `bv` launches an interactive TUI that blocks your session.**
+**CRITICAL: Use ONLY `--robot-*` flags. Bare `tkv` launches an interactive TUI that blocks your session.**
 
 ### The Workflow: Start With Triage
 
-**`bv --robot-triage` is your single entry point.** It returns:
+**`tkv --robot-triage` is your single entry point.** It returns:
 - `quick_ref`: at-a-glance counts + top 3 picks
 - `recommendations`: ranked actionable items with scores, reasons, unblock info
 - `quick_wins`: low-effort high-impact items
@@ -494,8 +494,8 @@ bv is a graph-aware triage engine for ticket graphs. It currently targets `tk` s
 - `commands`: copy-paste shell commands for next steps
 
 ```bash
-bv --robot-triage        # THE MEGA-COMMAND: start here
-bv --robot-next          # Minimal: just the single top pick + claim command
+tkv --robot-triage       # THE MEGA-COMMAND: start here
+tkv --robot-next         # Minimal: just the single top pick + claim command
 ```
 
 ### Command Reference
@@ -533,12 +533,12 @@ bv --robot-next          # Minimal: just the single top pick + claim command
 ### Scoping & Filtering
 
 ```bash
-bv --robot-plan --label backend              # Scope to label's subgraph
-bv --robot-insights --as-of HEAD~30          # Historical point-in-time
-bv --recipe actionable --robot-plan          # Pre-filter: ready to work
-bv --recipe high-impact --robot-triage       # Pre-filter: top PageRank
-bv --robot-triage --robot-triage-by-track    # Group by parallel work streams
-bv --robot-triage --robot-triage-by-label    # Group by domain
+tkv --robot-plan --label backend             # Scope to label's subgraph
+tkv --robot-insights --as-of HEAD~30         # Historical point-in-time
+tkv --recipe actionable --robot-plan         # Pre-filter: ready to work
+tkv --recipe high-impact --robot-triage      # Pre-filter: top PageRank
+tkv --robot-triage --robot-triage-by-track   # Group by parallel work streams
+tkv --robot-triage --robot-triage-by-label   # Group by domain
 ```
 
 ### Understanding Robot Output
@@ -555,11 +555,11 @@ bv --robot-triage --robot-triage-by-label    # Group by domain
 ### jq Quick Reference
 
 ```bash
-bv --robot-triage | jq '.quick_ref'                        # At-a-glance summary
-bv --robot-triage | jq '.recommendations[0]'               # Top recommendation
-bv --robot-plan | jq '.plan.summary.highest_impact'        # Best unblock target
-bv --robot-insights | jq '.status'                         # Check metric readiness
-bv --robot-insights | jq '.Cycles'                         # Circular deps (must fix!)
+tkv --robot-triage | jq '.quick_ref'                       # At-a-glance summary
+tkv --robot-triage | jq '.recommendations[0]'              # Top recommendation
+tkv --robot-plan | jq '.plan.summary.highest_impact'       # Best unblock target
+tkv --robot-insights | jq '.status'                        # Check metric readiness
+tkv --robot-insights | jq '.Cycles'                        # Circular deps (must fix!)
 ```
 
 ---

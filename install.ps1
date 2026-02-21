@@ -1,12 +1,12 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    Install script for beads_viewer (bv) on Windows.
+    Install script for ticket_viewer (tkv) on Windows.
 .DESCRIPTION
-    Builds and installs bv from source using Go.
-    Pre-built Windows binaries are not yet available, so Go 1.21+ is required.
+    Builds and installs tkv from source using Go.
+    Pre-built Windows binaries are not yet available, so Go 1.25+ is required.
 .EXAMPLE
-    irm https://raw.githubusercontent.com/Dicklesworthstone/beads_viewer/main/install.ps1 | iex
+    irm https://raw.githubusercontent.com/adampush/ticket_viewer/main/install.ps1 | iex
 #>
 
 [CmdletBinding()]
@@ -15,9 +15,10 @@ param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$REPO = "github.com/Dicklesworthstone/beads_viewer"
-$BIN_NAME = "bv"
-$MIN_GO_VERSION = "1.21"
+$REPO = "github.com/adampush/ticket_viewer"
+$BIN_NAME = "tkv"
+$CMD_PATH = "cmd/bv"
+$MIN_GO_VERSION = "1.25"
 
 function Write-Info { param([string]$Message) Write-Host "==> " -ForegroundColor Blue -NoNewline; Write-Host $Message }
 function Write-Success { param([string]$Message) Write-Host "==> " -ForegroundColor Green -NoNewline; Write-Host $Message }
@@ -121,7 +122,7 @@ function Main {
     # Temporarily allow stderr output (go install writes progress to stderr)
     $prevErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
-    & go install "$REPO/cmd/$BIN_NAME@latest" 2>&1 | ForEach-Object { Write-Host $_ }
+    & go install "$REPO/$CMD_PATH@latest" 2>&1 | ForEach-Object { Write-Host $_ }
     $ErrorActionPreference = $prevErrorActionPreference
     if ($LASTEXITCODE -ne 0) {
         Write-Error2 "Failed to build ${BIN_NAME}: go install exited with code $LASTEXITCODE"
@@ -142,7 +143,7 @@ function Main {
 
     Write-Info ""
     Write-Info "Installation complete!"
-    Write-Info "Run '$BIN_NAME' in any beads project directory to view issues."
+    Write-Info "Run '$BIN_NAME' in any project with .tickets/*.md to view issues."
     Write-Info ""
     Write-Info "Tip: For best display, use Windows Terminal with a Nerd Font."
 }

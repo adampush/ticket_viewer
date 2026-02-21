@@ -1,6 +1,6 @@
 ---
 id: bv-3eud
-status: open
+status: closed
 deps: [bv-a0uk, bv-n8vq]
 links: []
 created: 2026-02-20T21:43:08Z
@@ -67,3 +67,13 @@ Likely files:
 ## Artifacts
 
 - Release plumbing verification notes and command outputs.
+
+## Notes
+
+**2026-02-20T22:23:16Z**
+
+Updated module/updater/release plumbing to fork identity while keeping module path unchanged per decision lock. Changes: pkg/updater now targets adampush/ticket_viewer GitHub releases and uses ticket-viewer update user-agent; .goreleaser.yaml now uses project_name tkv, binary tkv, and fork homepage/owner metadata for brew/scoop outputs.
+
+**2026-02-20T22:23:24Z**
+
+Validation: go test ./pkg/updater/... passed; go build ./... passed; go vet ./... passed. goreleaser is not installed locally (goreleaser not found -> not found); per policy, goreleaser check will be validated in CI and captured in follow-up notes.

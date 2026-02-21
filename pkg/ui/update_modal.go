@@ -95,7 +95,7 @@ func PerformUpdateCmd() tea.Cmd {
 			if result != nil {
 				if result.RequireRoot {
 					requireRoot = true
-					msg = "Update requires elevated permissions. Run: sudo bv --update"
+					msg = "Update requires elevated permissions. Run: sudo tkv --update"
 				}
 			}
 			return UpdateCompleteMsg{
@@ -296,7 +296,7 @@ func (m UpdateModal) View() string {
 		if m.backupPath != "" {
 			b.WriteString(subtextStyle.Render(fmt.Sprintf("Backup: %s", m.backupPath)))
 			b.WriteString("\n")
-			b.WriteString(subtextStyle.Render("Run 'bv --rollback' to restore if needed"))
+			b.WriteString(subtextStyle.Render("Run 'tkv --rollback' to restore if needed"))
 			b.WriteString("\n\n")
 		}
 		b.WriteString(successStyle.Render("Restart bv to use the new version."))

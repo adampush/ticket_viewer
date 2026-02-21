@@ -54,7 +54,7 @@ func main() {
 	help := flag.Bool("help", false, "Show help")
 	versionFlag := flag.Bool("version", false, "Show version")
 	// Update flags (bv-182)
-	updateFlag := flag.Bool("update", false, "Update bv to the latest version")
+	updateFlag := flag.Bool("update", false, "Update tkv to the latest version")
 	checkUpdateFlag := flag.Bool("check-update", false, "Check if a new version is available")
 	rollbackFlag := flag.Bool("rollback", false, "Rollback to the previous version (from backup)")
 	yesFlag := flag.Bool("yes", false, "Skip confirmation prompts (use with --update)")
@@ -196,7 +196,7 @@ func main() {
 	pagesIncludeHistory := flag.Bool("pages-include-history", true, "Include git history for time-travel (default: true)")
 	previewPages := flag.String("preview-pages", "", "Preview existing static site bundle")
 	previewNoLiveReload := flag.Bool("no-live-reload", false, "Disable live-reload in preview mode")
-	watchExport := flag.Bool("watch-export", false, "Watch for beads changes and auto-regenerate export (use with --export-pages)")
+	watchExport := flag.Bool("watch-export", false, "Watch for ticket changes and auto-regenerate export (use with --export-pages)")
 	pagesWizard := flag.Bool("pages", false, "Launch interactive Pages deployment wizard")
 	// Debug rendering flag (for diagnosing TUI issues)
 	debugRender := flag.String("debug-render", "", "Render a view and output to file (views: insights, board)")
@@ -206,15 +206,15 @@ func main() {
 	backgroundMode := flag.Bool("background-mode", false, "Enable experimental background snapshot loading (TUI only)")
 	noBackgroundMode := flag.Bool("no-background-mode", false, "Disable experimental background snapshot loading (TUI only)")
 	// Agent blurb management (bv-105)
-	agentsAdd := flag.Bool("agents-add", false, "Add beads workflow instructions to AGENTS.md (creates file if needed)")
-	agentsRemove := flag.Bool("agents-remove", false, "Remove beads workflow instructions from AGENTS.md")
-	agentsUpdate := flag.Bool("agents-update", false, "Update beads workflow instructions to latest version")
+	agentsAdd := flag.Bool("agents-add", false, "Add agent workflow instructions to AGENTS.md (creates file if needed)")
+	agentsRemove := flag.Bool("agents-remove", false, "Remove agent workflow instructions from AGENTS.md")
+	agentsUpdate := flag.Bool("agents-update", false, "Update agent workflow instructions to latest version")
 	agentsCheck := flag.Bool("agents-check", false, "Check AGENTS.md blurb status (default if no --agents-* action)")
 	agentsDryRun := flag.Bool("agents-dry-run", false, "Show what would happen without executing (use with --agents-*)")
 	agentsForce := flag.Bool("agents-force", false, "Skip confirmation prompts (use with --agents-*)")
 	// Override pflag's default usage so -h/--help prints our custom header.
 	flag.Usage = func() {
-		fmt.Println("Usage: bv [options]")
+		fmt.Println("Usage: tkv [options]")
 		fmt.Println("\nA TUI viewer for ticket graphs.")
 		flag.PrintDefaults()
 	}
@@ -318,14 +318,14 @@ func main() {
 	}
 
 	if *help {
-		fmt.Println("Usage: bv [options]")
+		fmt.Println("Usage: tkv [options]")
 		fmt.Println("\nA TUI viewer for ticket graphs.")
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
 
 	if *robotHelp {
-		fmt.Println("bv AI Agent Interface")
+		fmt.Println("tkv AI Agent Interface")
 		fmt.Println("====================================")
 		fmt.Println("This tool provides structural analysis of the issue tracker graph (DAG).")
 		fmt.Println("Use these commands to understand project state without parsing raw JSONL.")
@@ -396,8 +396,8 @@ func main() {
 		fmt.Println("      Includes hash/config header for deterministic ordering.")
 		fmt.Println("      Output: tracker-aware show commands for each item, commented claim commands")
 		fmt.Println("      Options: --script-format=bash|fish|zsh, --script-limit=N")
-		fmt.Println("      Example: bv --emit-script > work.sh && bash work.sh")
-		fmt.Println("      Example: bv --emit-script --script-limit=3")
+		fmt.Println("      Example: tkv --emit-script > work.sh && bash work.sh")
+		fmt.Println("      Example: tkv --emit-script --script-limit=3")
 		fmt.Println("")
 		fmt.Println("  --robot-history")
 		fmt.Println("      Outputs bead-to-commit correlations as JSON.")
@@ -411,8 +411,8 @@ func main() {
 		fmt.Println("      - --history-since <ref>: Limit to recent commits")
 		fmt.Println("      - --history-limit <n>: Max commits to analyze (default: 500)")
 		fmt.Println("      - --min-confidence <0.0-1.0>: Filter by minimum confidence score")
-		fmt.Println("      Example: bv --robot-history --history-since '30 days ago'")
-		fmt.Println("      Example: bv --robot-history --min-confidence 0.7")
+		fmt.Println("      Example: tkv --robot-history --history-since '30 days ago'")
+		fmt.Println("      Example: tkv --robot-history --min-confidence 0.7")
 		fmt.Println("")
 		fmt.Println("  --robot-file-beads <path>")
 		fmt.Println("      Outputs beads that have touched a file path as JSON.")
@@ -425,8 +425,8 @@ func main() {
 		fmt.Println("      Each bead includes: bead_id, title, status, commit_shas, last_touch, total_changes")
 		fmt.Println("      Flags:")
 		fmt.Println("      - --file-beads-limit <n>: Max closed beads to show (default: 20)")
-		fmt.Println("      Example: bv --robot-file-beads pkg/auth/token.go")
-		fmt.Println("      Example: bv --robot-file-beads pkg/auth")
+		fmt.Println("      Example: tkv --robot-file-beads pkg/auth/token.go")
+		fmt.Println("      Example: tkv --robot-file-beads pkg/auth")
 		fmt.Println("")
 		fmt.Println("  --robot-file-hotspots")
 		fmt.Println("      Outputs files touched by the most beads as JSON.")
@@ -436,7 +436,7 @@ func main() {
 		fmt.Println("      - stats: Index statistics (total_files, total_bead_links)")
 		fmt.Println("      Flags:")
 		fmt.Println("      - --hotspots-limit <n>: Max hotspots to show (default: 10)")
-		fmt.Println("      Example: bv --robot-file-hotspots")
+		fmt.Println("      Example: tkv --robot-file-hotspots")
 		fmt.Println("")
 		fmt.Println("  --robot-impact <files>")
 		fmt.Println("      Analyzes impact of modifying files - what beads might be affected?")
@@ -447,8 +447,8 @@ func main() {
 		fmt.Println("      - warnings: Actionable warnings about potential conflicts")
 		fmt.Println("      - summary: Human-readable impact summary")
 		fmt.Println("      Input: Comma-separated file paths")
-		fmt.Println("      Example: bv --robot-impact pkg/auth/token.go")
-		fmt.Println("      Example: bv --robot-impact pkg/auth/token.go,pkg/auth/session.go")
+		fmt.Println("      Example: tkv --robot-impact pkg/auth/token.go")
+		fmt.Println("      Example: tkv --robot-impact pkg/auth/token.go,pkg/auth/session.go")
 		fmt.Println("")
 		fmt.Println("  --robot-file-relations <path>")
 		fmt.Println("      Outputs files that frequently co-change with the given file.")
@@ -461,8 +461,8 @@ func main() {
 		fmt.Println("      Options:")
 		fmt.Println("      - --relations-threshold <0.0-1.0>: Min correlation (default 0.5)")
 		fmt.Println("      - --relations-limit <n>: Max related files to return (default 10)")
-		fmt.Println("      Example: bv --robot-file-relations pkg/auth/token.go")
-		fmt.Println("      Example: bv --robot-file-relations pkg/auth/token.go --relations-threshold 0.3")
+		fmt.Println("      Example: tkv --robot-file-relations pkg/auth/token.go")
+		fmt.Println("      Example: tkv --robot-file-relations pkg/auth/token.go --relations-threshold 0.3")
 		fmt.Println("")
 		fmt.Println("  --robot-related <bead-id>")
 		fmt.Println("      Outputs beads related to a specific bead as JSON.")
@@ -479,8 +479,8 @@ func main() {
 		fmt.Println("      - --related-min-relevance <0-100>: Min relevance score (default 20)")
 		fmt.Println("      - --related-max-results <n>: Max results per category (default 10)")
 		fmt.Println("      - --related-include-closed: Include closed beads")
-		fmt.Println("      Example: bv --robot-related bv-abc1")
-		fmt.Println("      Example: bv --robot-related bv-abc1 --related-include-closed")
+		fmt.Println("      Example: tkv --robot-related bv-abc1")
+		fmt.Println("      Example: tkv --robot-related bv-abc1 --related-include-closed")
 		fmt.Println("")
 		fmt.Println("  --robot-sprint-list")
 		fmt.Println("      Outputs all sprints as JSON for planning and forecasting.")
@@ -488,12 +488,12 @@ func main() {
 		fmt.Println("      - generated_at: Timestamp of the output")
 		fmt.Println("      - sprint_count: Number of sprints")
 		fmt.Println("      - sprints: Array of sprint objects (id, name, start_date, end_date, bead_ids)")
-		fmt.Println("      Example: bv --robot-sprint-list")
+		fmt.Println("      Example: tkv --robot-sprint-list")
 		fmt.Println("")
 		fmt.Println("  --robot-sprint-show <id>")
 		fmt.Println("      Outputs details for a specific sprint as JSON.")
 		fmt.Println("      Returns the full sprint object with all fields.")
-		fmt.Println("      Example: bv --robot-sprint-show sprint-1")
+		fmt.Println("      Example: tkv --robot-sprint-show sprint-1")
 		fmt.Println("")
 		fmt.Println("  --robot-burndown <id|current>")
 		fmt.Println("      Outputs burndown data for a sprint as JSON.")
@@ -506,8 +506,8 @@ func main() {
 		fmt.Println("      - on_track: Whether sprint will complete on time")
 		fmt.Println("      - daily_points: Actual burndown data points")
 		fmt.Println("      - ideal_line: Expected burndown line")
-		fmt.Println("      Example: bv --robot-burndown current")
-		fmt.Println("      Example: bv --robot-burndown sprint-1")
+		fmt.Println("      Example: tkv --robot-burndown current")
+		fmt.Println("      Example: tkv --robot-burndown sprint-1")
 		fmt.Println("")
 		fmt.Println("  --robot-forecast <id|all>")
 		fmt.Println("      Outputs ETA forecast for a specific bead or all open issues.")
@@ -516,9 +516,9 @@ func main() {
 		fmt.Println("        --forecast-label=X    Filter by label")
 		fmt.Println("        --forecast-sprint=Y   Filter by sprint")
 		fmt.Println("        --forecast-agents=N   Parallel agents (default: 1)")
-		fmt.Println("      Example: bv --robot-forecast bv-123")
-		fmt.Println("      Example: bv --robot-forecast all --forecast-label=backend")
-		fmt.Println("      Example: bv --robot-forecast all --forecast-agents=2")
+		fmt.Println("      Example: tkv --robot-forecast bv-123")
+		fmt.Println("      Example: tkv --robot-forecast all --forecast-label=backend")
+		fmt.Println("      Example: tkv --robot-forecast all --forecast-agents=2")
 		fmt.Println("")
 		fmt.Println("  --robot-capacity [--agents=N] [--capacity-label=X]")
 		fmt.Println("      Outputs capacity simulation and completion projection as JSON.")
@@ -532,8 +532,8 @@ func main() {
 		fmt.Println("      Options:")
 		fmt.Println("        --agents=N           Number of parallel agents (default: 1)")
 		fmt.Println("        --capacity-label=X   Filter analysis to label's subgraph")
-		fmt.Println("      Example: bv --robot-capacity --agents=3")
-		fmt.Println("      Example: bv --robot-capacity --capacity-label=backend")
+		fmt.Println("      Example: tkv --robot-capacity --agents=3")
+		fmt.Println("      Example: tkv --robot-capacity --capacity-label=backend")
 		fmt.Println("")
 		fmt.Println("  --emit-script [--script-limit=N] [--script-format=bash|fish|zsh]")
 		fmt.Println("      Emits a shell script for top-N priority recommendations.")
@@ -545,10 +545,10 @@ func main() {
 		fmt.Println("      Options:")
 		fmt.Println("        --script-limit=N      Number of items (default: 5)")
 		fmt.Println("        --script-format=X     Script format: bash, fish, zsh")
-		fmt.Println("      Example: bv --emit-script")
-		fmt.Println("      Example: bv --emit-script --script-limit=3")
-		fmt.Println("      Example: bv --emit-script --script-format=fish > work.fish")
-		fmt.Println("      Example: bv --emit-script | bash  # Show top 5 items")
+		fmt.Println("      Example: tkv --emit-script")
+		fmt.Println("      Example: tkv --emit-script --script-limit=3")
+		fmt.Println("      Example: tkv --emit-script --script-format=fish > work.fish")
+		fmt.Println("      Example: tkv --emit-script | bash  # Show top 5 items")
 		fmt.Println("")
 		fmt.Println("  --export-md <file>")
 		fmt.Println("      Generates a readable status report with Mermaid.js visualizations.")
@@ -601,8 +601,8 @@ func main() {
 		fmt.Println("        - commands: Map of command name -> JSON Schema definition")
 		fmt.Println("      Options:")
 		fmt.Println("        --schema-command=NAME: Output schema for specific command only")
-		fmt.Println("      Example: bv --robot-schema")
-		fmt.Println("      Example: bv --robot-schema --schema-command=robot-triage")
+		fmt.Println("      Example: tkv --robot-schema")
+		fmt.Println("      Example: tkv --robot-schema --schema-command=robot-triage")
 		fmt.Println("")
 		fmt.Println("  --robot-label-health")
 		fmt.Println("      Outputs label health metrics as JSON (velocity, freshness, flow, criticality).")
@@ -637,7 +637,7 @@ func main() {
 		fmt.Println("        --graph-root ID: Extract subgraph starting from root issue")
 		fmt.Println("        --graph-depth N: Limit subgraph depth (0 = unlimited)")
 		fmt.Println("      Fields: format, graph (string for dot/mermaid), nodes, edges, filters_applied, explanation")
-		fmt.Println("      Example: bv --robot-graph --graph-format=dot --label=api > api-deps.dot")
+		fmt.Println("      Example: tkv --robot-graph --graph-format=dot --label=api > api-deps.dot")
 		fmt.Println("")
 		fmt.Println("  --export-graph <path.png|path.svg> [--graph-style=force|grid] [--graph-preset=compact|roomy]")
 		fmt.Println("      Export dependency graph as PNG or SVG image (pure Go, no external dependencies).")
@@ -660,8 +660,8 @@ func main() {
 		fmt.Println("        --graph-preset: Layout spacing - 'compact' (default) or 'roomy'")
 		fmt.Println("        --graph-title: Custom title for the graph header")
 		fmt.Println("")
-		fmt.Println("      Example: bv --export-graph deps.svg --label=api --graph-title='API Dependencies'")
-		fmt.Println("      Example: bv --export-graph full.png --graph-style=force --graph-preset=roomy")
+		fmt.Println("      Example: tkv --export-graph deps.svg --label=api --graph-title='API Dependencies'")
+		fmt.Println("      Example: tkv --export-graph full.png --graph-style=force --graph-preset=roomy")
 		fmt.Println("")
 		fmt.Println("  --robot-insights")
 		fmt.Println("      Graph metrics JSON for agents.")
@@ -705,14 +705,14 @@ func main() {
 		fmt.Println("      Affects: --robot-insights, --robot-plan, --robot-priority")
 		fmt.Println("      Filters issues to those with the label, then runs analysis on subgraph.")
 		fmt.Println("      Includes label_scope and label_context in output with health metrics.")
-		fmt.Println("      Example: bv --robot-insights --label api")
+		fmt.Println("      Example: tkv --robot-insights --label api")
 		fmt.Println("")
 		fmt.Println("  --robot-triage / --robot-next")
 		fmt.Println("      Unified triage (mega command) or single top pick. QuickRef includes top picks, quick_wins, blockers_to_clear.")
 		fmt.Println("")
 		fmt.Println("  --recipe NAME, -r NAME")
 		fmt.Println("      Apply a named recipe to filter and sort issues.")
-		fmt.Println("      Example: bv --recipe actionable")
+		fmt.Println("      Example: tkv --recipe actionable")
 		fmt.Println("      Built-in recipes: default, actionable, recent, blocked, high-impact, stale,")
 		fmt.Println("                        triage, closed, release-cut, quick-wins, bottlenecks")
 		fmt.Println("")
@@ -726,19 +726,19 @@ func main() {
 		fmt.Println("      Load issues from workspace configuration file.")
 		fmt.Println("      Path: typically .bv/workspace.yaml")
 		fmt.Println("      Aggregates issues from multiple repositories with namespaced IDs.")
-		fmt.Println("      Example: bv --workspace .bv/workspace.yaml")
+		fmt.Println("      Example: tkv --workspace .bv/workspace.yaml")
 		fmt.Println("")
 		fmt.Println("  --repo PREFIX")
 		fmt.Println("      Filter issues by repository prefix.")
 		fmt.Println("      Use with --workspace to focus on one repo in a multi-repo view.")
 		fmt.Println("      Matches ID prefixes like 'api-', 'web-', or partial 'api'.")
-		fmt.Println("      Example: bv --workspace .bv/workspace.yaml --repo api")
+		fmt.Println("      Example: tkv --workspace .bv/workspace.yaml --repo api")
 		fmt.Println("")
 		fmt.Println("  --save-baseline \"description\"")
 		fmt.Println("      Save current metrics as a baseline snapshot.")
 		fmt.Println("      Stores graph stats, top metrics, and cycle info in .bv/baseline.json.")
 		fmt.Println("      Use for drift detection: compare current state to saved baseline.")
-		fmt.Println("      Example: bv --save-baseline \"Before major refactor\"")
+		fmt.Println("      Example: tkv --save-baseline \"Before major refactor\"")
 		fmt.Println("")
 		fmt.Println("  --baseline-info")
 		fmt.Println("      Show information about the saved baseline.")
@@ -766,13 +766,13 @@ func main() {
 		fmt.Println("          Export static HTML site to directory.")
 		fmt.Println("          Creates self-contained bundle viewable in any browser.")
 		fmt.Println("          Output: index.html, beads.sqlite3, data/*.json, viewer assets")
-		fmt.Println("          Example: bv --export-pages ./bv-pages")
+		fmt.Println("          Example: tkv --export-pages ./bv-pages")
 		fmt.Println("")
 		fmt.Println("      --preview-pages <dir>")
 		fmt.Println("          Start local server to preview existing export.")
 		fmt.Println("          Opens http://localhost:9000 (or next available port) in your browser.")
 		fmt.Println("          Live-reload is enabled by default: browser auto-refreshes on file changes.")
-		fmt.Println("          Example: bv --preview-pages ./bv-pages")
+		fmt.Println("          Example: tkv --preview-pages ./bv-pages")
 		fmt.Println("")
 		fmt.Println("      --no-live-reload")
 		fmt.Println("          Disable live-reload for --preview-pages (default: live-reload is enabled).")
@@ -787,12 +787,12 @@ func main() {
 		fmt.Println("      Customize drift detection thresholds:")
 		fmt.Println("      - density_warning_pct: 50    # Warn if density +50%")
 		fmt.Println("      - blocked_increase_threshold: 5   # Warn if 5+ more blocked")
-		fmt.Println("      Run 'bv --baseline-info' to see current baseline state.")
+		fmt.Println("      Run 'tkv --baseline-info' to see current baseline state.")
 		os.Exit(0)
 	}
 
 	if *versionFlag {
-		fmt.Printf("bv %s\n", version.Version)
+		fmt.Printf("tkv %s\n", version.Version)
 		os.Exit(0)
 	}
 
@@ -806,9 +806,9 @@ func main() {
 		if available {
 			fmt.Printf("New version available: %s (current: %s)\n", newVersion, version.Version)
 			fmt.Printf("Download: %s\n", releaseURL)
-			fmt.Println("\nRun 'bv --update' to update automatically")
+			fmt.Println("\nRun 'tkv --update' to update automatically")
 		} else {
-			fmt.Printf("bv is up to date (version %s)\n", version.Version)
+			fmt.Printf("tkv is up to date (version %s)\n", version.Version)
 		}
 		os.Exit(0)
 	}
@@ -824,13 +824,13 @@ func main() {
 		// Check if update is needed
 		available, newVersion, _, _ := updater.CheckUpdateAvailable()
 		if !available {
-			fmt.Printf("bv is already up to date (version %s)\n", version.Version)
+			fmt.Printf("tkv is already up to date (version %s)\n", version.Version)
 			os.Exit(0)
 		}
 
 		// Confirm unless --yes is provided
 		if !*yesFlag {
-			fmt.Printf("Update bv from %s to %s? [Y/n]: ", version.Version, newVersion)
+			fmt.Printf("Update tkv from %s to %s? [Y/n]: ", version.Version, newVersion)
 			var response string
 			fmt.Scanln(&response)
 			response = strings.ToLower(strings.TrimSpace(response))
@@ -852,7 +852,7 @@ func main() {
 		fmt.Println(result.Message)
 		if result.BackupPath != "" {
 			fmt.Printf("Backup saved to: %s\n", result.BackupPath)
-			fmt.Println("Run 'bv --rollback' to restore if needed")
+			fmt.Println("Run 'tkv --rollback' to restore if needed")
 		}
 		os.Exit(0)
 	}
@@ -903,18 +903,18 @@ func main() {
 			// Check mode: report status
 			if !detection.Found() {
 				fmt.Printf("No agent file found (searched up to 3 parent directories from %s)\n", workDir)
-				fmt.Println("Run 'bv --agents-add' to create AGENTS.md with beads workflow instructions.")
+				fmt.Println("Run 'tkv --agents-add' to create AGENTS.md with agent workflow instructions.")
 				os.Exit(0)
 			}
 			if detection.HasLegacyBlurb {
 				fmt.Printf("Found %s at %s (legacy blurb — needs upgrade)\n", detection.FileType, detection.FilePath)
-				fmt.Println("Run 'bv --agents-update' to upgrade to the current format.")
+				fmt.Println("Run 'tkv --agents-update' to upgrade to the current format.")
 				os.Exit(0)
 			}
 			if detection.HasBlurb && detection.BlurbVersion < agents.BlurbVersion {
 				fmt.Printf("Found %s at %s (blurb v%d, current v%d — needs update)\n",
 					detection.FileType, detection.FilePath, detection.BlurbVersion, agents.BlurbVersion)
-				fmt.Println("Run 'bv --agents-update' to update to the latest version.")
+				fmt.Println("Run 'tkv --agents-update' to update to the latest version.")
 				os.Exit(0)
 			}
 			if detection.HasBlurb {
@@ -923,8 +923,8 @@ func main() {
 				os.Exit(0)
 			}
 			// File exists but no blurb
-			fmt.Printf("Found %s at %s (no beads workflow instructions)\n", detection.FileType, detection.FilePath)
-			fmt.Println("Run 'bv --agents-add' to add beads workflow instructions.")
+			fmt.Printf("Found %s at %s (no agent workflow instructions)\n", detection.FileType, detection.FilePath)
+			fmt.Println("Run 'tkv --agents-add' to add agent workflow instructions.")
 			os.Exit(0)
 		}
 
@@ -947,9 +947,9 @@ func main() {
 
 			if *agentsDryRun {
 				if creating {
-					fmt.Printf("[dry-run] Would create %s with beads workflow instructions.\n", targetPath)
+					fmt.Printf("[dry-run] Would create %s with agent workflow instructions.\n", targetPath)
 				} else {
-					fmt.Printf("[dry-run] Would append beads workflow instructions to %s.\n", targetPath)
+					fmt.Printf("[dry-run] Would append agent workflow instructions to %s.\n", targetPath)
 				}
 				os.Exit(0)
 			}
@@ -974,13 +974,13 @@ func main() {
 					fmt.Fprintf(os.Stderr, "Error creating agent file: %v\n", err)
 					os.Exit(1)
 				}
-				fmt.Printf("Created %s with beads workflow instructions.\n", targetPath)
+				fmt.Printf("Created %s with agent workflow instructions.\n", targetPath)
 			} else {
 				if err := agents.AppendBlurbToFile(targetPath); err != nil {
 					fmt.Fprintf(os.Stderr, "Error appending blurb: %v\n", err)
 					os.Exit(1)
 				}
-				fmt.Printf("Appended beads workflow instructions to %s.\n", targetPath)
+				fmt.Printf("Appended agent workflow instructions to %s.\n", targetPath)
 			}
 
 			ok, _ := agents.VerifyBlurbPresent(targetPath)
@@ -1256,7 +1256,7 @@ func main() {
 	if *baselineInfo {
 		if !baseline.Exists(baselinePath) {
 			fmt.Println("No baseline found.")
-			fmt.Println("Create one with: bv --save-baseline \"description\"")
+			fmt.Println("Create one with: tkv --save-baseline \"description\"")
 			os.Exit(0)
 		}
 		bl, err := baseline.Load(baselinePath)
@@ -1834,7 +1834,7 @@ func main() {
 			fmt.Println("  → Press Ctrl+C to stop")
 			fmt.Println("")
 			fmt.Println("To preview with auto-refresh, run in another terminal:")
-			fmt.Printf("  bv --preview-pages %s\n", *exportPages)
+			fmt.Printf("  tkv --preview-pages %s\n", *exportPages)
 
 			// Create a merged change channel for all watchers
 			mergedChangeCh := make(chan struct{}, 1)
@@ -1912,7 +1912,7 @@ func main() {
 		fmt.Printf("✓ Static site exported to: %s\n", *exportPages)
 		fmt.Println("")
 		fmt.Println("To preview locally:")
-		fmt.Printf("  bv --preview-pages %s\n", *exportPages)
+		fmt.Printf("  tkv --preview-pages %s\n", *exportPages)
 		fmt.Println("")
 		fmt.Println("Or open in browser:")
 		fmt.Printf("  open %s/index.html\n", *exportPages)
@@ -2418,7 +2418,7 @@ func main() {
 	if *checkDrift {
 		if !baseline.Exists(baselinePath) {
 			fmt.Fprintln(os.Stderr, "Error: No baseline found.")
-			fmt.Fprintln(os.Stderr, "Create one with: bv --save-baseline \"description\"")
+			fmt.Fprintln(os.Stderr, "Create one with: tkv --save-baseline \"description\"")
 			os.Exit(1)
 		}
 
@@ -2673,7 +2673,7 @@ func main() {
 				"jq '.Slack[:5]' - Nodes with slack (good parallel work candidates)",
 				"jq '.Cycles | length' - Count of detected cycles",
 				"jq '.advanced_insights.cycle_break' - Cycle break suggestions (bv-181)",
-				"BV_INSIGHTS_MAP_LIMIT=50 bv --robot-insights - Reduce map sizes",
+				"BV_INSIGHTS_MAP_LIMIT=50 tkv --robot-insights - Reduce map sizes",
 			},
 		}
 
@@ -3201,7 +3201,7 @@ func main() {
 			sb.WriteString("set -euo pipefail\n")
 		}
 
-		sb.WriteString(fmt.Sprintf("# Generated by bv --emit-script at %s\n", time.Now().UTC().Format(time.RFC3339)))
+		sb.WriteString(fmt.Sprintf("# Generated by tkv --emit-script at %s\n", time.Now().UTC().Format(time.RFC3339)))
 		sb.WriteString(fmt.Sprintf("# Data hash: %s\n", dataHash))
 		sb.WriteString(fmt.Sprintf("# Top %d recommendations from %d actionable items\n", len(recs), len(triage.Recommendations)))
 		sb.WriteString("#\n")
@@ -7583,16 +7583,16 @@ func generateRobotDocs(topic string) map[string]interface{} {
 	}
 
 	guide := map[string]interface{}{
-		"description": "bv provides structural analysis of ticket dependency graphs. It is the primary interface for AI agents to understand project state, plan work, and discover high-impact tasks.",
+		"description": "tkv provides structural analysis of ticket dependency graphs. It is the primary interface for AI agents to understand project state, plan work, and discover high-impact tasks.",
 		"quickstart": []string{
-			"bv --robot-triage               # Full triage with recommendations",
-			"bv --robot-next                  # Single top pick for immediate work",
-			"bv --robot-plan                  # Dependency-respecting execution plan",
-			"bv --robot-insights              # Deep graph analysis (PageRank, betweenness, etc.)",
-			"bv --robot-triage-by-track       # Parallel work streams for multi-agent coordination",
-			"bv --robot-schema                # JSON Schema definitions for all commands",
+			"tkv --robot-triage              # Full triage with recommendations",
+			"tkv --robot-next                # Single top pick for immediate work",
+			"tkv --robot-plan                # Dependency-respecting execution plan",
+			"tkv --robot-insights            # Deep graph analysis (PageRank, betweenness, etc.)",
+			"tkv --robot-triage-by-track     # Parallel work streams for multi-agent coordination",
+			"tkv --robot-schema              # JSON Schema definitions for all commands",
 		},
-		"data_source": "Auto-detected tracker sources (.tickets/*.md preferred, Beads JSONL/SQLite fallback) and git history (correlations)",
+		"data_source": "tk markdown tickets from .tickets/*.md and git history (correlations)",
 		"output_modes": map[string]string{
 			"json": "Default structured output",
 			"toon": "Token-optimized notation (saves ~30-50% tokens)",
@@ -7666,7 +7666,7 @@ func generateRobotDocs(topic string) map[string]interface{} {
 			NeedsIssues: false,
 		},
 		"robot-history": {
-			Flag: "--robot-history", Description: "Bead-to-commit correlations from git history.",
+			Flag: "--robot-history", Description: "Ticket-to-commit correlations from git history.",
 			KeyFields:   []string{"correlations", "confidence", "commit_sha", "bead_id"},
 			Params:      []string{"--bead-history <id>", "--history-since <date>", "--history-limit <n>", "--min-confidence 0.0-1.0"},
 			NeedsIssues: true,
@@ -7770,16 +7770,16 @@ func generateRobotDocs(topic string) map[string]interface{} {
 	}
 
 	examples := []map[string]string{
-		{"description": "Get top 3 picks for immediate work", "command": "bv --robot-triage | jq '.triage.quick_ref.top_picks[:3]'"},
-		{"description": "Claim the top recommendation", "command": "bv --robot-next | jq -r '.claim_command' | sh"},
-		{"description": "Find high-impact blockers to clear", "command": "bv --robot-triage | jq '.triage.blockers_to_clear | map(.id)'"},
-		{"description": "Get bug-only recommendations", "command": "bv --robot-triage | jq '.triage.recommendations[] | select(.type == \"bug\")'"},
-		{"description": "Multi-agent: top pick per parallel track", "command": "bv --robot-triage-by-track | jq '.triage.recommendations_by_track[].top_pick'"},
-		{"description": "Find beads related to a specific file", "command": "bv --robot-file-beads src/main.rs"},
-		{"description": "Search for issues by keyword", "command": "bv --search 'authentication' --robot-search"},
-		{"description": "Get TOON output (saves tokens)", "command": "bv --robot-triage --format toon"},
-		{"description": "Use env for default format", "command": "BV_OUTPUT_FORMAT=toon bv --robot-triage"},
-		{"description": "Show token savings estimate", "command": "bv --robot-triage --format toon --stats"},
+		{"description": "Get top 3 picks for immediate work", "command": "tkv --robot-triage | jq '.triage.quick_ref.top_picks[:3]'"},
+		{"description": "Claim the top recommendation", "command": "tkv --robot-next | jq -r '.claim_command' | sh"},
+		{"description": "Find high-impact blockers to clear", "command": "tkv --robot-triage | jq '.triage.blockers_to_clear | map(.id)'"},
+		{"description": "Get bug-only recommendations", "command": "tkv --robot-triage | jq '.triage.recommendations[] | select(.type == \"bug\")'"},
+		{"description": "Multi-agent: top pick per parallel track", "command": "tkv --robot-triage-by-track | jq '.triage.recommendations_by_track[].top_pick'"},
+		{"description": "Find tickets related to a specific file", "command": "tkv --robot-file-beads src/main.rs"},
+		{"description": "Search for issues by keyword", "command": "tkv --search 'authentication' --robot-search"},
+		{"description": "Get TOON output (saves tokens)", "command": "tkv --robot-triage --format toon"},
+		{"description": "Use env for default format", "command": "BV_OUTPUT_FORMAT=toon tkv --robot-triage"},
+		{"description": "Show token savings estimate", "command": "tkv --robot-triage --format toon --stats"},
 	}
 
 	envVars := map[string]string{
