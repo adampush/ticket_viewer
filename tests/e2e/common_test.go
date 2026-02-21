@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -492,6 +493,18 @@ func parseLegacyDependencies(raw json.RawMessage) []string {
 	return nil
 }
 
+func yamlScalar(v string) string {
+	return strconv.Quote(v)
+}
+
+func markdownHeading(title string) string {
+	title = strings.TrimSpace(strings.ReplaceAll(title, "\n", " "))
+	if title == "" {
+		return "untitled"
+	}
+	return title
+}
+
 func ensureTicketsFromLegacyBeadsFixture(workDir string) error {
 	if strings.TrimSpace(workDir) == "" {
 		return nil
@@ -578,18 +591,18 @@ func ensureTicketsFromLegacyBeadsFixture(workDir string) error {
 
 		var sb strings.Builder
 		sb.WriteString("---\n")
-		sb.WriteString(fmt.Sprintf("id: %s\n", rec.ID))
-		sb.WriteString(fmt.Sprintf("status: %s\n", status))
+		sb.WriteString(fmt.Sprintf("id: %s\n", yamlScalar(rec.ID)))
+		sb.WriteString(fmt.Sprintf("status: %s\n", yamlScalar(status)))
 		sb.WriteString(fmt.Sprintf("priority: %d\n", priority))
-		sb.WriteString(fmt.Sprintf("type: %s\n", issueType))
-		sb.WriteString(fmt.Sprintf("created: %s\n", created))
+		sb.WriteString(fmt.Sprintf("type: %s\n", yamlScalar(issueType)))
+		sb.WriteString(fmt.Sprintf("created: %s\n", yamlScalar(created)))
 		sb.WriteString("deps:\n")
 		for _, dep := range deps {
 			dep = strings.TrimSpace(dep)
 			if dep == "" {
 				continue
 			}
-			sb.WriteString(fmt.Sprintf("  - %s\n", dep))
+			sb.WriteString(fmt.Sprintf("  - %s\n", yamlScalar(dep)))
 		}
 		sb.WriteString("tags:\n")
 		for _, tag := range rec.Labels {
@@ -597,11 +610,11 @@ func ensureTicketsFromLegacyBeadsFixture(workDir string) error {
 			if tag == "" {
 				continue
 			}
-			sb.WriteString(fmt.Sprintf("  - %s\n", tag))
+			sb.WriteString(fmt.Sprintf("  - %s\n", yamlScalar(tag)))
 		}
 		sb.WriteString("---\n")
 		sb.WriteString("# ")
-		sb.WriteString(title)
+		sb.WriteString(markdownHeading(title))
 		sb.WriteString("\n\n")
 		desc := strings.TrimSpace(rec.Description)
 		if desc != "" {
@@ -734,18 +747,18 @@ func (f *TestFixture) Write() error {
 
 		var sb strings.Builder
 		sb.WriteString("---\n")
-		sb.WriteString(fmt.Sprintf("id: %s\n", issue.ID))
-		sb.WriteString(fmt.Sprintf("status: %s\n", status))
+		sb.WriteString(fmt.Sprintf("id: %s\n", yamlScalar(issue.ID)))
+		sb.WriteString(fmt.Sprintf("status: %s\n", yamlScalar(status)))
 		sb.WriteString(fmt.Sprintf("priority: %d\n", priority))
-		sb.WriteString(fmt.Sprintf("type: %s\n", issueType))
-		sb.WriteString(fmt.Sprintf("created: %s\n", created))
+		sb.WriteString(fmt.Sprintf("type: %s\n", yamlScalar(issueType)))
+		sb.WriteString(fmt.Sprintf("created: %s\n", yamlScalar(created)))
 		sb.WriteString("deps:\n")
 		for _, dep := range issue.Dependencies {
 			dep = strings.TrimSpace(dep)
 			if dep == "" {
 				continue
 			}
-			sb.WriteString(fmt.Sprintf("  - %s\n", dep))
+			sb.WriteString(fmt.Sprintf("  - %s\n", yamlScalar(dep)))
 		}
 		sb.WriteString("tags:\n")
 		for _, tag := range issue.Labels {
@@ -753,11 +766,11 @@ func (f *TestFixture) Write() error {
 			if tag == "" {
 				continue
 			}
-			sb.WriteString(fmt.Sprintf("  - %s\n", tag))
+			sb.WriteString(fmt.Sprintf("  - %s\n", yamlScalar(tag)))
 		}
 		sb.WriteString("---\n")
 		sb.WriteString("# ")
-		sb.WriteString(issue.Title)
+		sb.WriteString(markdownHeading(issue.Title))
 		sb.WriteString("\n\n")
 		if desc := strings.TrimSpace(issue.Description); desc != "" {
 			sb.WriteString(desc)
