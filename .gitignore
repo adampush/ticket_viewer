@@ -1,5 +1,6 @@
 beads_reference/
 /bv
+/tkv
 /main
 *.test
 cmd/bv/bv
