@@ -9,6 +9,10 @@ import (
 	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
 )
 
+func testModeLegacyFallbackEnabled() bool {
+	return strings.TrimSpace(os.Getenv("BV_TEST_MODE")) == "1"
+}
+
 // LoadMetadata captures source-selection details for callers that need diagnostics.
 type LoadMetadata struct {
 	SelectedSource DataSource
@@ -94,7 +98,7 @@ func loadSmart(beadsDir, repoPath string) ([]model.Issue, *LoadMetadata, error) 
 		}
 	}
 	if len(ticketSources) == 0 {
-		if os.Getenv("BV_TEST_MODE") != "" && strings.TrimSpace(beadsDir) != "" {
+		if testModeLegacyFallbackEnabled() && strings.TrimSpace(beadsDir) != "" {
 			if jsonlPath, findErr := loader.FindJSONLPath(beadsDir); findErr == nil {
 				issues, loadErr := loader.LoadIssuesFromFile(jsonlPath)
 				if loadErr == nil {
@@ -108,7 +112,7 @@ func loadSmart(beadsDir, repoPath string) ([]model.Issue, *LoadMetadata, error) 
 				}
 			}
 		}
-		if os.Getenv("BV_TEST_MODE") != "" && len(legacySources) > 0 {
+		if testModeLegacyFallbackEnabled() && len(legacySources) > 0 {
 			result, err := SelectBestSourceDetailed(legacySources, DefaultSelectionOptions())
 			if err != nil {
 				return nil, nil, err
