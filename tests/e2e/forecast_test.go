@@ -39,6 +39,9 @@ func createForecastRepo(t *testing.T) (string, time.Time) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads.jsonl: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(repoDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	return repoDir, now
 }

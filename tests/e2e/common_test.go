@@ -1,6 +1,7 @@
 package main_test
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -71,6 +72,9 @@ func detectScriptTUICapability(bvPath string) (bool, string) {
 	beads := `{"id":"cap-1","title":"Capability check","status":"open","priority":1,"issue_type":"task"}`
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		return false, fmt.Sprintf("failed to write beads.jsonl: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		return false, fmt.Sprintf("failed to create ticket fixture: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
@@ -369,6 +373,9 @@ func (l *DetailedLogger) report() {
 // It automatically sets up the working directory and environment.
 func runBVCommand(t *testing.T, workDir string, args ...string) ([]byte, error) {
 	t.Helper()
+	if err := ensureTicketsFromLegacyBeadsFixture(workDir); err != nil {
+		return nil, fmt.Errorf("prepare ticket fixture: %w", err)
+	}
 
 	binPath := buildBvBinary(t)
 
@@ -438,6 +445,179 @@ type fixtureIssue struct {
 	CreatedAt    string   `json:"created_at"`
 }
 
+type legacyBeadRecord struct {
+	ID           string          `json:"id"`
+	Title        string          `json:"title"`
+	Description  string          `json:"description,omitempty"`
+	Status       string          `json:"status"`
+	Priority     int             `json:"priority"`
+	IssueType    string          `json:"issue_type"`
+	Labels       []string        `json:"labels,omitempty"`
+	Dependencies json.RawMessage `json:"dependencies,omitempty"`
+	CreatedAt    string          `json:"created_at,omitempty"`
+}
+
+func parseLegacyDependencies(raw json.RawMessage) []string {
+	raw = bytes.TrimSpace(raw)
+	if len(raw) == 0 || bytes.Equal(raw, []byte("null")) {
+		return nil
+	}
+
+	var ids []string
+	if err := json.Unmarshal(raw, &ids); err == nil {
+		out := make([]string, 0, len(ids))
+		for _, id := range ids {
+			id = strings.TrimSpace(id)
+			if id != "" {
+				out = append(out, id)
+			}
+		}
+		return out
+	}
+
+	var deps []struct {
+		DependsOnID string `json:"depends_on_id"`
+	}
+	if err := json.Unmarshal(raw, &deps); err == nil {
+		out := make([]string, 0, len(deps))
+		for _, dep := range deps {
+			id := strings.TrimSpace(dep.DependsOnID)
+			if id != "" {
+				out = append(out, id)
+			}
+		}
+		return out
+	}
+
+	return nil
+}
+
+func ensureTicketsFromLegacyBeadsFixture(workDir string) error {
+	if strings.TrimSpace(workDir) == "" {
+		return nil
+	}
+	ticketsDir := filepath.Join(workDir, ".tickets")
+	if entries, err := os.ReadDir(ticketsDir); err == nil {
+		for _, e := range entries {
+			if !e.IsDir() && strings.HasSuffix(e.Name(), ".md") {
+				return nil
+			}
+		}
+	}
+
+	beadsPath := filepath.Join(workDir, ".beads", "beads.jsonl")
+	f, err := os.Open(beadsPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			altPath := filepath.Join(workDir, ".beads", "issues.jsonl")
+			f, err = os.Open(altPath)
+			if err != nil {
+				if os.IsNotExist(err) {
+					return nil
+				}
+				return fmt.Errorf("open legacy issues fixture: %w", err)
+			}
+		} else {
+			return fmt.Errorf("open legacy beads fixture: %w", err)
+		}
+	}
+	defer f.Close()
+
+	records := make([]legacyBeadRecord, 0)
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+		var rec legacyBeadRecord
+		if err := json.Unmarshal([]byte(line), &rec); err != nil {
+			// Some tests intentionally include malformed lines in legacy fixtures.
+			// Keep synthesizing from valid lines.
+			continue
+		}
+		if strings.TrimSpace(rec.ID) == "" {
+			continue
+		}
+		records = append(records, rec)
+	}
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("scan legacy beads fixture: %w", err)
+	}
+	if len(records) == 0 {
+		return nil
+	}
+
+	if err := os.MkdirAll(ticketsDir, 0o755); err != nil {
+		return fmt.Errorf("create .tickets dir: %w", err)
+	}
+
+	for _, rec := range records {
+		status := strings.TrimSpace(rec.Status)
+		if status == "" {
+			status = "open"
+		}
+		issueType := strings.TrimSpace(rec.IssueType)
+		if issueType == "" {
+			issueType = "task"
+		}
+		priority := rec.Priority
+		if priority < 0 {
+			priority = 2
+		}
+		created := strings.TrimSpace(rec.CreatedAt)
+		if created == "" {
+			created = "2000-01-01T00:00:00Z"
+		}
+		title := strings.TrimSpace(rec.Title)
+		if title == "" {
+			title = rec.ID
+		}
+
+		deps := parseLegacyDependencies(rec.Dependencies)
+
+		var sb strings.Builder
+		sb.WriteString("---\n")
+		sb.WriteString(fmt.Sprintf("id: %s\n", rec.ID))
+		sb.WriteString(fmt.Sprintf("status: %s\n", status))
+		sb.WriteString(fmt.Sprintf("priority: %d\n", priority))
+		sb.WriteString(fmt.Sprintf("type: %s\n", issueType))
+		sb.WriteString(fmt.Sprintf("created: %s\n", created))
+		sb.WriteString("deps:\n")
+		for _, dep := range deps {
+			dep = strings.TrimSpace(dep)
+			if dep == "" {
+				continue
+			}
+			sb.WriteString(fmt.Sprintf("  - %s\n", dep))
+		}
+		sb.WriteString("tags:\n")
+		for _, tag := range rec.Labels {
+			tag = strings.TrimSpace(tag)
+			if tag == "" {
+				continue
+			}
+			sb.WriteString(fmt.Sprintf("  - %s\n", tag))
+		}
+		sb.WriteString("---\n")
+		sb.WriteString("# ")
+		sb.WriteString(title)
+		sb.WriteString("\n\n")
+		desc := strings.TrimSpace(rec.Description)
+		if desc != "" {
+			sb.WriteString(desc)
+			sb.WriteString("\n")
+		}
+
+		ticketPath := filepath.Join(ticketsDir, rec.ID+".md")
+		if err := os.WriteFile(ticketPath, []byte(sb.String()), 0o644); err != nil {
+			return fmt.Errorf("write %s: %w", ticketPath, err)
+		}
+	}
+
+	return nil
+}
+
 // NewTestFixture creates a new test fixture with a temporary directory.
 func NewTestFixture(t *testing.T) *TestFixture {
 	t.Helper()
@@ -445,6 +625,10 @@ func NewTestFixture(t *testing.T) *TestFixture {
 	beadsDir := filepath.Join(dir, ".beads")
 	if err := os.MkdirAll(beadsDir, 0o755); err != nil {
 		t.Fatalf("failed to create .beads dir: %v", err)
+	}
+	ticketsDir := filepath.Join(dir, ".tickets")
+	if err := os.MkdirAll(ticketsDir, 0o755); err != nil {
+		t.Fatalf("failed to create .tickets dir: %v", err)
 	}
 	return &TestFixture{
 		t:      t,
@@ -506,7 +690,7 @@ func (f *TestFixture) AddIssueWithLabels(title, status string, priority int, iss
 	return id
 }
 
-// Write writes all issues to the .beads/beads.jsonl file.
+// Write writes all issues to both .beads/beads.jsonl and .tickets/*.md.
 func (f *TestFixture) Write() error {
 	f.t.Helper()
 
@@ -527,6 +711,62 @@ func (f *TestFixture) Write() error {
 		}
 		if _, err := file.WriteString("\n"); err != nil {
 			return fmt.Errorf("write newline: %w", err)
+		}
+	}
+
+	for _, issue := range f.beads {
+		status := strings.TrimSpace(issue.Status)
+		if status == "" {
+			status = "open"
+		}
+		issueType := strings.TrimSpace(issue.IssueType)
+		if issueType == "" {
+			issueType = "task"
+		}
+		priority := issue.Priority
+		if priority < 0 {
+			priority = 2
+		}
+		created := strings.TrimSpace(issue.CreatedAt)
+		if created == "" {
+			created = "2000-01-01T00:00:00Z"
+		}
+
+		var sb strings.Builder
+		sb.WriteString("---\n")
+		sb.WriteString(fmt.Sprintf("id: %s\n", issue.ID))
+		sb.WriteString(fmt.Sprintf("status: %s\n", status))
+		sb.WriteString(fmt.Sprintf("priority: %d\n", priority))
+		sb.WriteString(fmt.Sprintf("type: %s\n", issueType))
+		sb.WriteString(fmt.Sprintf("created: %s\n", created))
+		sb.WriteString("deps:\n")
+		for _, dep := range issue.Dependencies {
+			dep = strings.TrimSpace(dep)
+			if dep == "" {
+				continue
+			}
+			sb.WriteString(fmt.Sprintf("  - %s\n", dep))
+		}
+		sb.WriteString("tags:\n")
+		for _, tag := range issue.Labels {
+			tag = strings.TrimSpace(tag)
+			if tag == "" {
+				continue
+			}
+			sb.WriteString(fmt.Sprintf("  - %s\n", tag))
+		}
+		sb.WriteString("---\n")
+		sb.WriteString("# ")
+		sb.WriteString(issue.Title)
+		sb.WriteString("\n\n")
+		if desc := strings.TrimSpace(issue.Description); desc != "" {
+			sb.WriteString(desc)
+			sb.WriteString("\n")
+		}
+
+		ticketPath := filepath.Join(f.Dir, ".tickets", issue.ID+".md")
+		if err := os.WriteFile(ticketPath, []byte(sb.String()), 0o644); err != nil {
+			return fmt.Errorf("write %s: %w", ticketPath, err)
 		}
 	}
 

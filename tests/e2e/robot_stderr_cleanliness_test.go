@@ -18,6 +18,9 @@ func writeIssuesJSONL(t *testing.T, repoDir, content string) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "issues.jsonl"), []byte(content), 0o644); err != nil {
 		t.Fatalf("write issues.jsonl: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(repoDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 }
 
 func TestRobotTriage_MalformedIssuesLine_NoStderr(t *testing.T) {

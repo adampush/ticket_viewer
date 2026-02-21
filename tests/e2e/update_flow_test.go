@@ -47,9 +47,9 @@ func TestVersionFlag_IncludesBuildInfo(t *testing.T) {
 
 	output := string(out)
 
-	// Should include "bv" name
-	if !strings.Contains(strings.ToLower(output), "bv") {
-		t.Errorf("expected 'bv' in version output, got: %s", output)
+	// Should include the current CLI name
+	if !strings.Contains(strings.ToLower(output), "tkv") {
+		t.Errorf("expected 'tkv' in version output, got: %s", output)
 	}
 }
 
@@ -98,6 +98,9 @@ func TestUpdateFlag_RequiresNetwork(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(""), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tmpDir); err != nil {
 		t.Fatal(err)
 	}
 
@@ -160,7 +163,7 @@ func TestRobotHelp_DocumentsUpdateFeatures(t *testing.T) {
 	// Verify robot-help documents update-related features
 	bv := buildBvBinary(t)
 
-	cmd := exec.Command(bv, "-robot-help")
+	cmd := exec.Command(bv, "--robot-help")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("-robot-help failed: %v\n%s", err, out)
@@ -192,9 +195,12 @@ func TestStartup_UpdateCheckDoesNotBlock(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(`{"id":"TEST-1","title":"Test","status":"open","priority":1,"issue_type":"task"}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tmpDir); err != nil {
+		t.Fatal(err)
+	}
 
 	// Run robot-insights which should complete quickly
-	cmd := exec.Command(bv, "-robot-insights")
+	cmd := exec.Command(bv, "--robot-insights")
 	cmd.Dir = tmpDir
 	out, err := cmd.CombinedOutput()
 	if err != nil {

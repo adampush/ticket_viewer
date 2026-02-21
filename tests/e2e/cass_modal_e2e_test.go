@@ -30,6 +30,9 @@ func TestCassModalGracefulDegradation(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -77,6 +80,9 @@ func TestCassModalNoCrashOnVKeyWithoutCass(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -117,6 +123,9 @@ func TestCassDetectionEnvironmentVariable(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -155,6 +164,9 @@ func TestCassModalRobotTriageNoCrash(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
 	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -190,6 +202,9 @@ func TestCassStatusBarIndicator(t *testing.T) {
 	beads := `{"id":"bv-status","title":"Status bar test","status":"open","priority":1,"issue_type":"task"}`
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -243,6 +258,9 @@ func TestMultipleViewsWithoutCass(t *testing.T) {
 
 	if err := os.WriteFile(filepath.Join(beadsDir, "beads.jsonl"), []byte(beads), 0o644); err != nil {
 		t.Fatalf("write beads: %v", err)
+	}
+	if err := ensureTicketsFromLegacyBeadsFixture(tempDir); err != nil {
+		t.Fatalf("prepare ticket fixture: %v", err)
 	}
 
 	// Test TUI launch - covers default list view

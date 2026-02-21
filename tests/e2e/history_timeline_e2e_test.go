@@ -293,6 +293,9 @@ func createMultiCommitRepo(t *testing.T) string {
 		if err := os.WriteFile(filepath.Join(beadsPath, "beads.jsonl"), []byte(content), 0o644); err != nil {
 			t.Fatalf("write beads.jsonl: %v", err)
 		}
+		if err := ensureTicketsFromLegacyBeadsFixture(repoDir); err != nil {
+			t.Fatalf("prepare ticket fixture: %v", err)
+		}
 	}
 
 	writeCode := func(path, content string) {

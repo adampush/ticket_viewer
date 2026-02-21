@@ -238,16 +238,8 @@ func TestGraphNavigationEmptyGraph(t *testing.T) {
 	if err := json.Unmarshal(out, &payload); err != nil {
 		t.Fatalf("json decode: %v", err)
 	}
-
-	// Check if we have adjacency or nodes count
-	nodesCount, _ := payload["nodes"].(float64)
-	if int(nodesCount) != 0 {
-		// Also check adjacency if present
-		if adj, ok := payload["adjacency"].(map[string]any); ok {
-			if nodes, ok := adj["nodes"].([]any); ok && len(nodes) != 0 {
-				t.Errorf("expected 0 nodes, got %d", len(nodes))
-			}
-		}
+	if nodes, ok := payload["nodes"].(float64); ok && int(nodes) != 0 {
+		t.Fatalf("expected zero nodes for empty graph, got %v", nodes)
 	}
 }
 
