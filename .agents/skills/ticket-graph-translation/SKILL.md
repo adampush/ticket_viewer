@@ -106,6 +106,9 @@ Every ticket produced by this skill must include:
 9. Dependencies
    - upstream prerequisites
    - downstream tickets unlocked
+10. Artifacts
+    - required docs/config/session note updates
+    - migration/versioning requirements
 
 ## Definition of Ready (DoR)
 
@@ -230,7 +233,7 @@ Graph is PASS only if all are true:
 - dependencies match true execution constraints
 - tickets are atomic and independently verifiable
 - every ticket includes all required ticket content fields
-- ticket types (Feature/Task/Spike) are explicitly defined
+- ticket types (Feature/Task/Spike/Integration) are explicitly defined
 - every ready ticket passes DoR
 - acceptance criteria are measurable
 - test requirements are complete and mapped to acceptance criteria
