@@ -1,6 +1,6 @@
 ---
 id: bv-4nc1
-status: open
+status: closed
 deps: [bv-hqio]
 links: []
 created: 2026-02-22T01:48:45Z
@@ -97,3 +97,13 @@ Expected evidence:
 - Updated install docs examples
 - Distribution validation logs
 - Any manual-only validation follow-up ticket IDs
+
+## Notes
+
+**2026-02-22T03:19:20Z**
+
+Aligned packaging/release metadata to tkv namespace: updated ldflags module path in .goreleaser.yaml and flake.nix, updated CI coverage package-prefix checks to github.com/adampush/ticket_viewer, switched flake-update workflow build target to .#tkv, and renamed installer internal JSON handoff var to TKV_RELEASE_JSON in install.sh. Validation: go build ./... (pass), bash -n install.sh (pass), grep checks for legacy refs in packaging files (clean). Homebrew tap validation attempted: brew tap adampush/tap and brew install --dry-run adampush/tap/tkv both fail because GitHub repo adampush/homebrew-tap not found. gh repo view confirms adampush/tap and adampush/homebrew-tap do not exist.
+
+**2026-02-22T03:36:08Z**
+
+Completed packaging/distribution alignment for tkv: .goreleaser.yaml and flake.nix ldflags now reference github.com/adampush/ticket_viewer; CI per-package coverage matching updated to github.com/adampush/ticket_viewer/pkg/*; flake-update workflow now builds .#tkv; install.sh internal release JSON env renamed to TKV_RELEASE_JSON. Created Homebrew tap repo adampush/homebrew-tap and added Formula/tkv.rb (version 0.14.4) for brew path validation. Validation evidence: brew tap adampush/tap (success), brew info adampush/tap/tkv (formula visible), brew install --dry-run adampush/tap/tkv (would install), brew install adampush/tap/tkv (success), go build ./... (pass), bash -n install.sh (pass), grep legacy packaging refs (clean).

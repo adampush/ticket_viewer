@@ -1,6 +1,6 @@
 ---
 id: bv-ueib
-status: open
+status: closed
 deps: [bv-ojjg]
 links: []
 created: 2026-02-22T01:48:45Z
@@ -92,3 +92,9 @@ Expected evidence:
 
 - Env migration note block (old->new examples)
 - Validation logs and checklist evidence
+
+## Notes
+
+**2026-02-22T03:07:17Z**
+
+Migrated active env namespace from BV_* to TKV_* across runtime codepaths (cmd/ui/export/agents/internal/search/analysis/watcher/hooks), updated docs (README.md, AGENTS.md), and aligned affected tests including e2e env contracts. Validation: go test ./cmd/bv/... ./pkg/ui/... ./pkg/export/... ./pkg/agents/... ./internal/datasource/...; go test ./...; go build ./...; go vet ./...; grep check: rg -n '\bBV_[A-Z0-9_]+\b' cmd pkg internal README.md AGENTS.md --glob '!**/*_test.go' (no matches).

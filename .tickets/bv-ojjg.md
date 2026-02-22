@@ -1,6 +1,6 @@
 ---
 id: bv-ojjg
-status: open
+status: closed
 deps: [bv-y047]
 links: []
 created: 2026-02-22T01:48:45Z
@@ -86,3 +86,9 @@ Expected evidence:
 
 - Naming cleanup notes for touched packages
 - Validation evidence in ticket notes
+
+## Notes
+
+**2026-02-22T02:53:25Z**
+
+Completed WS3 terminology cleanup in core user-visible paths. Updated history/insights/TUI status text to issue-native wording (search placeholders, mode labels, empty states, badges, hints), sprint and graph UI copy to issue terminology, correlation explanation/reason strings to issue wording, and loader/correlation error messages to issue-native phrasing. Also updated related unit tests and snapshots/expectations accordingly. Validation passed: go test ./pkg/analysis/... ./pkg/correlation/... ./pkg/export/... ./pkg/ui/... ./pkg/loader/... plus full gates go build ./..., go vet ./..., go test ./... .

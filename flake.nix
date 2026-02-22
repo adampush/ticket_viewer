@@ -38,7 +38,7 @@
             ldflags = [
               "-s"
               "-w"
-              "-X github.com/Dicklesworthstone/beads_viewer/pkg/version.version=v${version}"
+              "-X github.com/adampush/ticket_viewer/pkg/version.version=v${version}"
             ];
 
             meta = with pkgs.lib; {
@@ -51,8 +51,6 @@
             };
           };
 
-          # Temporary transition alias; keep until rename cutover is fully adopted.
-          bv = self.packages.${system}.tkv;
           default = self.packages.${system}.tkv;
         };
 

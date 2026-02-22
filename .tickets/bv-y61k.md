@@ -1,6 +1,6 @@
 ---
 id: bv-y61k
-status: open
+status: closed
 deps: [bv-4nc1]
 links: []
 created: 2026-02-22T01:48:45Z
@@ -90,3 +90,9 @@ Expected evidence:
 - Final migration release-note draft
 - umbrella closure note with verification/validation evidence
 - follow-up ticket links for any deferred hardening
+
+## Notes
+
+**2026-02-22T03:38:02Z**
+
+Final integration validation complete. Engineering gates: go build ./... (pass), go vet ./... (pass), go test ./... (pass). Product flow checks: go run ./cmd/bv --help (pass), go run ./cmd/bv --robot-help (pass), go run ./cmd/bv --robot-schema (pass). Contract checks: rg -n '\bBV_[A-Z0-9_]+\b' cmd pkg internal README.md AGENTS.md --glob '!**/*_test.go' (no matches); rg -n 'github.com/Dicklesworthstone/beads_viewer' across active Go/packaging sources (no matches). Install/distribution validation: created adampush/homebrew-tap with Formula/tkv.rb, then validated brew tap adampush/tap (pass), brew info adampush/tap/tkv (pass), brew install --dry-run adampush/tap/tkv (pass), brew install adampush/tap/tkv (pass). Added final migration note doc: docs/tkv-native-migration-release-notes.md with breaking-change guidance and before/after examples.
