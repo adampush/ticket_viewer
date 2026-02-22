@@ -1,6 +1,6 @@
 ---
 id: bv-wcue
-status: open
+status: closed
 deps: []
 links: []
 created: 2026-02-22T01:48:45Z
@@ -94,3 +94,9 @@ Expected evidence:
 - Updated help/docs snapshots
 - PR checklist evidence for surface checks
 - Ticket notes with validation outputs
+
+## Notes
+
+**2026-02-22T02:13:43Z**
+
+Implemented Workstream 1 CLI/robot public surface rename: migrated flags to --suggest-issue, --issue-history, --robot-file-issues, and --file-issues-limit; updated help/robot-help/robot-docs language to issue/ticket-native wording; updated related tests and usage hints. Validation: go run ./cmd/bv --help passed with new flags and no bead terms in active surface; go run ./cmd/bv --robot-help | rg 'bead|Bead|beads' produced no matches; go run ./cmd/bv --robot-docs all | rg 'bead|Bead|beads|bead_id|bead_ids' produced no matches; go build ./... && go vet ./... && go test ./... all passed.

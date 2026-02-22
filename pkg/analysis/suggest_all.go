@@ -158,7 +158,7 @@ func GenerateRobotSuggestOutput(issues []model.Issue, config SuggestAllConfig, d
 			"jq '.suggestions.suggestions[].action_command' - All action commands",
 			"--suggest-type=dependency - Filter to dependency suggestions",
 			"--suggest-confidence=0.7 - Minimum confidence threshold",
-			"--suggest-bead=<id> - Suggestions for specific bead",
+			"--suggest-issue=<id> - Suggestions for specific issue",
 		},
 	}
 }

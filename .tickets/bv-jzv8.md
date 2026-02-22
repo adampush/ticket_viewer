@@ -1,6 +1,6 @@
 ---
 id: bv-jzv8
-status: in_progress
+status: open
 deps: [bv-y61k]
 links: []
 created: 2026-02-21T02:20:23Z

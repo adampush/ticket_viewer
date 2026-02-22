@@ -85,7 +85,7 @@ func main() {
 	robotSuggest := flag.Bool("robot-suggest", false, "Output smart suggestions (duplicates, dependencies, labels, cycles) as JSON")
 	suggestType := flag.String("suggest-type", "", "Filter suggestions by type: duplicate, dependency, label, cycle")
 	suggestConfidence := flag.Float64("suggest-confidence", 0.0, "Minimum confidence for suggestions (0.0-1.0)")
-	suggestBead := flag.String("suggest-bead", "", "Filter suggestions for specific bead ID")
+	suggestIssue := flag.String("suggest-issue", "", "Filter suggestions for specific issue ID")
 	// Graph export (bv-136)
 	robotGraph := flag.Bool("robot-graph", false, "Output dependency graph as JSON/DOT/Mermaid for AI agents")
 	graphFormat := flag.String("graph-format", "json", "Graph output format: json, dot, mermaid")
@@ -124,25 +124,25 @@ func main() {
 	baselineInfo := flag.Bool("baseline-info", false, "Show information about the current baseline")
 	checkDrift := flag.Bool("check-drift", false, "Check for drift from baseline (exit codes: 0=OK, 1=critical, 2=warning)")
 	robotDriftCheck := flag.Bool("robot-drift", false, "Output drift check as JSON (use with --check-drift)")
-	robotHistory := flag.Bool("robot-history", false, "Output bead-to-commit correlations as JSON")
-	beadHistory := flag.String("bead-history", "", "Show history for specific bead ID")
+	robotHistory := flag.Bool("robot-history", false, "Output issue-to-commit correlations as JSON")
+	issueHistory := flag.String("issue-history", "", "Show history for specific issue ID")
 	historySince := flag.String("history-since", "", "Limit history to commits after this date/ref (e.g., '30 days ago', '2024-01-01')")
 	historyLimit := flag.Int("history-limit", 500, "Max commits to analyze (0 = unlimited)")
 	minConfidence := flag.Float64("min-confidence", 0.0, "Filter correlations by minimum confidence (0.0-1.0)")
 	// Correlation audit flags (bv-e1u6)
-	robotExplainCorrelation := flag.String("robot-explain-correlation", "", "Explain why a commit is linked to a bead (format: SHA:beadID)")
-	robotConfirmCorrelation := flag.String("robot-confirm-correlation", "", "Confirm a correlation is correct (format: SHA:beadID)")
-	robotRejectCorrelation := flag.String("robot-reject-correlation", "", "Reject an incorrect correlation (format: SHA:beadID)")
+	robotExplainCorrelation := flag.String("robot-explain-correlation", "", "Explain why a commit is linked to an issue (format: SHA:issueID)")
+	robotConfirmCorrelation := flag.String("robot-confirm-correlation", "", "Confirm a correlation is correct (format: SHA:issueID)")
+	robotRejectCorrelation := flag.String("robot-reject-correlation", "", "Reject an incorrect correlation (format: SHA:issueID)")
 	correlationFeedbackBy := flag.String("correlation-by", "", "Agent/user identifier for correlation feedback")
 	correlationFeedbackReason := flag.String("correlation-reason", "", "Reason for correlation feedback")
 	robotCorrelationStats := flag.Bool("robot-correlation-stats", false, "Output correlation feedback statistics as JSON")
 	// Orphan commit detection flags (bv-jdop)
 	robotOrphans := flag.Bool("robot-orphans", false, "Output orphan commit candidates (commits that should be linked but aren't) as JSON")
 	orphansMinScore := flag.Int("orphans-min-score", 30, "Minimum suspicion score for orphan candidates (0-100)")
-	// File-bead index flags (bv-hmib)
-	robotFileBeads := flag.String("robot-file-beads", "", "Output beads that touched a file path as JSON")
-	fileBeadsLimit := flag.Int("file-beads-limit", 20, "Max closed beads to show (use with --robot-file-beads)")
-	fileHotspots := flag.Bool("robot-file-hotspots", false, "Output files touched by most beads as JSON")
+	// File correlation index flags (bv-hmib)
+	robotFileIssues := flag.String("robot-file-issues", "", "Output issues that touched a file path as JSON")
+	fileIssuesLimit := flag.Int("file-issues-limit", 20, "Max closed issues to show (use with --robot-file-issues)")
+	fileHotspots := flag.Bool("robot-file-hotspots", false, "Output files touched by most issues as JSON")
 	hotspotsLimit := flag.Int("hotspots-limit", 10, "Max hotspots to show (use with --robot-file-hotspots)")
 	// Impact analysis flag (bv-19pq)
 	robotImpact := flag.String("robot-impact", "", "Analyze impact of modifying files (comma-separated paths)")
@@ -151,22 +151,22 @@ func main() {
 	relationsThreshold := flag.Float64("relations-threshold", 0.5, "Minimum correlation threshold (0.0-1.0) for related files")
 	relationsLimit := flag.Int("relations-limit", 10, "Max related files to show")
 	// Related work discovery flag (bv-jtdl)
-	robotRelatedWork := flag.String("robot-related", "", "Output beads related to a specific bead ID as JSON")
+	robotRelatedWork := flag.String("robot-related", "", "Output issues related to a specific issue ID as JSON")
 	relatedMinRelevance := flag.Int("related-min-relevance", 20, "Minimum relevance score (0-100) for related work")
 	relatedMaxResults := flag.Int("related-max-results", 10, "Max results per category for related work")
-	relatedIncludeClosed := flag.Bool("related-include-closed", false, "Include closed beads in related work results")
+	relatedIncludeClosed := flag.Bool("related-include-closed", false, "Include closed issues in related work results")
 	// Blocker chain analysis flag (bv-nlo0)
 	robotBlockerChain := flag.String("robot-blocker-chain", "", "Output full blocker chain analysis for issue ID as JSON")
 	// Impact network graph flag (bv-48kr)
-	robotImpactNetwork := flag.String("robot-impact-network", "", "Output bead impact network as JSON (empty for full, or bead ID for subnetwork)")
-	networkDepth := flag.Int("network-depth", 2, "Depth of subnetwork when querying specific bead (1-3)")
+	robotImpactNetwork := flag.String("robot-impact-network", "", "Output issue impact network as JSON (empty for full, or issue ID for subnetwork)")
+	networkDepth := flag.Int("network-depth", 2, "Depth of subnetwork when querying specific issue (1-3)")
 	// Temporal causality analysis flag (bv-j74w)
-	robotCausality := flag.String("robot-causality", "", "Output causal chain analysis for bead ID as JSON")
+	robotCausality := flag.String("robot-causality", "", "Output causal chain analysis for issue ID as JSON")
 	// Sprint flags (bv-156)
 	robotSprintList := flag.Bool("robot-sprint-list", false, "Output sprints as JSON")
 	robotSprintShow := flag.String("robot-sprint-show", "", "Output specific sprint details as JSON")
 	// Forecast flags (bv-158)
-	robotForecast := flag.String("robot-forecast", "", "Output ETA forecast for bead ID, or 'all' for all open issues")
+	robotForecast := flag.String("robot-forecast", "", "Output ETA forecast for issue ID, or 'all' for all open issues")
 	forecastLabel := flag.String("forecast-label", "", "Filter forecast by label")
 	forecastSprint := flag.String("forecast-sprint", "", "Filter forecast by sprint ID")
 	forecastAgents := flag.Int("forecast-agents", 1, "Number of parallel agents for capacity calculation")
@@ -282,7 +282,7 @@ func main() {
 		*robotSearch ||
 		*robotDriftCheck ||
 		*robotHistory ||
-		*robotFileBeads != "" ||
+		*robotFileIssues != "" ||
 		*fileHotspots ||
 		*robotImpact != "" ||
 		*robotFileRelations != "" ||
@@ -400,50 +400,50 @@ func main() {
 		fmt.Println("      Example: tkv --emit-script --script-limit=3")
 		fmt.Println("")
 		fmt.Println("  --robot-history")
-		fmt.Println("      Outputs bead-to-commit correlations as JSON.")
-		fmt.Println("      Tracks which code changes relate to which beads via git history analysis.")
+		fmt.Println("      Outputs issue-to-commit correlations as JSON.")
+		fmt.Println("      Tracks which code changes relate to which issues via git history analysis.")
 		fmt.Println("      Key sections:")
-		fmt.Println("      - stats: Summary (total beads, beads with commits, avg cycle time)")
-		fmt.Println("      - histories: Per-bead data (events, commits, milestones, cycle_time)")
-		fmt.Println("      - commit_index: Reverse lookup from commit SHA to bead IDs")
+		fmt.Println("      - stats: Summary (total issues, issues with commits, avg cycle time)")
+		fmt.Println("      - histories: Per-issue data (events, commits, milestones, cycle_time)")
+		fmt.Println("      - commit_index: Reverse lookup from commit SHA to issue IDs")
 		fmt.Println("      Flags:")
-		fmt.Println("      - --bead-history <id>: Filter to single bead")
+		fmt.Println("      - --issue-history <id>: Filter to single issue")
 		fmt.Println("      - --history-since <ref>: Limit to recent commits")
 		fmt.Println("      - --history-limit <n>: Max commits to analyze (default: 500)")
 		fmt.Println("      - --min-confidence <0.0-1.0>: Filter by minimum confidence score")
 		fmt.Println("      Example: tkv --robot-history --history-since '30 days ago'")
 		fmt.Println("      Example: tkv --robot-history --min-confidence 0.7")
 		fmt.Println("")
-		fmt.Println("  --robot-file-beads <path>")
-		fmt.Println("      Outputs beads that have touched a file path as JSON.")
-		fmt.Println("      Answers: 'What beads have touched this file, and why?'")
+		fmt.Println("  --robot-file-issues <path>")
+		fmt.Println("      Outputs issues that have touched a file path as JSON.")
+		fmt.Println("      Answers: 'What issues have touched this file, and why?'")
 		fmt.Println("      Key sections:")
 		fmt.Println("      - file_path: The queried file path")
-		fmt.Println("      - open_beads: Currently open beads that touched this file")
-		fmt.Println("      - closed_beads: Recently closed beads (limited by --file-beads-limit)")
-		fmt.Println("      - total_beads: Total count of beads")
-		fmt.Println("      Each bead includes: bead_id, title, status, commit_shas, last_touch, total_changes")
+		fmt.Println("      - open_issues: Currently open issues that touched this file")
+		fmt.Println("      - closed_issues: Recently closed issues (limited by --file-issues-limit)")
+		fmt.Println("      - total_issues: Total count of issues")
+		fmt.Println("      Each entry includes: issue_id, title, status, commit_shas, last_touch, total_changes")
 		fmt.Println("      Flags:")
-		fmt.Println("      - --file-beads-limit <n>: Max closed beads to show (default: 20)")
-		fmt.Println("      Example: tkv --robot-file-beads pkg/auth/token.go")
-		fmt.Println("      Example: tkv --robot-file-beads pkg/auth")
+		fmt.Println("      - --file-issues-limit <n>: Max closed issues to show (default: 20)")
+		fmt.Println("      Example: tkv --robot-file-issues pkg/auth/token.go")
+		fmt.Println("      Example: tkv --robot-file-issues pkg/auth")
 		fmt.Println("")
 		fmt.Println("  --robot-file-hotspots")
-		fmt.Println("      Outputs files touched by the most beads as JSON.")
+		fmt.Println("      Outputs files touched by the most issues as JSON.")
 		fmt.Println("      Identifies potential conflict zones or high-churn areas.")
 		fmt.Println("      Key sections:")
-		fmt.Println("      - hotspots: Array of {file_path, total_beads, open_beads, closed_beads}")
-		fmt.Println("      - stats: Index statistics (total_files, total_bead_links)")
+		fmt.Println("      - hotspots: Array of {file_path, total_issues, open_issues, closed_issues}")
+		fmt.Println("      - stats: Index statistics (total_files, total_issue_links)")
 		fmt.Println("      Flags:")
 		fmt.Println("      - --hotspots-limit <n>: Max hotspots to show (default: 10)")
 		fmt.Println("      Example: tkv --robot-file-hotspots")
 		fmt.Println("")
 		fmt.Println("  --robot-impact <files>")
-		fmt.Println("      Analyzes impact of modifying files - what beads might be affected?")
+		fmt.Println("      Analyzes impact of modifying files - what issues might be affected?")
 		fmt.Println("      Critical for agents: check before making changes to avoid conflicts.")
 		fmt.Println("      Key sections:")
-		fmt.Println("      - risk_level: low/medium/high/critical based on open beads")
-		fmt.Println("      - affected_beads: Beads touching these files with relevance scores")
+		fmt.Println("      - risk_level: low/medium/high/critical based on open issues")
+		fmt.Println("      - affected_issues: Issues touching these files with relevance scores")
 		fmt.Println("      - warnings: Actionable warnings about potential conflicts")
 		fmt.Println("      - summary: Human-readable impact summary")
 		fmt.Println("      Input: Comma-separated file paths")
@@ -464,21 +464,21 @@ func main() {
 		fmt.Println("      Example: tkv --robot-file-relations pkg/auth/token.go")
 		fmt.Println("      Example: tkv --robot-file-relations pkg/auth/token.go --relations-threshold 0.3")
 		fmt.Println("")
-		fmt.Println("  --robot-related <bead-id>")
-		fmt.Println("      Outputs beads related to a specific bead as JSON.")
+		fmt.Println("  --robot-related <issue-id>")
+		fmt.Println("      Outputs issues related to a specific issue as JSON.")
 		fmt.Println("      Discovers related work across multiple dimensions:")
-		fmt.Println("      - file_overlap: Beads touching the same files")
-		fmt.Println("      - commit_overlap: Beads sharing commits")
-		fmt.Println("      - dependency_cluster: Beads in the same dependency graph area")
-		fmt.Println("      - concurrent: Beads active in overlapping time windows")
-		fmt.Println("      Key fields per related bead:")
+		fmt.Println("      - file_overlap: Issues touching the same files")
+		fmt.Println("      - commit_overlap: Issues sharing commits")
+		fmt.Println("      - dependency_cluster: Issues in the same dependency graph area")
+		fmt.Println("      - concurrent: Issues active in overlapping time windows")
+		fmt.Println("      Key fields per related issue:")
 		fmt.Println("      - relevance: 0-100 score indicating strength of relationship")
 		fmt.Println("      - reason: Human-readable explanation of the connection")
 		fmt.Println("      - shared_files/shared_commits: Evidence of overlap")
 		fmt.Println("      Options:")
 		fmt.Println("      - --related-min-relevance <0-100>: Min relevance score (default 20)")
 		fmt.Println("      - --related-max-results <n>: Max results per category (default 10)")
-		fmt.Println("      - --related-include-closed: Include closed beads")
+		fmt.Println("      - --related-include-closed: Include closed issues")
 		fmt.Println("      Example: tkv --robot-related bv-abc1")
 		fmt.Println("      Example: tkv --robot-related bv-abc1 --related-include-closed")
 		fmt.Println("")
@@ -487,7 +487,7 @@ func main() {
 		fmt.Println("      Key fields:")
 		fmt.Println("      - generated_at: Timestamp of the output")
 		fmt.Println("      - sprint_count: Number of sprints")
-		fmt.Println("      - sprints: Array of sprint objects (id, name, start_date, end_date, bead_ids)")
+		fmt.Println("      - sprints: Array of sprint objects (id, name, start_date, end_date, issue_ids)")
 		fmt.Println("      Example: tkv --robot-sprint-list")
 		fmt.Println("")
 		fmt.Println("  --robot-sprint-show <id>")
@@ -510,7 +510,7 @@ func main() {
 		fmt.Println("      Example: tkv --robot-burndown sprint-1")
 		fmt.Println("")
 		fmt.Println("  --robot-forecast <id|all>")
-		fmt.Println("      Outputs ETA forecast for a specific bead or all open issues.")
+		fmt.Println("      Outputs ETA forecast for a specific issue or all open issues.")
 		fmt.Println("      Returns estimated completion date, confidence, and factors.")
 		fmt.Println("      Options:")
 		fmt.Println("        --forecast-label=X    Filter by label")
@@ -765,7 +765,7 @@ func main() {
 		fmt.Println("      --export-pages <dir>")
 		fmt.Println("          Export static HTML site to directory.")
 		fmt.Println("          Creates self-contained bundle viewable in any browser.")
-		fmt.Println("          Output: index.html, beads.sqlite3, data/*.json, viewer assets")
+		fmt.Println("          Output: index.html, index database, data/*.json, viewer assets")
 		fmt.Println("          Example: tkv --export-pages ./bv-pages")
 		fmt.Println("")
 		fmt.Println("      --preview-pages <dir>")
@@ -2317,7 +2317,7 @@ func main() {
 	if *robotSuggest {
 		config := analysis.DefaultSuggestAllConfig()
 		config.MinConfidence = *suggestConfidence
-		config.FilterBead = *suggestBead
+		config.FilterBead = *suggestIssue
 
 		// Parse filter type
 		switch *suggestType {
@@ -3248,7 +3248,7 @@ func main() {
 	}
 
 	// Handle --robot-history flag
-	if *robotHistory || *beadHistory != "" {
+	if *robotHistory || *issueHistory != "" {
 		cwd, err := os.Getwd()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error getting current directory: %v\n", err)
@@ -3275,7 +3275,7 @@ func main() {
 
 		// Build correlator options
 		opts := correlation.CorrelatorOptions{
-			BeadID: *beadHistory,
+			BeadID: *issueHistory,
 			Limit:  *historyLimit,
 		}
 
@@ -3365,11 +3365,11 @@ func main() {
 			os.Exit(0)
 		}
 
-		// Parse SHA:beadID format
+		// Parse SHA:issueID format
 		parseCorrelationArg := func(arg string) (string, string, error) {
 			parts := strings.SplitN(arg, ":", 2)
 			if len(parts) != 2 {
-				return "", "", fmt.Errorf("expected format: SHA:beadID, got: %s", arg)
+				return "", "", fmt.Errorf("expected format: SHA:issueID, got: %s", arg)
 			}
 			return parts[0], parts[1], nil
 		}
@@ -3414,7 +3414,7 @@ func main() {
 			// Find the specific commit
 			history, ok := report.Histories[beadID]
 			if !ok {
-				fmt.Fprintf(os.Stderr, "Bead not found: %s\n", beadID)
+				fmt.Fprintf(os.Stderr, "Issue not found: %s\n", beadID)
 				os.Exit(1)
 			}
 
@@ -3427,7 +3427,7 @@ func main() {
 			}
 
 			if targetCommit == nil {
-				fmt.Fprintf(os.Stderr, "Commit %s not found in bead %s correlations\n", commitSHA, beadID)
+				fmt.Fprintf(os.Stderr, "Commit %s not found in issue %s correlations\n", commitSHA, beadID)
 				os.Exit(1)
 			}
 
@@ -3687,8 +3687,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	// Handle --robot-file-beads and --robot-file-hotspots flags (bv-hmib)
-	if *robotFileBeads != "" || *fileHotspots {
+	// Handle --robot-file-issues and --robot-file-hotspots flags (bv-hmib)
+	if *robotFileIssues != "" || *fileHotspots {
 		cwd, err := os.Getwd()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error getting current directory: %v\n", err)
@@ -3759,11 +3759,11 @@ func main() {
 			}
 		} else {
 			// Output file-beads lookup
-			result := fileLookup.LookupByFile(*robotFileBeads)
+			result := fileLookup.LookupByFile(*robotFileIssues)
 
 			// Limit closed beads if specified
-			if len(result.ClosedBeads) > *fileBeadsLimit {
-				result.ClosedBeads = result.ClosedBeads[:*fileBeadsLimit]
+			if len(result.ClosedBeads) > *fileIssuesLimit {
+				result.ClosedBeads = result.ClosedBeads[:*fileIssuesLimit]
 			}
 
 			type FileBeadsOutput struct {
@@ -3776,7 +3776,7 @@ func main() {
 
 			output := FileBeadsOutput{
 				RobotEnvelope: NewRobotEnvelope(report.DataHash),
-				FilePath:      *robotFileBeads,
+				FilePath:      *robotFileIssues,
 				TotalBeads:    result.TotalBeads,
 				OpenBeads:     result.OpenBeads,
 				ClosedBeads:   result.ClosedBeads,
@@ -4010,7 +4010,7 @@ func main() {
 
 		result := report.FindRelatedWork(*robotRelatedWork, opts)
 		if result == nil {
-			fmt.Fprintf(os.Stderr, "Bead not found in history: %s\n", *robotRelatedWork)
+			fmt.Fprintf(os.Stderr, "Issue not found in history: %s\n", *robotRelatedWork)
 			os.Exit(1)
 		}
 
@@ -4230,7 +4230,7 @@ func main() {
 
 		result := report.BuildCausalityChain(*robotCausality, opts)
 		if result == nil {
-			fmt.Fprintf(os.Stderr, "Bead not found: %s\n", *robotCausality)
+			fmt.Fprintf(os.Stderr, "Issue not found: %s\n", *robotCausality)
 			os.Exit(1)
 		}
 
@@ -7652,7 +7652,7 @@ func generateRobotDocs(topic string) map[string]interface{} {
 		"robot-suggest": {
 			Flag: "--robot-suggest", Description: "Smart suggestions: potential duplicates, missing dependencies, label assignments, cycle warnings.",
 			KeyFields:   []string{"suggestions", "type", "confidence"},
-			Params:      []string{"--suggest-type duplicate|dependency|label|cycle", "--suggest-confidence 0.0-1.0", "--suggest-bead <id>"},
+			Params:      []string{"--suggest-type duplicate|dependency|label|cycle", "--suggest-confidence 0.0-1.0", "--suggest-issue <id>"},
 			NeedsIssues: true,
 		},
 		"robot-schema": {
@@ -7667,8 +7667,8 @@ func generateRobotDocs(topic string) map[string]interface{} {
 		},
 		"robot-history": {
 			Flag: "--robot-history", Description: "Ticket-to-commit correlations from git history.",
-			KeyFields:   []string{"correlations", "confidence", "commit_sha", "bead_id"},
-			Params:      []string{"--bead-history <id>", "--history-since <date>", "--history-limit <n>", "--min-confidence 0.0-1.0"},
+			KeyFields:   []string{"correlations", "confidence", "commit_sha", "issue_id"},
+			Params:      []string{"--issue-history <id>", "--history-since <date>", "--history-limit <n>", "--min-confidence 0.0-1.0"},
 			NeedsIssues: true,
 		},
 		"robot-diff": {
@@ -7704,17 +7704,17 @@ func generateRobotDocs(topic string) map[string]interface{} {
 			NeedsIssues: true,
 		},
 		"robot-orphans": {
-			Flag: "--robot-orphans", Description: "Orphan commit candidates that should be linked to beads.",
+			Flag: "--robot-orphans", Description: "Orphan commit candidates that should be linked to issues.",
 			Params:      []string{"--orphans-min-score 0-100"},
 			NeedsIssues: true,
 		},
-		"robot-file-beads": {
-			Flag: "--robot-file-beads <path>", Description: "Beads that touched a specific file path.",
-			Params:      []string{"--file-beads-limit <n>"},
+		"robot-file-issues": {
+			Flag: "--robot-file-issues <path>", Description: "Issues that touched a specific file path.",
+			Params:      []string{"--file-issues-limit <n>"},
 			NeedsIssues: true,
 		},
 		"robot-file-hotspots": {
-			Flag: "--robot-file-hotspots", Description: "Files touched by the most beads.",
+			Flag: "--robot-file-hotspots", Description: "Files touched by the most issues.",
 			Params:      []string{"--hotspots-limit <n>"},
 			NeedsIssues: true,
 		},
@@ -7724,7 +7724,7 @@ func generateRobotDocs(topic string) map[string]interface{} {
 			NeedsIssues: true,
 		},
 		"robot-related": {
-			Flag: "--robot-related <id>", Description: "Beads related to a specific bead ID.",
+			Flag: "--robot-related <id>", Description: "Issues related to a specific issue ID.",
 			Params:      []string{"--related-min-relevance 0-100", "--related-max-results <n>", "--related-include-closed"},
 			NeedsIssues: true,
 		},
@@ -7733,12 +7733,12 @@ func generateRobotDocs(topic string) map[string]interface{} {
 			NeedsIssues: true,
 		},
 		"robot-impact-network": {
-			Flag: "--robot-impact-network [<id>|all]", Description: "Impact network graph (full or subnetwork for a bead).",
+			Flag: "--robot-impact-network [<id>|all]", Description: "Impact network graph (full or subnetwork for an issue).",
 			Params:      []string{"--network-depth 1-3"},
 			NeedsIssues: true,
 		},
 		"robot-causality": {
-			Flag: "--robot-causality <id>", Description: "Causal chain analysis for a bead.",
+			Flag: "--robot-causality <id>", Description: "Causal chain analysis for an issue.",
 			NeedsIssues: true,
 		},
 		"robot-sprint-list": {
@@ -7750,7 +7750,7 @@ func generateRobotDocs(topic string) map[string]interface{} {
 			NeedsIssues: true,
 		},
 		"robot-forecast": {
-			Flag: "--robot-forecast <id|all>", Description: "ETA predictions for bead completion.",
+			Flag: "--robot-forecast <id|all>", Description: "ETA predictions for issue completion.",
 			Params:      []string{"--forecast-label <label>", "--forecast-sprint <id>", "--forecast-agents <n>"},
 			NeedsIssues: true,
 		},
@@ -7775,7 +7775,7 @@ func generateRobotDocs(topic string) map[string]interface{} {
 		{"description": "Find high-impact blockers to clear", "command": "tkv --robot-triage | jq '.triage.blockers_to_clear | map(.id)'"},
 		{"description": "Get bug-only recommendations", "command": "tkv --robot-triage | jq '.triage.recommendations[] | select(.type == \"bug\")'"},
 		{"description": "Multi-agent: top pick per parallel track", "command": "tkv --robot-triage-by-track | jq '.triage.recommendations_by_track[].top_pick'"},
-		{"description": "Find tickets related to a specific file", "command": "tkv --robot-file-beads src/main.rs"},
+		{"description": "Find tickets related to a specific file", "command": "tkv --robot-file-issues src/main.rs"},
 		{"description": "Search for issues by keyword", "command": "tkv --search 'authentication' --robot-search"},
 		{"description": "Get TOON output (saves tokens)", "command": "tkv --robot-triage --format toon"},
 		{"description": "Use env for default format", "command": "BV_OUTPUT_FORMAT=toon tkv --robot-triage"},

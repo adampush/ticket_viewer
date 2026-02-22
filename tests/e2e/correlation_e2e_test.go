@@ -257,16 +257,16 @@ func TestCorrelationRobotRelated(t *testing.T) {
 	}
 }
 
-// TestCorrelationRobotFileBeads verifies --robot-file-beads finds beads that touched a file.
-func TestCorrelationRobotFileBeads(t *testing.T) {
+// TestCorrelationRobotFileIssues verifies --robot-file-issues finds issues that touched a file.
+func TestCorrelationRobotFileIssues(t *testing.T) {
 	bv := buildBvBinary(t)
 	repoDir := createCorrelationRepo(t)
 
-	cmd := exec.Command(bv, "--robot-file-beads", "pkg/auth/session.go")
+	cmd := exec.Command(bv, "--robot-file-issues", "pkg/auth/session.go")
 	cmd.Dir = repoDir
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		t.Fatalf("--robot-file-beads failed: %v\n%s", err, out)
+		t.Fatalf("--robot-file-issues failed: %v\n%s", err, out)
 	}
 
 	var payload struct {
@@ -470,11 +470,11 @@ func TestCorrelationSharedFileRelations(t *testing.T) {
 	git("commit", "-m", "feat(SHARE-2): add Two function")
 
 	// Both beads should show in file-beads for shared.go
-	cmd := exec.Command(bv, "--robot-file-beads", "src/shared.go")
+	cmd := exec.Command(bv, "--robot-file-issues", "src/shared.go")
 	cmd.Dir = repoDir
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		t.Fatalf("--robot-file-beads failed: %v\n%s", err, out)
+		t.Fatalf("--robot-file-issues failed: %v\n%s", err, out)
 	}
 
 	var payload struct {
