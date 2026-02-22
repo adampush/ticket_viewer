@@ -8,7 +8,7 @@
 
 > **A graph-aware terminal triage engine and TUI for `tk` ticket graphs.**
 
-> Historical note: this project was originally `beads_viewer` with the `bv` binary. Some deep historical sections below still use legacy terms where intentionally preserved.
+> Fork note: this project is a fork of Jeff Emanuel's [`bv` / `beads_viewer`](https://github.com/Dicklesworthstone/beads_viewer), adapted for use with the [`tk` ticket tracker](https://github.com/wedow/ticket).
 
 <div align="center" style="margin: 1.2em 0;">
   <table>
