@@ -6,7 +6,7 @@ Ticket: `bv-jzv8`
 
 Complete the transition from legacy `beads_viewer` naming to a fully `tkv`-native project identity across CLI, robot APIs, docs, code terminology, config/env namespaces, module path, and release tooling.
 
-## User Outcomes and Success Criteria
+## User Outcomes and Success Metrics (Product Value)
 
 ### Primary user flows
 
@@ -15,7 +15,17 @@ Complete the transition from legacy `beads_viewer` naming to a fully `tkv`-nativ
 3. **CI/integration users** consume env/config defaults using only `TKV_*` variables.
 4. **Installer users** install/upgrade via documented channels and receive consistent `tkv` naming.
 
-### Observable success criteria (binary)
+### Product Success Metrics (Baseline -> Target)
+
+| Metric | Baseline Capture | Target | Measurement Window |
+|---|---|---|---|
+| Public naming consistency | Count of legacy bead-era terms in active help/docs at stream start | `0` in active surfaces | Per workstream PR + final merge |
+| Robot contract consistency | Count of schema/payload key mismatches at stream start | `0` mismatches | Per robot/schema stream PR + final merge |
+| Env namespace migration | Count of active `BV_*` env reads at stream start | `0` active `BV_*` reads (legacy behavior only as documented) | Env/config stream PR + final merge |
+| Module namespace migration | Count of active imports using legacy module path at stream start | `0` active legacy imports | Module migration PR + final merge |
+| Distribution consistency | Count of installer/docs channel mismatches at stream start | `0` mismatches in validated channels | Packaging stream PR + release cut |
+
+### Observable acceptance checks (binary)
 
 - `tkv --help`, `tkv --robot-help`, and `tkv --robot-docs all` contain no legacy bead terms except explicitly marked historical notes.
 - `tkv --robot-schema` matches emitted payload keys for all robot commands under tests.
@@ -58,6 +68,18 @@ Out of scope:
 4. **Historical naming allowance:** only in explicitly marked migration/historical docs sections.
 5. **Module cutover policy:** single-phase hard cut; all internal imports updated in same PR as `go.mod` change.
 
+## Go/No-Go Value Checkpoint (Decision Record)
+
+- Decision: **GO**
+- Decision owner: Adam Push
+- Decision date: 2026-02-21
+- Value case: naming inconsistency across CLI/robot/env/docs currently increases operator confusion and automation fragility; the cutover consolidates one canonical model (`tkv`, `ticket`, `TKV_*`).
+- Effort boundary: constrained to the six scoped workstreams; unrelated refactors remain out of scope.
+- Re-evaluation triggers:
+  1. Two consecutive workstreams require rollback due to regressions.
+  2. Scope expands beyond naming/interface contracts into unrelated behavior changes.
+  3. Validation gates repeatedly fail for the same contract class without clear remediation path.
+
 ## Interface Contracts Matrix (Old -> New)
 
 This plan requires explicit interface-contract tracking for all externally visible renames. The table below defines contract classes and required behavior. Each workstream PR must include its exact old->new key/flag mapping as validation evidence.
@@ -79,7 +101,52 @@ This plan requires explicit interface-contract tracking for all externally visib
 4. Deterministic validation at each phase with full `go build`, `go vet`, and `go test ./...`.
 5. Minimize blast radius: isolate each workstream into narrow PRs with explicit file boundaries.
 
-## Architecture and File-Level Plan
+## Non-Functional Requirements (Security, Performance, Scale)
+
+Security:
+
+- No new secret-bearing logs or credentials in docs/examples.
+- Browser safety behavior for tests remains intact (no unintended browser launch in test mode).
+
+Performance:
+
+- Naming-only streams must not introduce measurable startup/per-request regressions in normal CLI flows.
+- For touched startup paths, use existing profiling/check commands to confirm no obvious regression before merge.
+
+Scale/Reliability:
+
+- Two-phase analysis behavior and timeout protections remain intact.
+- Robot mode outputs remain deterministic for unchanged fields.
+
+If an NFR dimension is not materially affected in a stream, mark it `N/A` in that stream PR with rationale.
+
+## Observability and Telemetry Plan
+
+Required operational signals per workstream:
+
+- build/vet/test gate results
+- contract checks (schema/help/grep outputs)
+- unchanged-behavior verification notes
+
+Evidence and recording:
+
+- attach command outputs and key pass signals in PR validation checklist
+- add `tk add-note <id> "validation: ..."` entries with links/snippets
+
+Escalation thresholds:
+
+- any schema/payload mismatch => block merge
+- any reintroduction of active legacy contract entries (`BV_*` reads, legacy module imports, active legacy help terms) => block merge
+- repeated gate failures for same stream => trigger Go/No-Go re-evaluation
+
+## Architecture, Interface Contracts, and Data Model Evolution
+
+### Data Model and Schema Evolution
+
+- Domain data model intent: no semantic data model changes expected from naming cleanup streams.
+- Schema evolution intent: Workstream 2 intentionally evolves robot key naming; old keys are removed from active payloads as part of direct cutover policy.
+- Module evolution intent: Workstream 5 updates module/import namespace only; no intentional runtime behavior change.
+- Contract delta artifact: each workstream PR must enumerate concrete old->new entries for touched interfaces.
 
 ### Workstream 1: Public CLI and Robot Surface Rename
 
@@ -226,9 +293,9 @@ Manual-only validation is allowed only when automation is infeasible; rationale 
 | 5) Module/import migration | Adam Push | Workstream 4 complete | no legacy module imports; full suite green | `go build`/`go vet`/`go test` evidence |
 | 6) Packaging/distribution | Adam Push | Workstream 5 complete | install/release channels consistent and verified | installer/tap verification evidence |
 
-## Validation Plan
+## Verification (Engineering) and Validation (Product) Plan
 
-### Global gates (required for every stream)
+### Verification (Engineering): Global gates (required for every stream)
 
 - `go build ./...`
 - `go vet ./...`
@@ -236,7 +303,7 @@ Manual-only validation is allowed only when automation is infeasible; rationale 
 - expected pass signal: exit code `0` for all commands
 - evidence location: `tk add-note <id> "validation: ..."` and PR validation checklist
 
-### Stream-specific validation
+### Verification (Engineering): Stream-specific checks
 
 1. **CLI/robot surface**
    - `tkv --help`
@@ -270,6 +337,19 @@ Manual-only validation is allowed only when automation is infeasible; rationale 
    - expected pass signal: install commands complete successfully and output matches docs
    - evidence location: installer/tap logs attached to PR checklist
 
+### Validation (Product): User-flow acceptance
+
+| User Flow | Validation Method | Success Signal | Evidence |
+|---|---|---|---|
+| CLI user runs help/examples | run documented commands from help/README | commands execute and present ticket-native naming in active surfaces | command transcript in PR checklist |
+| Automation user consumes robot outputs | run robot commands + schema contract checks | payload keys/schema match and downstream parsing expectations hold | contract test outputs + schema evidence |
+| CI/integration user uses env/config defaults | execute env-driven tests with `TKV_*` expectations | only documented `TKV_*` behavior is active in codepaths | env test output + grep evidence |
+| Installer user follows release channel docs | perform installer/tap verification steps | install/upgrade paths match docs and naming | installer/tap logs in PR artifacts |
+
+Validation completion rule:
+
+- a stream is not complete until both verification gates and product validation checks pass with recorded evidence.
+
 ## Unchanged Behavior Verification (Non-Regression)
 
 The following behaviors must remain stable unless explicitly changed by a workstream contract:
@@ -302,7 +382,7 @@ Docs parity checklist (must all pass):
 - README examples execute as written.
 - Env variable names in docs match active code lookups.
 
-## Risks and Mitigations
+## Open Risks and Follow-up Tickets
 
 1. Broad rename churn introduces regressions.
    - Mitigation: phase-by-phase PRs with narrow scope and full test gates.
@@ -315,6 +395,11 @@ Docs parity checklist (must all pass):
 
 4. Docs drift from behavior during fast iteration.
    - Mitigation: docs parity checklist is required acceptance criteria.
+
+Follow-up ticket policy:
+
+- if manual-only validation is used, create a follow-up ticket to automate it.
+- if a stream introduces deferred hardening work, create explicit child ticket(s) linked via `tk dep`.
 
 ## Rollout and Recovery Strategy
 
