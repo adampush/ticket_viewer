@@ -58,6 +58,19 @@ Out of scope:
 4. **Historical naming allowance:** only in explicitly marked migration/historical docs sections.
 5. **Module cutover policy:** single-phase hard cut; all internal imports updated in same PR as `go.mod` change.
 
+## Interface Contracts Matrix (Old -> New)
+
+This plan requires explicit interface-contract tracking for all externally visible renames. The table below defines contract classes and required behavior. Each workstream PR must include its exact old->new key/flag mapping as validation evidence.
+
+| Workstream | Surface | Old | New | Legacy Behavior | Validation |
+|---|---|---|---|---|---|
+| 1 | CLI flags/help text | bead-era flag/term | ticket-native equivalent | old names hard-fail | `tkv --help`, `tkv --robot-help`, docs parity checklist |
+| 2 | Robot payload + schema keys | bead-named payload keys | ticket-native payload keys | old keys removed from active payload | `tkv --robot-schema` + contract tests |
+| 3 | User-visible internal terminology | mixed bead/ticket terms in primary paths | ticket-native terminology | no compatibility aliasing | targeted package tests + output snapshot checks |
+| 4 | Environment/config namespace | `BV_*` vars | `TKV_*` vars | legacy `BV_*` ignored, defaults apply | grep checks + env-driven tests |
+| 5 | Module/import namespace | `github.com/Dicklesworthstone/beads_viewer` | `github.com/adampush/ticket_viewer` | partial migration invalid | full import grep + build/test |
+| 6 | Packaging/install metadata | legacy project naming in install/release text | `tkv` naming | old naming removed from active channels | installer dry-runs + tap install verification |
+
 ## Design Principles
 
 1. No compatibility wrappers: do direct cutover.
@@ -183,6 +196,16 @@ Acceptance criteria:
 - Preserve stable subsystems (`pkg/analysis` algorithms, scheduler/math behavior) unless naming leaks into output.
 - Require green gates before moving to next stream.
 
+## Testing Matrix (Required Minimum)
+
+| Change Type | Required Coverage | Additional Requirement | Evidence |
+|---|---|---|---|
+| Implementation behavior change | unit + integration | happy-path, edge-case, failure-path | test output + `tk` note/PR checklist |
+| Public interface change (CLI/API/schema/env/config) | unit + integration + e2e/non-regression | explicit contract old->new verification | command output + schema/help snapshots |
+| Migration/rename/refactor | non-regression + targeted changed-behavior tests | unchanged-behavior assertions must be listed | regression test evidence + grep checks |
+
+Manual-only validation is allowed only when automation is infeasible; rationale and follow-up automation ticket are required.
+
 ## Execution Order
 
 1. Public CLI and robot surface rename
@@ -192,6 +215,17 @@ Acceptance criteria:
 5. Module path migration
 6. Packaging/distribution finalization
 
+## Ownership, Sequencing, and Checkpoints
+
+| Workstream | Owner | Entry Gate | Exit Gate | Checkpoint Artifact |
+|---|---|---|---|---|
+| 1) CLI/robot surface | Adam Push | Plan approved + scope frozen | Help/docs free of legacy terms in active surface | PR checklist + `tk add-note` with command outputs |
+| 2) Robot payload/schema | Adam Push | Workstream 1 complete | schema and emitted payload parity proven | contract test results + schema snapshot |
+| 3) Internal terminology | Adam Push | Workstream 2 complete | no mixed terminology in primary execution paths | package test evidence + reviewer checklist |
+| 4) Env/config migration | Adam Push | Workstream 3 complete | active codepaths use `TKV_*`; legacy behavior matches defaults policy | grep evidence + env tests |
+| 5) Module/import migration | Adam Push | Workstream 4 complete | no legacy module imports; full suite green | `go build`/`go vet`/`go test` evidence |
+| 6) Packaging/distribution | Adam Push | Workstream 5 complete | install/release channels consistent and verified | installer/tap verification evidence |
+
 ## Validation Plan
 
 ### Global gates (required for every stream)
@@ -199,6 +233,8 @@ Acceptance criteria:
 - `go build ./...`
 - `go vet ./...`
 - `go test ./...`
+- expected pass signal: exit code `0` for all commands
+- evidence location: `tk add-note <id> "validation: ..."` and PR validation checklist
 
 ### Stream-specific validation
 
@@ -206,23 +242,48 @@ Acceptance criteria:
    - `tkv --help`
    - `tkv --robot-help`
    - `tkv --robot-docs all`
+   - expected pass signal: output contains only ticket-native active terms
+   - evidence location: help/docs snapshots in PR notes
 
 2. **Robot payload/schema**
    - `tkv --robot-schema`
    - e2e contract tests for robot payload key names
+   - expected pass signal: emitted payload keys match schema contract
+   - evidence location: contract test output + schema diff/check report
 
 3. **Env/config migration**
    - grep checks for `\bBV_[A-Z0-9_]+\b` in active code/docs
    - test updates proving `TKV_*` variables drive behavior
    - note: for migration gating, "active codepaths" excludes test-only fixtures and historical/session notes
+   - expected pass signal: active code/docs checks pass with no legacy env matches; env tests pass
+   - evidence location: grep result log + targeted test output
 
 4. **Module path migration**
    - grep checks for `github.com/Dicklesworthstone/beads_viewer`
    - full rebuild/test after import rewrite
+   - expected pass signal: no legacy import matches in active codepaths + full suite passes
+   - evidence location: grep result log + build/vet/test output
 
 5. **Packaging/distribution**
    - installer dry-runs where available
    - Homebrew tap install verification
+   - expected pass signal: install commands complete successfully and output matches docs
+   - evidence location: installer/tap logs attached to PR checklist
+
+## Unchanged Behavior Verification (Non-Regression)
+
+The following behaviors must remain stable unless explicitly changed by a workstream contract:
+
+1. Graph-analysis semantics and recommendation ranking behavior (outside intentional key/label renames).
+2. Deterministic robot command structure for unchanged fields.
+3. Existing empty/partial dataset handling behavior.
+4. Browser safety gates for test mode (`no browser` behavior in tests).
+
+Verification requirements:
+
+- run `go test ./...` and targeted e2e contract suites
+- compare representative `--robot-*` outputs for unchanged sections before/after each stream
+- document unchanged-behavior checks in `tk` notes and PR checklist
 
 ## Documentation Deliverables and Verification Checklist
 
@@ -282,6 +343,33 @@ Temporary constraints during rollout:
   - updated docs for changed interface
   - validation evidence in PR description
   - checklist outcomes for docs/help/schema parity
+
+## Ticketization Rules (`bv-jzv8` Umbrella)
+
+`bv-jzv8` is the umbrella planning ticket for the full cleanup effort. Implementation executes through child tickets derived from this plan.
+
+Ticket graph requirements:
+
+1. Create child tickets aligned to workstreams (or safe sub-splits for high-risk streams).
+2. Model dependencies to match execution order using `tk dep`.
+3. Keep one active implementation ticket in progress at a time unless explicit parallelization is planned.
+
+Each child ticket must include:
+
+- Context/Why
+- Scope (in/out)
+- Assumptions
+- Open questions (owner + timing + blocking status)
+- Implementation spec (likely files/modules/contracts)
+- Acceptance criteria (pass/fail + edge/failure behavior)
+- Validation plan (commands + expected evidence)
+- Dependencies (upstream/downstream)
+- Artifacts (docs/config/session notes/migration/versioning)
+
+Child ticket readiness rules:
+
+- must satisfy Definition of Ready before starting
+- must satisfy Definition of Done with validation evidence before closure
 
 ## Done Definition
 
