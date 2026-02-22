@@ -3758,32 +3758,32 @@ func main() {
 				os.Exit(1)
 			}
 		} else {
-			// Output file-beads lookup
+			// Output file-issues lookup
 			result := fileLookup.LookupByFile(*robotFileIssues)
 
-			// Limit closed beads if specified
+			// Limit closed issues if specified
 			if len(result.ClosedBeads) > *fileIssuesLimit {
 				result.ClosedBeads = result.ClosedBeads[:*fileIssuesLimit]
 			}
 
-			type FileBeadsOutput struct {
+			type FileIssuesOutput struct {
 				RobotEnvelope
-				FilePath    string                      `json:"file_path"`
-				TotalBeads  int                         `json:"total_beads"`
-				OpenBeads   []correlation.BeadReference `json:"open_beads"`
-				ClosedBeads []correlation.BeadReference `json:"closed_beads"`
+				FilePath     string                      `json:"file_path"`
+				TotalIssues  int                         `json:"total_issues"`
+				OpenIssues   []correlation.BeadReference `json:"open_issues"`
+				ClosedIssues []correlation.BeadReference `json:"closed_issues"`
 			}
 
-			output := FileBeadsOutput{
+			output := FileIssuesOutput{
 				RobotEnvelope: NewRobotEnvelope(report.DataHash),
 				FilePath:      *robotFileIssues,
-				TotalBeads:    result.TotalBeads,
-				OpenBeads:     result.OpenBeads,
-				ClosedBeads:   result.ClosedBeads,
+				TotalIssues:   result.TotalBeads,
+				OpenIssues:    result.OpenBeads,
+				ClosedIssues:  result.ClosedBeads,
 			}
 
 			if err := encoder.Encode(output); err != nil {
-				fmt.Fprintf(os.Stderr, "Error encoding file beads: %v\n", err)
+				fmt.Fprintf(os.Stderr, "Error encoding file issues: %v\n", err)
 				os.Exit(1)
 			}
 		}
@@ -3842,22 +3842,22 @@ func main() {
 
 		type ImpactOutput struct {
 			RobotEnvelope
-			Files         []string                   `json:"files"`
-			RiskLevel     string                     `json:"risk_level"`
-			RiskScore     float64                    `json:"risk_score"`
-			Summary       string                     `json:"summary"`
-			Warnings      []string                   `json:"warnings"`
-			AffectedBeads []correlation.AffectedBead `json:"affected_beads"`
+			Files          []string                   `json:"files"`
+			RiskLevel      string                     `json:"risk_level"`
+			RiskScore      float64                    `json:"risk_score"`
+			Summary        string                     `json:"summary"`
+			Warnings       []string                   `json:"warnings"`
+			AffectedIssues []correlation.AffectedBead `json:"affected_issues"`
 		}
 
 		output := ImpactOutput{
-			RobotEnvelope: NewRobotEnvelope(report.DataHash),
-			Files:         impactResult.Files,
-			RiskLevel:     impactResult.RiskLevel,
-			RiskScore:     impactResult.RiskScore,
-			Summary:       impactResult.Summary,
-			Warnings:      impactResult.Warnings,
-			AffectedBeads: impactResult.AffectedBeads,
+			RobotEnvelope:  NewRobotEnvelope(report.DataHash),
+			Files:          impactResult.Files,
+			RiskLevel:      impactResult.RiskLevel,
+			RiskScore:      impactResult.RiskScore,
+			Summary:        impactResult.Summary,
+			Warnings:       impactResult.Warnings,
+			AffectedIssues: impactResult.AffectedBeads,
 		}
 
 		encoder := newRobotEncoder(os.Stdout)

@@ -270,14 +270,14 @@ func TestCorrelationRobotFileIssues(t *testing.T) {
 	}
 
 	var payload struct {
-		FilePath   string `json:"file_path"`
-		TotalBeads int    `json:"total_beads"`
-		OpenBeads  []struct {
+		FilePath    string `json:"file_path"`
+		TotalIssues int    `json:"total_issues"`
+		OpenIssues  []struct {
 			BeadID string `json:"bead_id"`
-		} `json:"open_beads"`
-		ClosedBeads []struct {
+		} `json:"open_issues"`
+		ClosedIssues []struct {
 			BeadID string `json:"bead_id"`
-		} `json:"closed_beads"`
+		} `json:"closed_issues"`
 	}
 
 	if err := json.Unmarshal(out, &payload); err != nil {
@@ -289,13 +289,13 @@ func TestCorrelationRobotFileIssues(t *testing.T) {
 	}
 
 	// Multiple beads touched session.go
-	if payload.TotalBeads < 2 {
-		t.Errorf("expected at least 2 beads touching session.go, got %d", payload.TotalBeads)
+	if payload.TotalIssues < 2 {
+		t.Errorf("expected at least 2 issues touching session.go, got %d", payload.TotalIssues)
 	}
 
-	// All beads should be closed in this test repo
-	if len(payload.OpenBeads)+len(payload.ClosedBeads) == 0 {
-		t.Error("expected file-beads payload to include at least one bead entry")
+	// All issues should be closed in this test repo
+	if len(payload.OpenIssues)+len(payload.ClosedIssues) == 0 {
+		t.Error("expected file-issues payload to include at least one issue entry")
 	}
 }
 
@@ -478,25 +478,25 @@ func TestCorrelationSharedFileRelations(t *testing.T) {
 	}
 
 	var payload struct {
-		TotalBeads int `json:"total_beads"`
-		OpenBeads  []struct {
+		TotalIssues int `json:"total_issues"`
+		OpenIssues  []struct {
 			BeadID string `json:"bead_id"`
-		} `json:"open_beads"`
-		ClosedBeads []struct {
+		} `json:"open_issues"`
+		ClosedIssues []struct {
 			BeadID string `json:"bead_id"`
-		} `json:"closed_beads"`
+		} `json:"closed_issues"`
 	}
 
 	if err := json.Unmarshal(out, &payload); err != nil {
 		t.Fatalf("json decode: %v", err)
 	}
 
-	if payload.TotalBeads < 2 {
-		t.Errorf("expected at least 2 beads for shared.go, got %d", payload.TotalBeads)
+	if payload.TotalIssues < 2 {
+		t.Errorf("expected at least 2 issues for shared.go, got %d", payload.TotalIssues)
 	}
 
-	if len(payload.OpenBeads)+len(payload.ClosedBeads) == 0 {
-		t.Error("expected file-beads payload entries for shared.go")
+	if len(payload.OpenIssues)+len(payload.ClosedIssues) == 0 {
+		t.Error("expected file-issues payload entries for shared.go")
 	}
 }
 
