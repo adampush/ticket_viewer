@@ -3,8 +3,8 @@ package datasource
 import (
 	"fmt"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/loader"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/loader"
+	"github.com/adampush/ticket_viewer/pkg/model"
 )
 
 // SourceDiff represents differences between two data sources

@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/loader"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/loader"
+	"github.com/adampush/ticket_viewer/pkg/model"
 )
 
 // =============================================================================
@@ -22,8 +22,8 @@ func TestFindJSONLPath_NonExistentDirectory(t *testing.T) {
 	if err == nil {
 		t.Fatal("Expected error for non-existent directory")
 	}
-	if !strings.Contains(err.Error(), "failed to read beads directory") {
-		t.Errorf("Expected 'failed to read beads directory' error, got: %v", err)
+	if !strings.Contains(err.Error(), "failed to read issue data directory") {
+		t.Errorf("Expected 'failed to read issue data directory' error, got: %v", err)
 	}
 }
 
@@ -33,8 +33,8 @@ func TestFindJSONLPath_EmptyDirectory(t *testing.T) {
 	if err == nil {
 		t.Fatal("Expected error for empty directory")
 	}
-	if !strings.Contains(err.Error(), "no beads JSONL file found") {
-		t.Errorf("Expected 'no beads JSONL file found' error, got: %v", err)
+	if !strings.Contains(err.Error(), "no issue JSONL file found") {
+		t.Errorf("Expected 'no issue JSONL file found' error, got: %v", err)
 	}
 }
 
@@ -522,7 +522,7 @@ func TestLoadIssues_BeadsPathIsFile(t *testing.T) {
 	if err == nil {
 		t.Fatal("Expected error when .beads is a file, not a directory")
 	}
-	if !strings.Contains(err.Error(), "failed to read beads directory") {
+	if !strings.Contains(err.Error(), "failed to read issue data directory") {
 		t.Errorf("Unexpected error: %v", err)
 	}
 }
@@ -585,8 +585,8 @@ func TestLoadIssuesFromFile_NonExistentFile(t *testing.T) {
 	if err == nil {
 		t.Fatal("Expected error for non-existent file")
 	}
-	if !strings.Contains(err.Error(), "no beads issues found") {
-		t.Errorf("Expected 'no beads issues found' error, got: %v", err)
+	if !strings.Contains(err.Error(), "no issues found") {
+		t.Errorf("Expected 'no issues found' error, got: %v", err)
 	}
 }
 

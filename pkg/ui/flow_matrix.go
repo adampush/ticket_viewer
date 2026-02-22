@@ -5,8 +5,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/analysis"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/analysis"
+	"github.com/adampush/ticket_viewer/pkg/model"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )

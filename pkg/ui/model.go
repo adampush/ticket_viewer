@@ -11,21 +11,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/agents"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/analysis"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/baseline"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/cass"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/correlation"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/debug"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/drift"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/export"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/instance"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/loader"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/recipe"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/search"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/updater"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/watcher"
+	"github.com/adampush/ticket_viewer/pkg/agents"
+	"github.com/adampush/ticket_viewer/pkg/analysis"
+	"github.com/adampush/ticket_viewer/pkg/baseline"
+	"github.com/adampush/ticket_viewer/pkg/cass"
+	"github.com/adampush/ticket_viewer/pkg/correlation"
+	"github.com/adampush/ticket_viewer/pkg/debug"
+	"github.com/adampush/ticket_viewer/pkg/drift"
+	"github.com/adampush/ticket_viewer/pkg/export"
+	"github.com/adampush/ticket_viewer/pkg/instance"
+	"github.com/adampush/ticket_viewer/pkg/loader"
+	"github.com/adampush/ticket_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/recipe"
+	"github.com/adampush/ticket_viewer/pkg/search"
+	"github.com/adampush/ticket_viewer/pkg/updater"
+	"github.com/adampush/ticket_viewer/pkg/watcher"
 
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/list"
@@ -146,11 +146,11 @@ const (
 )
 
 func freshnessWarnThreshold() time.Duration {
-	return envDurationSeconds("BV_FRESHNESS_WARN_S", 30*time.Second)
+	return envDurationSeconds("TKV_FRESHNESS_WARN_S", 30*time.Second)
 }
 
 func freshnessStaleThreshold() time.Duration {
-	return envDurationSeconds("BV_FRESHNESS_STALE_S", 2*time.Minute)
+	return envDurationSeconds("TKV_FRESHNESS_STALE_S", 2*time.Minute)
 }
 
 func workerPollTickCmd() tea.Cmd {
@@ -921,7 +921,7 @@ func NewModel(issues []model.Issue, activeRecipe *recipe.Recipe, beadsPath strin
 	var backgroundWorker *BackgroundWorker
 	var backgroundModeErr error
 	backgroundModeRequested := false
-	if v := strings.TrimSpace(os.Getenv("BV_BACKGROUND_MODE")); v != "" {
+	if v := strings.TrimSpace(os.Getenv("TKV_BACKGROUND_MODE")); v != "" {
 		switch strings.ToLower(v) {
 		case "1", "true", "yes", "on":
 			backgroundModeRequested = true
@@ -2158,12 +2158,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			addTiming("total", "total")
 			m.statusMsg += "]"
 		}
-		// Auto-enable background mode after slow sync reloads (opt-out via BV_BACKGROUND_MODE=0).
+		// Auto-enable background mode after slow sync reloads (opt-out via TKV_BACKGROUND_MODE=0).
 		autoEnabled := false
 		slowReload := reloadDuration >= time.Second
 		if slowReload && m.backgroundWorker == nil && m.beadsPath != "" {
 			autoAllowed := true
-			if v := strings.TrimSpace(os.Getenv("BV_BACKGROUND_MODE")); v != "" {
+			if v := strings.TrimSpace(os.Getenv("TKV_BACKGROUND_MODE")); v != "" {
 				switch strings.ToLower(v) {
 				case "0", "false", "no", "off":
 					autoAllowed = false
@@ -2193,7 +2193,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if autoEnabled {
 				m.statusMsg += "; background mode auto-enabled"
 			} else {
-				m.statusMsg += "; consider BV_BACKGROUND_MODE=1"
+				m.statusMsg += "; consider TKV_BACKGROUND_MODE=1"
 			}
 		}
 		m.statusIsError = false
@@ -3733,15 +3733,15 @@ func (m Model) handleHistoryKeys(msg tea.KeyMsg) Model {
 	case "/":
 		// Start search (bv-nkrj)
 		m.historyView.StartSearch()
-		m.statusMsg = "🔍 Type to search commits, beads, authors..."
+		m.statusMsg = "🔍 Type to search commits, issues, authors..."
 		m.statusIsError = false
 	case "v":
 		// Toggle between Bead mode and Git mode (bv-tl3n)
 		m.historyView.ToggleViewMode()
 		if m.historyView.IsGitMode() {
-			m.statusMsg = "🔀 Git Mode: commits on left, related beads on right"
+			m.statusMsg = "🔀 Git Mode: commits on left, related issues on right"
 		} else {
-			m.statusMsg = "📦 Bead Mode: beads on left, commits on right"
+			m.statusMsg = "📦 Issue Mode: issues on left, commits on right"
 		}
 		m.statusIsError = false
 	case "j", "down":
@@ -3910,14 +3910,14 @@ func (m Model) handleHistoryKeys(msg tea.KeyMsg) Model {
 					break
 				}
 			}
-			// Switch to graph view focused on this bead
+			// Switch to graph view focused on this issue
 			m.isHistoryView = false
 			m.graphView.SelectByID(selectedID)
 			m.focused = focusGraph
 			m.statusMsg = fmt.Sprintf("📊 Graph view: %s", selectedID)
 			m.statusIsError = false
 		} else {
-			m.statusMsg = "❌ No bead selected"
+			m.statusMsg = "❌ No issue selected"
 			m.statusIsError = true
 		}
 	case "h", "esc":
@@ -3974,10 +3974,10 @@ func gitRemoteToWebURL(remote string) string {
 }
 
 // openBrowserURL opens a URL in the default browser (bv-xf4p)
-// Set BV_NO_BROWSER=1 to suppress browser opening (useful for tests).
+// Set TKV_NO_BROWSER=1 to suppress browser opening (useful for tests).
 func openBrowserURL(url string) error {
 	// Skip browser opening in test mode or when explicitly disabled
-	if os.Getenv("BV_NO_BROWSER") != "" || os.Getenv("BV_TEST_MODE") != "" {
+	if os.Getenv("TKV_NO_BROWSER") != "" || os.Getenv("TKV_TEST_MODE") != "" {
 		return nil
 	}
 
@@ -4424,7 +4424,7 @@ func (m Model) renderLoadingScreen() string {
 	lines := []string{
 		spinnerStyle.Render(frame),
 		"",
-		titleStyle.Render("Loading beads..."),
+		titleStyle.Render("Loading issues..."),
 	}
 	if m.beadsPath != "" {
 		lines = append(lines, "", subStyle.Render(m.beadsPath))
@@ -4865,7 +4865,7 @@ func (m *Model) renderHelpOverlay() string {
 	}
 
 	historySection := []struct{ key, desc string }{
-		{"j/k", "Navigate beads"},
+		{"j/k", "Navigate issues"},
 		{"J/K", "Navigate commits"},
 		{"Tab", "Toggle focus"},
 		{"y", "Copy SHA"},
@@ -7020,7 +7020,7 @@ func (m *Model) enterHistoryView() {
 	m.isHistoryView = true
 	m.focused = focusHistory
 
-	m.statusMsg = fmt.Sprintf("Loaded history: %d beads with commits", report.Stats.BeadsWithCommits)
+	m.statusMsg = fmt.Sprintf("Loaded history: %d issues with commits", report.Stats.BeadsWithCommits)
 	m.statusIsError = false
 }
 
@@ -7045,7 +7045,7 @@ func (m *Model) enterTimeTravelMode(revision string) {
 	// Check if beads files exist at the revision
 	hasBeads, err := gitLoader.HasBeadsAtRevision(revision)
 	if err != nil || !hasBeads {
-		m.statusMsg = fmt.Sprintf("❌ No beads history at %s (try fewer commits back)", revision)
+		m.statusMsg = fmt.Sprintf("❌ No issue history at %s (try fewer commits back)", revision)
 		m.statusIsError = true
 		return
 	}
@@ -7740,12 +7740,12 @@ func (m *Model) openInEditor() {
 		}
 	}
 	if beadsFile == "" {
-		m.statusMsg = "❌ No .beads directory or beads.jsonl found"
+		m.statusMsg = "❌ No .beads directory or issue JSONL file found"
 		m.statusIsError = true
 		return
 	}
 	if _, err := os.Stat(beadsFile); os.IsNotExist(err) {
-		m.statusMsg = fmt.Sprintf("❌ Beads file not found: %s", beadsFile)
+		m.statusMsg = fmt.Sprintf("❌ Issue file not found: %s", beadsFile)
 		m.statusIsError = true
 		return
 	}

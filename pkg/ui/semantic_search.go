@@ -8,9 +8,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/analysis"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/search"
+	"github.com/adampush/ticket_viewer/pkg/analysis"
+	"github.com/adampush/ticket_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/search"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"

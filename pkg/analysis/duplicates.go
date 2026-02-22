@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/model"
 )
 
 // Package-level compiled regex for performance (avoids recompilation on each call)

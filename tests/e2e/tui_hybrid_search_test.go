@@ -6,9 +6,9 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/loader"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/search"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/ui"
+	"github.com/adampush/ticket_viewer/pkg/loader"
+	"github.com/adampush/ticket_viewer/pkg/search"
+	"github.com/adampush/ticket_viewer/pkg/ui"
 )
 
 func TestTUIHybridSearchSmoke(t *testing.T) {

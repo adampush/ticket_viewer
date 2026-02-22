@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/model"
 )
 
 func TestCalculateBurndownAt_OnTrackWithProgress(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/model"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -201,8 +201,8 @@ func (m Model) renderSprintDashboard() string {
 	}
 	sb.WriteString("\n")
 
-	// Sprint beads list (abbreviated)
-	sb.WriteString(labelStyle.Render("Beads in Sprint:"))
+	// Sprint issue list (abbreviated)
+	sb.WriteString(labelStyle.Render("Issues in Sprint:"))
 	sb.WriteString("\n")
 	displayLimit := min(10, len(sprintIssues))
 	for i := 0; i < displayLimit; i++ {

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/cass"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/correlation"
+	"github.com/adampush/ticket_viewer/pkg/cass"
+	"github.com/adampush/ticket_viewer/pkg/correlation"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -169,7 +169,7 @@ type HistoryModel struct {
 func NewHistoryModel(report *correlation.HistoryReport, theme Theme) HistoryModel {
 	// Initialize search input (bv-nkrj)
 	ti := textinput.New()
-	ti.Placeholder = "Search commits, beads, authors..."
+	ti.Placeholder = "Search commits, issues, authors..."
 	ti.CharLimit = 100
 	ti.Width = 40
 
@@ -718,11 +718,11 @@ func (h *HistoryModel) StartSearchWithMode(mode historySearchMode) {
 	case searchModeSHA:
 		h.searchInput.Placeholder = "Enter SHA prefix..."
 	case searchModeBead:
-		h.searchInput.Placeholder = "Search bead ID or title..."
+		h.searchInput.Placeholder = "Search issue ID or title..."
 	case searchModeAuthor:
 		h.searchInput.Placeholder = "Search by author..."
 	default:
-		h.searchInput.Placeholder = "Search commits, beads, authors..."
+		h.searchInput.Placeholder = "Search commits, issues, authors..."
 	}
 }
 
@@ -951,7 +951,7 @@ func (h *HistoryModel) GetSearchModeName() string {
 	case searchModeSHA:
 		return "sha"
 	case searchModeBead:
-		return "bead"
+		return "issue"
 	case searchModeAuthor:
 		return "author"
 	default:
@@ -1262,11 +1262,11 @@ func (h *HistoryModel) View() string {
 	// In git mode, check commit list; in bead mode, check histories
 	if h.viewMode == historyModeGit {
 		if len(h.commitList) == 0 {
-			return h.renderEmpty("No commits with bead correlations found")
+			return h.renderEmpty("No commits with issue correlations found")
 		}
 	} else {
 		if len(h.histories) == 0 {
-			return h.renderEmpty("No beads with commit correlations found")
+			return h.renderEmpty("No issues with commit correlations found")
 		}
 	}
 
@@ -1495,7 +1495,7 @@ func (h *HistoryModel) renderTimelinePanel(width, height int) string {
 	// Get selected bead
 	if len(h.beadIDs) == 0 || h.selectedBead >= len(h.beadIDs) {
 		content := titleStyle.Render("TIMELINE") + "\n\n" +
-			r.NewStyle().Foreground(t.Secondary).Render("Select a bead to view timeline")
+			r.NewStyle().Foreground(t.Secondary).Render("Select an issue to view timeline")
 		return panelStyle.Render(content)
 	}
 
@@ -1805,7 +1805,7 @@ func (h *HistoryModel) renderHeader() string {
 		modeLabel = "Git"
 	} else {
 		modeIcon = "◈"
-		modeLabel = "Beads"
+		modeLabel = "Issues"
 	}
 
 	// Check for transition flash effect (bv-kvlx)
@@ -1911,8 +1911,8 @@ func (h *HistoryModel) renderStatsLine() string {
 	// Build stats badges
 	var badges []string
 
-	// Beads with commits
-	beadsBadge := badgeStyle.Render(valueStyle.Render(fmt.Sprintf("%d", stats.BeadsWithCommits)) + " beads")
+	// Issues with commits
+	beadsBadge := badgeStyle.Render(valueStyle.Render(fmt.Sprintf("%d", stats.BeadsWithCommits)) + " issues")
 	badges = append(badges, beadsBadge)
 
 	// Total commits
@@ -1932,7 +1932,7 @@ func (h *HistoryModel) renderStatsLine() string {
 
 	// Commits per bead
 	if stats.AvgCommitsPerBead > 0 {
-		cpdBadge := badgeStyle.Render(valueStyle.Render(fmt.Sprintf("%.1f", stats.AvgCommitsPerBead)) + " commits/bead")
+		cpdBadge := badgeStyle.Render(valueStyle.Render(fmt.Sprintf("%.1f", stats.AvgCommitsPerBead)) + " commits/issue")
 		badges = append(badges, cpdBadge)
 	}
 
@@ -1988,9 +1988,9 @@ func (h *HistoryModel) renderFilterLine() string {
 			totalBeads = len(h.report.Histories)
 		}
 		if len(h.histories) != totalBeads {
-			parts = append(parts, filterStyle.Render(fmt.Sprintf("Showing %d/%d beads", len(h.histories), totalBeads)))
+			parts = append(parts, filterStyle.Render(fmt.Sprintf("Showing %d/%d issues", len(h.histories), totalBeads)))
 		} else {
-			parts = append(parts, filterStyle.Render(fmt.Sprintf("Showing all %d beads with commits", len(h.histories))))
+			parts = append(parts, filterStyle.Render(fmt.Sprintf("Showing all %d issues with commits", len(h.histories))))
 		}
 	}
 
@@ -2294,7 +2294,7 @@ func (h *HistoryModel) renderDetailPanel(width, height int) string {
 
 	hist := h.SelectedHistory()
 	if hist == nil {
-		return panelStyle.Render("No bead selected")
+		return panelStyle.Render("No issue selected")
 	}
 
 	// Header
@@ -3242,7 +3242,7 @@ func (h *HistoryModel) renderGitDetailPanel(width, height int) string {
 	// Add footer hint (bv-xf4p)
 	lines = append(lines, strings.Repeat("─", detailSepWidth))
 	hintStyle := t.Renderer.NewStyle().Foreground(t.Muted).Italic(true)
-	lines = append(lines, hintStyle.Render("J/K:bead  y:copy  o:open  g:graph"))
+	lines = append(lines, hintStyle.Render("J/K:issue  y:copy  o:open  g:graph"))
 
 	content := strings.Join(lines, "\n")
 	return panelStyle.Render(content)
@@ -3265,7 +3265,7 @@ func (h *HistoryModel) renderCommitMiddlePanel(width, height int) string {
 
 	hist := h.SelectedHistory()
 	if hist == nil {
-		return panelStyle.Render("Select a bead to view commits")
+		return panelStyle.Render("Select an issue to view commits")
 	}
 
 	var lines []string
@@ -3357,7 +3357,7 @@ func (h *HistoryModel) renderGitBeadListPanel(width, height int) string {
 
 	commit := h.SelectedGitCommit()
 	if commit == nil {
-		return panelStyle.Render("Select a commit to view beads")
+		return panelStyle.Render("Select a commit to view issues")
 	}
 
 	var lines []string

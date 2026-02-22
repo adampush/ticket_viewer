@@ -11,7 +11,7 @@ import (
 
 // BeadReference links a bead to a file via commits.
 type BeadReference struct {
-	BeadID       string    `json:"bead_id"`
+	BeadID       string    `json:"issue_id"`
 	Title        string    `json:"title"`
 	Status       string    `json:"status"`        // open/in_progress/closed
 	CommitSHAs   []string  `json:"commit_shas"`   // which commits linked this bead to this file
@@ -22,7 +22,7 @@ type BeadReference struct {
 // FileBeadIndex provides O(1) lookup from file path to beads that touched it.
 type FileBeadIndex struct {
 	// FileToBeads maps normalized file paths to beads that modified them
-	FileToBeads map[string][]BeadReference `json:"file_to_beads"`
+	FileToBeads map[string][]BeadReference `json:"file_to_issues"`
 
 	// Stats provides aggregate information about the index
 	Stats FileIndexStats `json:"stats"`
@@ -30,17 +30,17 @@ type FileBeadIndex struct {
 
 // FileIndexStats contains aggregate statistics about the file index.
 type FileIndexStats struct {
-	TotalFiles             int `json:"total_files"`               // number of unique files
-	TotalBeadLinks         int `json:"total_bead_links"`          // sum of all bead references
-	FilesWithMultipleBeads int `json:"files_with_multiple_beads"` // files touched by >1 bead
+	TotalFiles             int `json:"total_files"`                // number of unique files
+	TotalBeadLinks         int `json:"total_issue_links"`          // sum of all bead references
+	FilesWithMultipleBeads int `json:"files_with_multiple_issues"` // files touched by >1 bead
 }
 
 // FileBeadLookupResult is the result of looking up beads for a file.
 type FileBeadLookupResult struct {
 	FilePath    string          `json:"file_path"`
-	OpenBeads   []BeadReference `json:"open_beads"`   // currently open beads
-	ClosedBeads []BeadReference `json:"closed_beads"` // recently closed beads
-	TotalBeads  int             `json:"total_beads"`
+	OpenBeads   []BeadReference `json:"open_issues"`   // currently open beads
+	ClosedBeads []BeadReference `json:"closed_issues"` // recently closed beads
+	TotalBeads  int             `json:"total_issues"`
 }
 
 // FileLookup provides file-to-bead lookup functionality.
@@ -370,9 +370,9 @@ func (fl *FileLookup) GetHotspots(limit int) []FileHotspot {
 // FileHotspot represents a file that has been touched by many beads.
 type FileHotspot struct {
 	FilePath    string `json:"file_path"`
-	TotalBeads  int    `json:"total_beads"`
-	OpenBeads   int    `json:"open_beads"`
-	ClosedBeads int    `json:"closed_beads"`
+	TotalBeads  int    `json:"total_issues"`
+	OpenBeads   int    `json:"open_issues"`
+	ClosedBeads int    `json:"closed_issues"`
 }
 
 // CoChangeEntry represents a file that frequently co-changes with another file.
@@ -546,7 +546,7 @@ func (m *CoChangeMatrix) GetRelatedFiles(filePath string, threshold float64, lim
 // ImpactResult is the result of analyzing what beads might be affected by file changes.
 type ImpactResult struct {
 	Files         []string       `json:"files"`
-	AffectedBeads []AffectedBead `json:"affected_beads"`
+	AffectedBeads []AffectedBead `json:"affected_issues"`
 	RiskLevel     string         `json:"risk_level"`
 	RiskScore     float64        `json:"risk_score"`
 	Warnings      []string       `json:"warnings"`
@@ -555,7 +555,7 @@ type ImpactResult struct {
 
 // AffectedBead represents a bead that touches one or more of the analyzed files.
 type AffectedBead struct {
-	BeadID       string    `json:"bead_id"`
+	BeadID       string    `json:"issue_id"`
 	Title        string    `json:"title"`
 	Status       string    `json:"status"`
 	OverlapFiles []string  `json:"overlap_files"`
@@ -707,22 +707,22 @@ func (fl *FileLookup) ImpactAnalysis(files []string) *ImpactResult {
 		result.Warnings = append(result.Warnings, "Active work in progress on these files - coordinate before making changes")
 	}
 	if openCount > 0 {
-		result.Warnings = append(result.Warnings, "Open beads touch these files - review before modifying")
+		result.Warnings = append(result.Warnings, "Open issues touch these files - review before modifying")
 	}
 
 	total := inProgressCount + openCount + recentClosedCount
 	if total == 0 {
-		result.Summary = "No beads found touching these files - safe to proceed"
+		result.Summary = "No issues found touching these files - safe to proceed"
 	} else {
 		parts := []string{}
 		if inProgressCount > 0 {
-			parts = append(parts, fmt.Sprintf("%d %s in progress", inProgressCount, pluralize(inProgressCount, "bead")))
+			parts = append(parts, fmt.Sprintf("%d %s in progress", inProgressCount, pluralize(inProgressCount, "issue")))
 		}
 		if openCount > 0 {
-			parts = append(parts, fmt.Sprintf("%d open %s", openCount, pluralize(openCount, "bead")))
+			parts = append(parts, fmt.Sprintf("%d open %s", openCount, pluralize(openCount, "issue")))
 		}
 		if recentClosedCount > 0 {
-			parts = append(parts, fmt.Sprintf("%d recently closed %s", recentClosedCount, pluralize(recentClosedCount, "bead")))
+			parts = append(parts, fmt.Sprintf("%d recently closed %s", recentClosedCount, pluralize(recentClosedCount, "issue")))
 		}
 		prefix := "Found "
 		if inProgressCount > 0 {

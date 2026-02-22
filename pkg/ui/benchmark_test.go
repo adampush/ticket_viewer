@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/analysis"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/testutil"
+	"github.com/adampush/ticket_viewer/pkg/analysis"
+	"github.com/adampush/ticket_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/testutil"
 )
 
 func copyIssues(in []model.Issue) []model.Issue {

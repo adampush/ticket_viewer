@@ -82,9 +82,9 @@ func (fs *FeedbackStore) Save(fb CorrelationFeedback) error {
 	fs.mu.Lock()
 	defer fs.mu.Unlock()
 
-	// Ensure the beads directory exists
+	// Ensure the issue data directory exists
 	if err := os.MkdirAll(fs.beadsDir, 0755); err != nil {
-		return fmt.Errorf("creating beads directory: %w", err)
+		return fmt.Errorf("creating issue data directory: %w", err)
 	}
 
 	// Open file in append mode

@@ -12,7 +12,7 @@ import (
 
 	json "github.com/goccy/go-json"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/model"
 )
 
 // BeadsDirEnvVar is the name of the environment variable for custom beads directory
@@ -120,7 +120,7 @@ func FindJSONLPath(beadsDir string) (string, error) {
 func FindJSONLPathWithWarnings(beadsDir string, warnFunc func(msg string)) (string, error) {
 	entries, err := os.ReadDir(beadsDir)
 	if err != nil {
-		return "", fmt.Errorf("failed to read beads directory: %w", err)
+		return "", fmt.Errorf("failed to read issue data directory: %w", err)
 	}
 
 	var candidates []string
@@ -161,7 +161,7 @@ func FindJSONLPathWithWarnings(beadsDir string, warnFunc func(msg string)) (stri
 	}
 
 	if len(candidates) == 0 {
-		return "", fmt.Errorf("no beads JSONL file found in %s", beadsDir)
+		return "", fmt.Errorf("no issue JSONL file found in %s", beadsDir)
 	}
 
 	// Priority order for beads files - matches bd's canonical naming (bv-96):
@@ -235,7 +235,7 @@ type ParseOptions struct {
 func LoadIssuesFromFileWithOptions(path string, opts ParseOptions) ([]model.Issue, error) {
 	// Check if file exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return nil, fmt.Errorf("no beads issues found at %s", path)
+		return nil, fmt.Errorf("no issues found at %s", path)
 	}
 
 	file, err := os.Open(path)
@@ -252,7 +252,7 @@ func LoadIssuesFromFileWithOptions(path string, opts ParseOptions) ([]model.Issu
 func LoadIssuesFromFileWithOptionsPooled(path string, opts ParseOptions) (PooledIssues, error) {
 	// Check if file exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return PooledIssues{}, fmt.Errorf("no beads issues found at %s", path)
+		return PooledIssues{}, fmt.Errorf("no issues found at %s", path)
 	}
 
 	file, err := os.Open(path)
@@ -334,7 +334,7 @@ func parseIssuesWithOptions(r io.Reader, opts ParseOptions, usePool bool) ([]mod
 	// Default warning handler prints to stderr (suppressed in robot mode).
 	warn := opts.WarningHandler
 	if warn == nil {
-		if os.Getenv("BV_ROBOT") == "1" {
+		if os.Getenv("TKV_ROBOT") == "1" {
 			warn = func(string) {}
 		} else {
 			warn = func(msg string) {

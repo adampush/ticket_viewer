@@ -5,12 +5,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/loader"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/loader"
+	"github.com/adampush/ticket_viewer/pkg/model"
 )
 
 func testModeLegacyFallbackEnabled() bool {
-	return strings.TrimSpace(os.Getenv("BV_TEST_MODE")) == "1"
+	return strings.TrimSpace(os.Getenv("TKV_TEST_MODE")) == "1"
 }
 
 // LoadMetadata captures source-selection details for callers that need diagnostics.

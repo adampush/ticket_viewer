@@ -4,7 +4,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/model"
 )
 
 // SuggestAllConfig configures the unified suggestion generator
@@ -134,7 +134,7 @@ type RobotSuggestOutput struct {
 type SuggestFilter struct {
 	Type          string  `json:"type,omitempty"`
 	MinConfidence float64 `json:"min_confidence,omitempty"`
-	BeadID        string  `json:"bead_id,omitempty"`
+	BeadID        string  `json:"issue_id,omitempty"`
 }
 
 // GenerateRobotSuggestOutput creates the full robot-suggest output

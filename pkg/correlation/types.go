@@ -38,7 +38,7 @@ func (e EventType) IsValid() bool {
 
 // BeadEvent represents a single lifecycle event for a bead, extracted from git history
 type BeadEvent struct {
-	BeadID      string    `json:"bead_id"`
+	BeadID      string    `json:"issue_id"`
 	EventType   EventType `json:"event_type"`
 	Timestamp   time.Time `json:"timestamp"`
 	CommitSHA   string    `json:"commit_sha"`
@@ -113,7 +113,7 @@ type CycleTime struct {
 
 // BeadHistory is the complete correlation record for a single bead
 type BeadHistory struct {
-	BeadID     string             `json:"bead_id"`
+	BeadID     string             `json:"issue_id"`
 	Title      string             `json:"title"`
 	Status     string             `json:"status"`
 	Events     []BeadEvent        `json:"events"`      // All lifecycle events, chronological
@@ -128,11 +128,11 @@ type CommitIndex map[string][]string
 
 // HistoryStats provides aggregate statistics for the history report
 type HistoryStats struct {
-	TotalBeads         int            `json:"total_beads"`
-	BeadsWithCommits   int            `json:"beads_with_commits"`
+	TotalBeads         int            `json:"total_issues"`
+	BeadsWithCommits   int            `json:"issues_with_commits"`
 	TotalCommits       int            `json:"total_commits"`
 	UniqueAuthors      int            `json:"unique_authors"`
-	AvgCommitsPerBead  float64        `json:"avg_commits_per_bead"`
+	AvgCommitsPerBead  float64        `json:"avg_commits_per_issue"`
 	AvgCycleTimeDays   *float64       `json:"avg_cycle_time_days,omitempty"` // nil if no closed beads
 	MethodDistribution map[string]int `json:"method_distribution"`           // Count per correlation method
 }
@@ -150,7 +150,7 @@ type HistoryReport struct {
 
 // FilterOptions controls which beads to include in the history report
 type FilterOptions struct {
-	BeadIDs       []string   `json:"bead_ids,omitempty"`       // Specific beads to include (nil = all)
+	BeadIDs       []string   `json:"issue_ids,omitempty"`      // Specific beads to include (nil = all)
 	Since         *time.Time `json:"since,omitempty"`          // Only events after this time
 	Until         *time.Time `json:"until,omitempty"`          // Only events before this time
 	Authors       []string   `json:"authors,omitempty"`        // Filter by author name/email
@@ -186,7 +186,7 @@ type CorrelationSignal struct {
 // CorrelationExplanation provides a detailed breakdown of why a commit is linked to a bead
 type CorrelationExplanation struct {
 	CommitSHA      string              `json:"commit_sha"`
-	BeadID         string              `json:"bead_id"`
+	BeadID         string              `json:"issue_id"`
 	Confidence     float64             `json:"confidence"`     // 0.0 to 1.0
 	ConfidencePct  int                 `json:"confidence_pct"` // 0 to 100 for display
 	Level          string              `json:"level"`          // "very high", "high", "moderate", "low", "very low"
@@ -212,7 +212,7 @@ const (
 // CorrelationFeedback represents user/agent feedback on a correlation
 type CorrelationFeedback struct {
 	CommitSHA    string       `json:"commit_sha"`
-	BeadID       string       `json:"bead_id"`
+	BeadID       string       `json:"issue_id"`
 	FeedbackAt   time.Time    `json:"feedback_at"`
 	FeedbackBy   string       `json:"feedback_by"`   // Agent or user identifier
 	Type         FeedbackType `json:"type"`          // confirm, reject, ignore

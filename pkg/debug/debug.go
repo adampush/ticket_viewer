@@ -1,15 +1,15 @@
 // Package debug provides conditional debug logging for bv.
 //
-// Debug logging is enabled by setting the BV_DEBUG environment variable:
+// Debug logging is enabled by setting the TKV_DEBUG environment variable:
 //
-//	BV_DEBUG=1 bv --robot-triage
+//	TKV_DEBUG=1 tkv --robot-triage
 //
 // When enabled, debug messages are written to stderr with timestamps.
 // When disabled (default), all debug functions are no-ops with zero overhead.
 //
 // Usage:
 //
-//	import "github.com/Dicklesworthstone/beads_viewer/pkg/debug"
+//	import "github.com/adampush/ticket_viewer/pkg/debug"
 //
 //	func myFunc() {
 //	    debug.Log("processing %d items", count)
@@ -26,16 +26,16 @@ import (
 )
 
 var (
-	// enabled is true when BV_DEBUG env var is set
+	// enabled is true when TKV_DEBUG env var is set
 	enabled bool
-	// logger writes to stderr with [BV_DEBUG] prefix
+	// logger writes to stderr with [TKV_DEBUG] prefix
 	logger *log.Logger
 )
 
 func init() {
-	if os.Getenv("BV_DEBUG") != "" {
+	if os.Getenv("TKV_DEBUG") != "" {
 		enabled = true
-		logger = log.New(os.Stderr, "[BV_DEBUG] ", log.Ltime|log.Lmicroseconds)
+		logger = log.New(os.Stderr, "[TKV_DEBUG] ", log.Ltime|log.Lmicroseconds)
 	}
 }
 
@@ -49,7 +49,7 @@ func Enabled() bool {
 func SetEnabled(e bool) {
 	enabled = e
 	if e && logger == nil {
-		logger = log.New(os.Stderr, "[BV_DEBUG] ", log.Ltime|log.Lmicroseconds)
+		logger = log.New(os.Stderr, "[TKV_DEBUG] ", log.Ltime|log.Lmicroseconds)
 	}
 }
 

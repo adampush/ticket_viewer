@@ -220,11 +220,11 @@ func TestDefaultDimValue(t *testing.T) {
 }
 
 func TestEnvVarNaming(t *testing.T) {
-	// All env vars should have BV_ prefix
+	// All env vars should have TKV_ prefix
 	envVars := []string{EnvSemanticEmbedder, EnvSemanticModel, EnvSemanticDim}
 	for _, env := range envVars {
-		if len(env) < 3 || env[:3] != "BV_" {
-			t.Errorf("Environment variable %q should have BV_ prefix", env)
+		if len(env) < 4 || env[:4] != "TKV_" {
+			t.Errorf("Environment variable %q should have TKV_ prefix", env)
 		}
 	}
 }

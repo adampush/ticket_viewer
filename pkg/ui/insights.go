@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/analysis"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/analysis"
+	"github.com/adampush/ticket_viewer/pkg/model"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
@@ -44,8 +44,8 @@ var metricDescriptions = map[MetricPanel]MetricInfo{
 		Icon:        "🚧",
 		Title:       "Bottlenecks",
 		ShortDesc:   "Betweenness Centrality",
-		WhatIs:      "Measures how often a bead lies on **shortest paths** between other beads in the dependency graph.",
-		WhyUseful:   "High-scoring beads are *critical junctions*. Delays here ripple across the entire project.",
+		WhatIs:      "Measures how often an issue lies on **shortest paths** between other issues in the dependency graph.",
+		WhyUseful:   "High-scoring issues are *critical junctions*. Delays here ripple across the entire project.",
 		HowToUse:    "**Prioritize** these to unblock parallel workstreams. Consider breaking them into smaller pieces.",
 		FormulaHint: "`BW(v) = Σ (σst(v) / σst)` for all s≠v≠t",
 	},
@@ -53,7 +53,7 @@ var metricDescriptions = map[MetricPanel]MetricInfo{
 		Icon:        "🏛️",
 		Title:       "Keystones",
 		ShortDesc:   "Impact Depth",
-		WhatIs:      "Measures how **deep** in the dependency chain a bead sits (downstream chain length).",
+		WhatIs:      "Measures how **deep** in the dependency chain an issue sits (downstream chain length).",
 		WhyUseful:   "Keystones are *foundational*. Everything above them depends on their completion.",
 		HowToUse:    "**Complete these first.** Blocking a keystone blocks the entire chain above it.",
 		FormulaHint: "`Impact(v) = 1 + max(Impact(u))` for all u depending on v",
@@ -62,8 +62,8 @@ var metricDescriptions = map[MetricPanel]MetricInfo{
 		Icon:        "🌐",
 		Title:       "Influencers",
 		ShortDesc:   "Eigenvector Centrality",
-		WhatIs:      "Scores beads by their connections to other **well-connected** beads.",
-		WhyUseful:   "Influencers are connected to *important* beads. Changes here have wide-reaching effects.",
+		WhatIs:      "Scores issues by their connections to other **well-connected** issues.",
+		WhyUseful:   "Influencers are connected to *important* issues. Changes here have wide-reaching effects.",
 		HowToUse:    "**Review carefully** before changes. They're central to project structure.",
 		FormulaHint: "`EV(v) = (1/λ) × Σ A[v,u] × EV(u)`",
 	},
@@ -71,7 +71,7 @@ var metricDescriptions = map[MetricPanel]MetricInfo{
 		Icon:        "🛰️",
 		Title:       "Hubs",
 		ShortDesc:   "HITS Hub Score",
-		WhatIs:      "Beads that **depend on** many important authorities (aggregators).",
+		WhatIs:      "Issues that **depend on** many important authorities (aggregators).",
 		WhyUseful:   "Hubs collect dependencies. They often represent *high-level features* or epics.",
 		HowToUse:    "**Track for milestones.** Their completion signals major project progress.",
 		FormulaHint: "`Hub(v) = Σ Authority(u)` for all u where v→u",
@@ -80,7 +80,7 @@ var metricDescriptions = map[MetricPanel]MetricInfo{
 		Icon:        "📚",
 		Title:       "Authorities",
 		ShortDesc:   "HITS Authority Score",
-		WhatIs:      "Beads that are **depended upon** by many important hubs (providers).",
+		WhatIs:      "Issues that are **depended upon** by many important hubs (providers).",
 		WhyUseful:   "Authorities are *foundational services/components* that many features need.",
 		HowToUse:    "**Stabilize early.** Breaking an authority breaks many dependent hubs.",
 		FormulaHint: "`Auth(v) = Σ Hub(u)` for all u where u→v",
@@ -116,7 +116,7 @@ var metricDescriptions = map[MetricPanel]MetricInfo{
 		Icon:        "🔄",
 		Title:       "Cycles",
 		ShortDesc:   "Circular Dependencies",
-		WhatIs:      "Groups of beads forming **dependency loops** (A→B→C→A).",
+		WhatIs:      "Groups of issues forming **dependency loops** (A→B→C→A).",
 		WhyUseful:   "Cycles indicate *structural problems*. They can't be resolved in sequence.",
 		HowToUse:    "**Break cycles** by removing or reversing a dependency. Refactor to decouple.",
 		FormulaHint: "Detected via Tarjan's SCC algorithm",
@@ -1820,7 +1820,7 @@ func (m *InsightsModel) renderCalculationProofMD(selectedID string) string {
 		upstream := m.findDependents(selectedID)
 		downstream := m.findDependencies(selectedID)
 		if len(upstream) > 0 {
-			sb.WriteString(fmt.Sprintf("**Beads depending on this (%d):**\n", len(upstream)))
+			sb.WriteString(fmt.Sprintf("**Issues depending on this (%d):**\n", len(upstream)))
 			for i, id := range upstream {
 				if i >= 5 {
 					sb.WriteString(fmt.Sprintf("- _...+%d more_\n", len(upstream)-5))
@@ -1840,7 +1840,7 @@ func (m *InsightsModel) renderCalculationProofMD(selectedID string) string {
 				sb.WriteString(fmt.Sprintf("- ↑ %s\n", m.getBeadTitle(id, 40)))
 			}
 		}
-		sb.WriteString("\n> This bead lies on many shortest paths, making it a *critical junction*.\n\n")
+		sb.WriteString("\n> This issue lies on many shortest paths, making it a *critical junction*.\n\n")
 
 	case PanelKeystones:
 		impact := stats.GetCriticalPathScore(selectedID)
@@ -1904,7 +1904,7 @@ func (m *InsightsModel) renderCalculationProofMD(selectedID string) string {
 		idx := m.selectedIndex[PanelCycles]
 		if idx >= 0 && idx < len(m.insights.Cycles) {
 			cycle := m.insights.Cycles[idx]
-			sb.WriteString(fmt.Sprintf("**Cycle with %d beads:**\n```\n", len(cycle)))
+			sb.WriteString(fmt.Sprintf("**Cycle with %d issues:**\n```\n", len(cycle)))
 			for i, id := range cycle {
 				arrow := "→"
 				if i == len(cycle)-1 {
@@ -1913,7 +1913,7 @@ func (m *InsightsModel) renderCalculationProofMD(selectedID string) string {
 				sb.WriteString(fmt.Sprintf("%s %s\n", arrow, m.getBeadTitle(id, 35)))
 			}
 			sb.WriteString("```\n\n")
-			sb.WriteString("> These beads form a circular dependency. *Break the cycle* by removing or reversing one edge.\n\n")
+			sb.WriteString("> These issues form a circular dependency. *Break the cycle* by removing or reversing one edge.\n\n")
 		}
 
 	default:

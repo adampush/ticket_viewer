@@ -28,8 +28,8 @@ var (
 
 func TestMain(m *testing.M) {
 	// Prevent any test from accidentally opening a browser
-	os.Setenv("BV_NO_BROWSER", "1")
-	os.Setenv("BV_TEST_MODE", "1")
+	os.Setenv("TKV_NO_BROWSER", "1")
+	os.Setenv("TKV_TEST_MODE", "1")
 
 	// Build the binary once for all tests
 	if err := buildBvOnce(); err != nil {
@@ -88,7 +88,7 @@ func detectScriptTUICapability(bvPath string) (bool, string) {
 	cmd.Dir = tempDir
 	cmd.Env = append(os.Environ(),
 		"TERM=xterm-256color",
-		"BV_TUI_AUTOCLOSE_MS=250",
+		"TKV_TUI_AUTOCLOSE_MS=250",
 	)
 
 	outFile := filepath.Join(tempDir, "script.out")
@@ -386,8 +386,8 @@ func runBVCommand(t *testing.T, workDir string, args ...string) ([]byte, error) 
 	cmd := exec.CommandContext(ctx, binPath, args...)
 	cmd.Dir = workDir
 	cmd.Env = append(os.Environ(),
-		"BV_NO_BROWSER=1",
-		"BV_TEST_MODE=1",
+		"TKV_NO_BROWSER=1",
+		"TKV_TEST_MODE=1",
 		"TERM=dumb",
 	)
 

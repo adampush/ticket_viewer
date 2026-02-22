@@ -1,13 +1,15 @@
+//go:build ignore
 // +build ignore
 
 // generate_testdata.go creates standard test datasets for benchmarking.
 // Usage: go run scripts/generate_testdata.go
 //
 // Creates:
-//   tests/testdata/benchmark/small.jsonl   (100 issues)
-//   tests/testdata/benchmark/medium.jsonl  (1000 issues)
-//   tests/testdata/benchmark/large.jsonl   (5000 issues)
-//   tests/testdata/benchmark/huge.jsonl    (20000 issues)
+//
+//	tests/testdata/benchmark/small.jsonl   (100 issues)
+//	tests/testdata/benchmark/medium.jsonl  (1000 issues)
+//	tests/testdata/benchmark/large.jsonl   (5000 issues)
+//	tests/testdata/benchmark/huge.jsonl    (20000 issues)
 package main
 
 import (
@@ -15,14 +17,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/testutil"
+	"github.com/adampush/ticket_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/testutil"
 )
 
 type datasetSpec struct {
-	name  string
-	size  int
-	desc  string
+	name string
+	size int
+	desc string
 }
 
 var datasets = []datasetSpec{

@@ -58,15 +58,15 @@ type OrphanCandidate struct {
 
 	// Detection results
 	SuspicionScore int               `json:"suspicion_score"` // 0-100
-	ProbableBeads  []ProbableBead    `json:"probable_beads"`  // Beads this might belong to
+	ProbableBeads  []ProbableBead    `json:"probable_issues"` // Beads this might belong to
 	Signals        []OrphanSignalHit `json:"signals"`         // Why we think it's orphaned
 }
 
 // ProbableBead is a bead that an orphan commit might belong to.
 type ProbableBead struct {
-	BeadID     string   `json:"bead_id"`
-	BeadTitle  string   `json:"bead_title"`
-	BeadStatus string   `json:"bead_status"`
+	BeadID     string   `json:"issue_id"`
+	BeadTitle  string   `json:"issue_title"`
+	BeadStatus string   `json:"issue_status"`
 	Confidence int      `json:"confidence"` // 0-100
 	Reasons    []string `json:"reasons"`    // Why we think it matches
 }
@@ -85,7 +85,7 @@ type OrphanReport struct {
 	DataHash    string              `json:"data_hash"` // Beads content hash
 	Stats       OrphanReportStats   `json:"stats"`
 	Candidates  []OrphanCandidate   `json:"candidates"`
-	ByBead      map[string][]string `json:"by_bead,omitempty"` // BeadID -> []commit SHAs
+	ByBead      map[string][]string `json:"by_issue,omitempty"` // BeadID -> []commit SHAs
 }
 
 // OrphanReportStats provides aggregate statistics.
@@ -393,7 +393,7 @@ func (od *OrphanDetector) checkMessage(candidate *OrphanCandidate, beadScores ma
 				}
 				beadScores[beadID].score += 35
 				beadScores[beadID].reasons = append(beadScores[beadID].reasons,
-					"bead ID mentioned in commit message")
+					"issue ID mentioned in commit message")
 			}
 		}
 	}
@@ -443,7 +443,7 @@ func (od *OrphanDetector) checkAuthor(candidate *OrphanCandidate, beadScores map
 			}
 			beadScores[beadID].score += weight
 			beadScores[beadID].reasons = append(beadScores[beadID].reasons,
-				"same author worked on bead nearby")
+				"same author worked on issue nearby")
 		}
 	}
 }

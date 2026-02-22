@@ -27,24 +27,24 @@ import (
 	"golang.org/x/term"
 	"gopkg.in/yaml.v3"
 
-	"github.com/Dicklesworthstone/beads_viewer/internal/datasource"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/agents"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/analysis"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/baseline"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/correlation"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/drift"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/export"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/hooks"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/loader"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/metrics"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/recipe"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/search"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/ui"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/updater"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/version"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/watcher"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/workspace"
+	"github.com/adampush/ticket_viewer/internal/datasource"
+	"github.com/adampush/ticket_viewer/pkg/agents"
+	"github.com/adampush/ticket_viewer/pkg/analysis"
+	"github.com/adampush/ticket_viewer/pkg/baseline"
+	"github.com/adampush/ticket_viewer/pkg/correlation"
+	"github.com/adampush/ticket_viewer/pkg/drift"
+	"github.com/adampush/ticket_viewer/pkg/export"
+	"github.com/adampush/ticket_viewer/pkg/hooks"
+	"github.com/adampush/ticket_viewer/pkg/loader"
+	"github.com/adampush/ticket_viewer/pkg/metrics"
+	"github.com/adampush/ticket_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/recipe"
+	"github.com/adampush/ticket_viewer/pkg/search"
+	"github.com/adampush/ticket_viewer/pkg/ui"
+	"github.com/adampush/ticket_viewer/pkg/updater"
+	"github.com/adampush/ticket_viewer/pkg/version"
+	"github.com/adampush/ticket_viewer/pkg/watcher"
+	"github.com/adampush/ticket_viewer/pkg/workspace"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -61,7 +61,7 @@ func main() {
 	exportFile := flag.String("export-md", "", "Export issues to a Markdown file (e.g., report.md)")
 	robotHelp := flag.Bool("robot-help", false, "Show AI agent help")
 	robotDocs := flag.String("robot-docs", "", "Machine-readable JSON docs for AI agents. Topics: guide, commands, examples, env, exit-codes, all")
-	outputFormat := flag.String("format", "", "Structured output format for --robot-* commands: json or toon (env: BV_OUTPUT_FORMAT, TOON_DEFAULT_FORMAT)")
+	outputFormat := flag.String("format", "", "Structured output format for --robot-* commands: json or toon (env: TKV_OUTPUT_FORMAT, TOON_DEFAULT_FORMAT)")
 	toonStats := flag.Bool("stats", false, "Show JSON vs TOON token estimates on stderr (env: TOON_STATS=1)")
 	robotInsights := flag.Bool("robot-insights", false, "Output graph analysis and insights as JSON for AI agents")
 	robotPlan := flag.Bool("robot-plan", false, "Output dependency-respecting execution plan as JSON for AI agents")
@@ -109,8 +109,8 @@ func main() {
 	semanticQuery := flag.String("search", "", "Semantic search query (vector-based; builds/updates index on first run)")
 	robotSearch := flag.Bool("robot-search", false, "Output semantic search results as JSON for AI agents (use with --search)")
 	searchLimit := flag.Int("search-limit", 10, "Max results for --search/--robot-search")
-	searchMode := flag.String("search-mode", "", "Search ranking mode: text or hybrid (default: BV_SEARCH_MODE or text)")
-	searchPreset := flag.String("search-preset", "", "Hybrid preset name (default: BV_SEARCH_PRESET or default)")
+	searchMode := flag.String("search-mode", "", "Search ranking mode: text or hybrid (default: TKV_SEARCH_MODE or text)")
+	searchPreset := flag.String("search-preset", "", "Hybrid preset name (default: TKV_SEARCH_PRESET or default)")
 	searchWeights := flag.String("search-weights", "", "Hybrid weights JSON (overrides preset; keys: text,pagerank,status,impact,priority,recency)")
 	diffSince := flag.String("diff-since", "", "Show changes since historical point (commit SHA, branch, tag, or date)")
 	asOf := flag.String("as-of", "", "View state at point in time (commit SHA, branch, tag, or date)")
@@ -257,7 +257,7 @@ func main() {
 	_ = labelScope
 	_ = agentBrief
 
-	envRobot := os.Getenv("BV_ROBOT") == "1"
+	envRobot := os.Getenv("TKV_ROBOT") == "1"
 	stdoutIsTTY := term.IsTerminal(int(os.Stdout.Fd()))
 
 	robotMode := envRobot ||
@@ -304,7 +304,7 @@ func main() {
 
 	// Mark robot mode for downstream packages (e.g., parsers) to keep stdout JSON clean.
 	if robotMode && !envRobot {
-		_ = os.Setenv("BV_ROBOT", "1")
+		_ = os.Setenv("TKV_ROBOT", "1")
 		envRobot = true
 	}
 
@@ -333,7 +333,7 @@ func main() {
 		fmt.Println("Output format:")
 		fmt.Println("  --format json|toon")
 		fmt.Println("      Structured output encoding for --robot-* commands (default: json).")
-		fmt.Println("      Env: BV_OUTPUT_FORMAT, TOON_DEFAULT_FORMAT.")
+		fmt.Println("      Env: TKV_OUTPUT_FORMAT, TOON_DEFAULT_FORMAT.")
 		fmt.Println("  --stats")
 		fmt.Println("      Print JSON vs TOON token estimates to stderr (or set TOON_STATS=1).")
 		fmt.Println("")
@@ -387,7 +387,7 @@ func main() {
 		fmt.Println("      Builds/updates a local on-disk vector index on first run.")
 		fmt.Println("      Use --robot-search to emit JSON for automation.")
 		fmt.Println("      Optional hybrid re-ranking:")
-		fmt.Println("      - --search-mode=text|hybrid (default: BV_SEARCH_MODE or text)")
+		fmt.Println("      - --search-mode=text|hybrid (default: TKV_SEARCH_MODE or text)")
 		fmt.Println("      - --search-preset=default|bug-hunting|sprint-planning|impact-first|text-only")
 		fmt.Println("      - --search-weights='{\"text\":0.4,\"pagerank\":0.2,\"status\":0.15,\"impact\":0.1,\"priority\":0.1,\"recency\":0.05}'")
 		fmt.Println("")
@@ -561,8 +561,8 @@ func main() {
 		fmt.Println("      Configure hooks to automate export workflows:")
 		fmt.Println("      - pre-export: Validation, notifications (failure cancels export)")
 		fmt.Println("      - post-export: Notifications, uploads (failure logged only)")
-		fmt.Println("      Environment variables: BV_EXPORT_PATH, BV_EXPORT_FORMAT,")
-		fmt.Println("        BV_ISSUE_COUNT, BV_TIMESTAMP")
+		fmt.Println("      Environment variables: TKV_EXPORT_PATH, TKV_EXPORT_FORMAT,")
+		fmt.Println("        TKV_ISSUE_COUNT, TKV_TIMESTAMP")
 		fmt.Println("")
 		fmt.Println("  --diff-since <commit|date>")
 		fmt.Println("      Shows changes since a historical point.")
@@ -667,7 +667,7 @@ func main() {
 		fmt.Println("      Graph metrics JSON for agents.")
 		fmt.Println("      Top lists: Bottlenecks (betweenness), Keystones (critical path), Influencers (eigenvector),")
 		fmt.Println("                 Cores (k-core), Articulation points (cut vertices), Slack (parallelism headroom).")
-		fmt.Println("      Full maps (capped by BV_INSIGHTS_MAP_LIMIT): pagerank, betweenness, eigenvector, hubs/authorities, core_number, slack.")
+		fmt.Println("      Full maps (capped by TKV_INSIGHTS_MAP_LIMIT): pagerank, betweenness, eigenvector, hubs/authorities, core_number, slack.")
 		fmt.Println("      status captures per-metric state: computed|approx|timeout|skipped with elapsed_ms and reasons.")
 		fmt.Println("      Shared fields: data_hash, analysis_config.")
 		fmt.Println("      Quick jq: jq '.full_stats.core_number | to_entries | sort_by(-.value)[:5]'   # top k-core nodes")
@@ -2602,7 +2602,7 @@ func main() {
 
 		// Default cap to keep payload small; allow override via env
 		mapLimit := 200
-		if v := os.Getenv("BV_INSIGHTS_MAP_LIMIT"); v != "" {
+		if v := os.Getenv("TKV_INSIGHTS_MAP_LIMIT"); v != "" {
 			if n, err := strconv.Atoi(v); err == nil && n > 0 {
 				mapLimit = n
 			}
@@ -2673,7 +2673,7 @@ func main() {
 				"jq '.Slack[:5]' - Nodes with slack (good parallel work candidates)",
 				"jq '.Cycles | length' - Count of detected cycles",
 				"jq '.advanced_insights.cycle_break' - Cycle break suggestions (bv-181)",
-				"BV_INSIGHTS_MAP_LIMIT=50 tkv --robot-insights - Reduce map sizes",
+				"TKV_INSIGHTS_MAP_LIMIT=50 tkv --robot-insights - Reduce map sizes",
 			},
 		}
 
@@ -4904,16 +4904,16 @@ func main() {
 		os.Exit(2)
 	}
 	if *backgroundMode {
-		_ = os.Setenv("BV_BACKGROUND_MODE", "1")
+		_ = os.Setenv("TKV_BACKGROUND_MODE", "1")
 	} else if *noBackgroundMode {
-		_ = os.Setenv("BV_BACKGROUND_MODE", "0")
-	} else if v, ok := os.LookupEnv("BV_BACKGROUND_MODE"); ok && strings.TrimSpace(v) != "" {
+		_ = os.Setenv("TKV_BACKGROUND_MODE", "0")
+	} else if v, ok := os.LookupEnv("TKV_BACKGROUND_MODE"); ok && strings.TrimSpace(v) != "" {
 		// Respect explicit user env var.
 	} else if enabled, ok := loadBackgroundModeFromUserConfig(); ok {
 		if enabled {
-			_ = os.Setenv("BV_BACKGROUND_MODE", "1")
+			_ = os.Setenv("TKV_BACKGROUND_MODE", "1")
 		} else {
-			_ = os.Setenv("BV_BACKGROUND_MODE", "0")
+			_ = os.Setenv("TKV_BACKGROUND_MODE", "0")
 		}
 	}
 
@@ -4980,8 +4980,8 @@ func runTUIProgram(m ui.Model) error {
 		p.Kill()
 	}()
 
-	// Optional auto-quit for automated tests: set BV_TUI_AUTOCLOSE_MS.
-	if v := os.Getenv("BV_TUI_AUTOCLOSE_MS"); v != "" {
+	// Optional auto-quit for automated tests: set TKV_TUI_AUTOCLOSE_MS.
+	if v := os.Getenv("TKV_TUI_AUTOCLOSE_MS"); v != "" {
 		if ms, err := strconv.Atoi(v); err == nil && ms > 0 {
 			go func() {
 				timer := time.NewTimer(time.Duration(ms) * time.Millisecond)
@@ -5854,13 +5854,13 @@ func copyViewerAssets(outputDir, title string) error {
 }
 
 func maybeBuildHybridWasmAssets(assetsDir string) error {
-	if os.Getenv("BV_BUILD_HYBRID_WASM") == "" {
+	if os.Getenv("TKV_BUILD_HYBRID_WASM") == "" {
 		return nil
 	}
 
 	wasmPackPath, err := exec.LookPath("wasm-pack")
 	if err != nil {
-		return fmt.Errorf("BV_BUILD_HYBRID_WASM is set but wasm-pack was not found in PATH")
+		return fmt.Errorf("TKV_BUILD_HYBRID_WASM is set but wasm-pack was not found in PATH")
 	}
 
 	wasmSrc := filepath.Join(assetsDir, "..", "wasm_scorer")
@@ -6214,7 +6214,7 @@ func generateREADME(bundlePath, title, pagesURL string, issues []model.Issue, tr
 
 	// Footer with timestamp and links
 	b.WriteString("---\n\n")
-	b.WriteString(fmt.Sprintf("*Generated %s by [bv](https://github.com/Dicklesworthstone/beads_viewer)*\n\n", time.Now().Format("Jan 2, 2006 at 3:04 PM MST")))
+	b.WriteString(fmt.Sprintf("*Generated %s by [bv](https://github.com/adampush/ticket_viewer)*\n\n", time.Now().Format("Jan 2, 2006 at 3:04 PM MST")))
 
 	if pagesURL != "" {
 		b.WriteString(fmt.Sprintf("**[Open Interactive Dashboard](%s)** for full details, dependency graph, search, and time-travel.\n", pagesURL))
@@ -7333,8 +7333,8 @@ type TimeTravelCommit struct {
 	SHA         string   `json:"sha"`
 	Date        string   `json:"date"`
 	Message     string   `json:"message,omitempty"`
-	BeadsAdded  []string `json:"beads_added,omitempty"`
-	BeadsClosed []string `json:"beads_closed,omitempty"`
+	BeadsAdded  []string `json:"issues_added,omitempty"`
+	BeadsClosed []string `json:"issues_closed,omitempty"`
 }
 
 // generateHistoryForExport creates time-travel history data from git history
@@ -7394,14 +7394,14 @@ func generateHistoryForExport(issues []model.Issue) (*TimeTravelHistory, error) 
 				commitMap[commit.SHA] = ttCommit
 			}
 
-			// Determine if this bead was added or modified in this commit
-			// For simplicity, we consider any commit touching a bead as "adding" it
+			// Determine if this issue was added or modified in this commit
+			// For simplicity, we consider any commit touching an issue as "adding" it
 			// (the first time it appears in history)
 			ttCommit.BeadsAdded = append(ttCommit.BeadsAdded, beadID)
 		}
 	}
 
-	// Check for closed beads (status = closed)
+	// Check for closed issues (status = closed)
 	issueStatusMap := make(map[string]bool)
 	for _, issue := range issues {
 		issueStatusMap[issue.ID] = issue.Status == model.StatusClosed
@@ -7410,7 +7410,7 @@ func generateHistoryForExport(issues []model.Issue) (*TimeTravelHistory, error) 
 	// Convert map to sorted slice
 	var commits []TimeTravelCommit
 	for _, commit := range commitMap {
-		// Deduplicate beads_added
+		// Deduplicate issues_added
 		seen := make(map[string]bool)
 		var dedupedAdded []string
 		for _, id := range commit.BeadsAdded {
@@ -7506,10 +7506,10 @@ func (e *toonRobotEncoder) Encode(v any) error {
 
 // newJSONRobotEncoder creates a JSON encoder for robot mode output.
 // By default, output is compact (no indentation) for performance.
-// Set BV_PRETTY_JSON=1 to enable pretty-printing for human readability.
+// Set TKV_PRETTY_JSON=1 to enable pretty-printing for human readability.
 func newJSONRobotEncoder(w io.Writer) *json.Encoder {
 	encoder := json.NewEncoder(w)
-	if os.Getenv("BV_PRETTY_JSON") == "1" {
+	if os.Getenv("TKV_PRETTY_JSON") == "1" {
 		encoder.SetIndent("", "  ")
 	}
 	return encoder
@@ -7517,7 +7517,7 @@ func newJSONRobotEncoder(w io.Writer) *json.Encoder {
 
 // newRobotEncoder creates an encoder for robot mode output.
 //
-// Default output is JSON. Use `--format toon` (or BV_OUTPUT_FORMAT/TOON_DEFAULT_FORMAT)
+// Default output is JSON. Use `--format toon` (or TKV_OUTPUT_FORMAT/TOON_DEFAULT_FORMAT)
 // to emit TOON for agent-friendly token savings.
 func newRobotEncoder(w io.Writer) robotEncoder {
 	if robotOutputFormat == "toon" {
@@ -7529,7 +7529,7 @@ func newRobotEncoder(w io.Writer) robotEncoder {
 func resolveRobotOutputFormat(cli string) string {
 	format := strings.TrimSpace(cli)
 	if format == "" {
-		format = strings.TrimSpace(os.Getenv("BV_OUTPUT_FORMAT"))
+		format = strings.TrimSpace(os.Getenv("TKV_OUTPUT_FORMAT"))
 	}
 	if format == "" {
 		format = strings.TrimSpace(os.Getenv("TOON_DEFAULT_FORMAT"))
@@ -7778,20 +7778,20 @@ func generateRobotDocs(topic string) map[string]interface{} {
 		{"description": "Find tickets related to a specific file", "command": "tkv --robot-file-issues src/main.rs"},
 		{"description": "Search for issues by keyword", "command": "tkv --search 'authentication' --robot-search"},
 		{"description": "Get TOON output (saves tokens)", "command": "tkv --robot-triage --format toon"},
-		{"description": "Use env for default format", "command": "BV_OUTPUT_FORMAT=toon tkv --robot-triage"},
+		{"description": "Use env for default format", "command": "TKV_OUTPUT_FORMAT=toon tkv --robot-triage"},
 		{"description": "Show token savings estimate", "command": "tkv --robot-triage --format toon --stats"},
 	}
 
 	envVars := map[string]string{
-		"BV_OUTPUT_FORMAT":    "Default output format: json or toon (overridden by --format)",
-		"TOON_DEFAULT_FORMAT": "Fallback format if BV_OUTPUT_FORMAT not set",
+		"TKV_OUTPUT_FORMAT":   "Default output format: json or toon (overridden by --format)",
+		"TOON_DEFAULT_FORMAT": "Fallback format if TKV_OUTPUT_FORMAT not set",
 		"TOON_STATS":          "Set to 1 to show JSON vs TOON token estimates on stderr",
 		"TOON_KEY_FOLDING":    "TOON key folding mode",
 		"TOON_INDENT":         "TOON indentation level (0-16)",
-		"BV_PRETTY_JSON":      "Set to 1 for indented JSON output",
-		"BV_ROBOT":            "Set to 1 to force robot mode (clean stdout)",
-		"BV_SEARCH_MODE":      "Search mode: text or hybrid",
-		"BV_SEARCH_PRESET":    "Hybrid search preset name",
+		"TKV_PRETTY_JSON":     "Set to 1 for indented JSON output",
+		"TKV_ROBOT":           "Set to 1 to force robot mode (clean stdout)",
+		"TKV_SEARCH_MODE":     "Search mode: text or hybrid",
+		"TKV_SEARCH_PRESET":   "Hybrid search preset name",
 	}
 
 	exitCodes := map[string]string{

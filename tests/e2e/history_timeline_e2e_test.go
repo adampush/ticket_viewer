@@ -91,13 +91,13 @@ func TestTimelineExportStructure(t *testing.T) {
 	}
 
 	// history.json has different structure than robot-history:
-	// { "commits": [{ "sha", "message", "date", "beads_added" }] }
+	// { "commits": [{ "sha", "message", "date", "issues_added" }] }
 	var history struct {
 		Commits []struct {
 			SHA        string   `json:"sha"`
 			Message    string   `json:"message"`
-			Date       string   `json:"date"`        // ISO date string
-			BeadsAdded []string `json:"beads_added"` // Bead IDs added in this commit
+			Date       string   `json:"date"`         // ISO date string
+			BeadsAdded []string `json:"issues_added"` // Issue IDs added in this commit
 		} `json:"commits"`
 	}
 
@@ -209,7 +209,7 @@ func TestTimelineBeadCorrelation(t *testing.T) {
 	var payload struct {
 		CommitIndex map[string][]string `json:"commit_index"`
 		Histories   map[string]struct {
-			BeadID  string `json:"bead_id"`
+			IssueID string `json:"issue_id"`
 			Commits []struct {
 				SHA string `json:"sha"`
 			} `json:"commits"`
@@ -220,9 +220,9 @@ func TestTimelineBeadCorrelation(t *testing.T) {
 		t.Fatalf("json decode: %v", err)
 	}
 
-	// Verify commit_index maps commits to beads (required for timeline filtering)
+	// Verify commit_index maps commits to issues (required for timeline filtering)
 	if len(payload.CommitIndex) == 0 {
-		t.Fatal("commit_index is empty (required for timeline bead filtering)")
+		t.Fatal("commit_index is empty (required for timeline issue filtering)")
 	}
 
 	// Verify bidirectional consistency: commits in history should appear in commit_index
@@ -266,7 +266,7 @@ func TestTimelineTUIToggleWithTimeout(t *testing.T) {
 	cmd.Dir = repoDir
 	cmd.Env = append(os.Environ(),
 		"TERM=xterm-256color",
-		"BV_TUI_AUTOCLOSE_MS=2000", // Auto-close after 2s
+		"TKV_TUI_AUTOCLOSE_MS=2000", // Auto-close after 2s
 	)
 
 	ensureCmdStdinCloses(t, ctx, cmd, 3*time.Second)
@@ -387,10 +387,10 @@ func TestTimelineStatsAccuracy(t *testing.T) {
 
 	var payload struct {
 		Stats struct {
-			TotalBeads       int `json:"total_beads"`
-			BeadsWithCommits int `json:"beads_with_commits"`
-			TotalCommits     int `json:"total_commits"`
-			UniqueAuthors    int `json:"unique_authors"`
+			TotalIssues       int `json:"total_issues"`
+			IssuesWithCommits int `json:"issues_with_commits"`
+			TotalCommits      int `json:"total_commits"`
+			UniqueAuthors     int `json:"unique_authors"`
 		} `json:"stats"`
 		Histories map[string]struct {
 			Commits []struct {
@@ -404,17 +404,17 @@ func TestTimelineStatsAccuracy(t *testing.T) {
 	}
 
 	// Verify stats accuracy
-	if payload.Stats.TotalBeads < 2 {
-		t.Errorf("expected at least 2 beads, got %d", payload.Stats.TotalBeads)
+	if payload.Stats.TotalIssues < 2 {
+		t.Errorf("expected at least 2 issues, got %d", payload.Stats.TotalIssues)
 	}
 
-	beadsWithCommits := 0
+	issuesWithCommits := 0
 	totalCommits := 0
 	authors := make(map[string]bool)
 
 	for _, hist := range payload.Histories {
 		if len(hist.Commits) > 0 {
-			beadsWithCommits++
+			issuesWithCommits++
 		}
 		for _, c := range hist.Commits {
 			totalCommits++
@@ -424,9 +424,9 @@ func TestTimelineStatsAccuracy(t *testing.T) {
 		}
 	}
 
-	if payload.Stats.BeadsWithCommits != beadsWithCommits {
-		t.Errorf("stats.beads_with_commits=%d doesn't match actual=%d",
-			payload.Stats.BeadsWithCommits, beadsWithCommits)
+	if payload.Stats.IssuesWithCommits != issuesWithCommits {
+		t.Errorf("stats.issues_with_commits=%d doesn't match actual=%d",
+			payload.Stats.IssuesWithCommits, issuesWithCommits)
 	}
 
 	if payload.Stats.UniqueAuthors != len(authors) && len(authors) > 0 {

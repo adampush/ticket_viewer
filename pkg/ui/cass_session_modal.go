@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/cass"
+	"github.com/adampush/ticket_viewer/pkg/cass"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -210,7 +210,7 @@ func (m CassSessionModal) View() string {
 func (m CassSessionModal) formatMatchReason(session cass.ScoredResult) string {
 	switch session.Strategy {
 	case cass.StrategyIDMention:
-		return fmt.Sprintf("Matched via: bead ID mentioned (%s)", m.beadID)
+		return fmt.Sprintf("Matched via: issue ID mentioned (%s)", m.beadID)
 	case cass.StrategyKeywords:
 		if len(session.Keywords) > 0 {
 			return fmt.Sprintf("Matched via: keywords %q", strings.Join(session.Keywords, ", "))

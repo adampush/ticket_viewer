@@ -95,8 +95,8 @@ func TestRobotHistoryIncludesEventsAndCommitIndex(t *testing.T) {
 		GitRange        string `json:"git_range"`
 		LatestCommitSHA string `json:"latest_commit_sha"`
 		Stats           struct {
-			TotalBeads         int            `json:"total_beads"`
-			BeadsWithCommits   int            `json:"beads_with_commits"`
+			TotalIssues        int            `json:"total_issues"`
+			IssuesWithCommits  int            `json:"issues_with_commits"`
 			MethodDistribution map[string]int `json:"method_distribution"`
 		} `json:"stats"`
 		Histories map[string]struct {
@@ -130,11 +130,11 @@ func TestRobotHistoryIncludesEventsAndCommitIndex(t *testing.T) {
 	if payload.LatestCommitSHA == "" {
 		t.Fatalf("latest_commit_sha missing")
 	}
-	if payload.Stats.TotalBeads != 1 {
-		t.Fatalf("expected total_beads=1, got %d", payload.Stats.TotalBeads)
+	if payload.Stats.TotalIssues != 1 {
+		t.Fatalf("expected total_issues=1, got %d", payload.Stats.TotalIssues)
 	}
-	if payload.Stats.BeadsWithCommits != 1 {
-		t.Fatalf("expected beads_with_commits=1, got %d", payload.Stats.BeadsWithCommits)
+	if payload.Stats.IssuesWithCommits != 1 {
+		t.Fatalf("expected issues_with_commits=1, got %d", payload.Stats.IssuesWithCommits)
 	}
 	if payload.Stats.MethodDistribution["co_committed"] == 0 {
 		t.Fatalf("expected co_committed entries in method_distribution, got %v", payload.Stats.MethodDistribution)
@@ -311,8 +311,8 @@ func TestRobotHistoryRenameTracking(t *testing.T) {
 
 	var payload struct {
 		Stats struct {
-			TotalBeads       int `json:"total_beads"`
-			BeadsWithCommits int `json:"beads_with_commits"`
+			TotalIssues       int `json:"total_issues"`
+			IssuesWithCommits int `json:"issues_with_commits"`
 		} `json:"stats"`
 		Histories map[string]struct {
 			Events []struct {
@@ -330,8 +330,8 @@ func TestRobotHistoryRenameTracking(t *testing.T) {
 		t.Fatalf("json decode: %v", err)
 	}
 
-	if payload.Stats.TotalBeads != 1 {
-		t.Fatalf("expected total_beads=1, got %d", payload.Stats.TotalBeads)
+	if payload.Stats.TotalIssues != 1 {
+		t.Fatalf("expected total_issues=1, got %d", payload.Stats.TotalIssues)
 	}
 
 	hist, ok := payload.Histories["RENAME-1"]
@@ -413,7 +413,7 @@ func TestRobotHistoryEmptyRepo(t *testing.T) {
 
 	var payload struct {
 		Stats struct {
-			TotalBeads int `json:"total_beads"`
+			TotalIssues int `json:"total_issues"`
 		} `json:"stats"`
 		Histories map[string]interface{} `json:"histories"`
 	}
@@ -422,8 +422,8 @@ func TestRobotHistoryEmptyRepo(t *testing.T) {
 		t.Fatalf("json decode: %v", err)
 	}
 
-	if payload.Stats.TotalBeads != 0 {
-		t.Fatalf("expected 0 beads in empty repo, got %d", payload.Stats.TotalBeads)
+	if payload.Stats.TotalIssues != 0 {
+		t.Fatalf("expected 0 issues in empty repo, got %d", payload.Stats.TotalIssues)
 	}
 
 	if payload.Histories == nil {

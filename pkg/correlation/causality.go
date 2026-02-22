@@ -41,7 +41,7 @@ type CausalEvent struct {
 
 // CausalChain represents the full causal flow for a bead
 type CausalChain struct {
-	BeadID     string        `json:"bead_id"`
+	BeadID     string        `json:"issue_id"`
 	Title      string        `json:"title"`
 	Status     string        `json:"status"`
 	Events     []CausalEvent `json:"events"`      // All events in chronological order
@@ -131,7 +131,7 @@ func (hr *HistoryReport) BuildCausalityChain(beadID string, opts CausalityOption
 		switch event.EventType {
 		case EventCreated:
 			causalType = CausalCreated
-			desc = "Bead created"
+			desc = "Issue created"
 		case EventClaimed:
 			causalType = CausalClaimed
 			desc = "Work started (claimed)"
@@ -140,7 +140,7 @@ func (hr *HistoryReport) BuildCausalityChain(beadID string, opts CausalityOption
 			desc = "Work completed (closed)"
 		case EventReopened:
 			causalType = CausalReopened
-			desc = "Bead reopened"
+			desc = "Issue reopened"
 		default:
 			continue // Skip modified events for now
 		}

@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/analysis"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/analysis"
+	"github.com/adampush/ticket_viewer/pkg/model"
 
 	"gonum.org/v1/gonum/graph/network"
 	"gonum.org/v1/gonum/graph/topo"

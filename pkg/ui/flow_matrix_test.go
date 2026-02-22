@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/analysis"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/ui"
+	"github.com/adampush/ticket_viewer/pkg/analysis"
+	"github.com/adampush/ticket_viewer/pkg/ui"
 )
 
 // =============================================================================

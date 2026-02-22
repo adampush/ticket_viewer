@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/analysis"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/recipe"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/watcher"
+	"github.com/adampush/ticket_viewer/pkg/analysis"
+	"github.com/adampush/ticket_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/recipe"
+	"github.com/adampush/ticket_viewer/pkg/watcher"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -576,14 +576,14 @@ func TestView_LoadingScreen_TransitionsOnFirstSnapshotOrError(t *testing.T) {
 	m.snapshot = nil
 	m.snapshotInitPending = true
 
-	if out := m.View(); !strings.Contains(out, "Loading beads") {
+	if out := m.View(); !strings.Contains(out, "Loading issues") {
 		t.Fatalf("expected loading screen before first snapshot, got: %q", out)
 	}
 
 	// Error should exit the loading screen (we already have initial data).
 	modelAny, _ := m.Update(SnapshotErrorMsg{Err: errors.New("boom"), Recoverable: true})
 	mErr := modelAny.(Model)
-	if out := mErr.View(); strings.Contains(out, "Loading beads") {
+	if out := mErr.View(); strings.Contains(out, "Loading issues") {
 		t.Fatalf("expected loading screen to clear on error, got: %q", out)
 	}
 
@@ -592,7 +592,7 @@ func TestView_LoadingScreen_TransitionsOnFirstSnapshotOrError(t *testing.T) {
 	snap := NewSnapshotBuilder(issues).Build()
 	modelAny, _ = m.Update(SnapshotReadyMsg{Snapshot: snap})
 	mOK := modelAny.(Model)
-	if out := mOK.View(); strings.Contains(out, "Loading beads") {
+	if out := mOK.View(); strings.Contains(out, "Loading issues") {
 		t.Fatalf("expected loading screen to clear on first snapshot, got: %q", out)
 	}
 }

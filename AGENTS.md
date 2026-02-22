@@ -159,14 +159,14 @@ Cross-package integration tests live in the `tests/` directory.
 
 ### Never Open Browsers
 
-**Tests must NEVER automatically open a browser.** All browser-opening functions check `BV_NO_BROWSER` and `BV_TEST_MODE` environment variables. These are set globally via `TestMain` in:
+**Tests must NEVER automatically open a browser.** All browser-opening functions check `TKV_NO_BROWSER` and `TKV_TEST_MODE` environment variables. These are set globally via `TestMain` in:
 - `tests/e2e/common_test.go`
 - `pkg/export/main_test.go`
 - `pkg/ui/main_test.go`
 
 When adding new browser-opening code, always check these env vars first:
 ```go
-if os.Getenv("BV_NO_BROWSER") != "" || os.Getenv("BV_TEST_MODE") != "" {
+if os.Getenv("TKV_NO_BROWSER") != "" || os.Getenv("TKV_TEST_MODE") != "" {
     return nil
 }
 ```
@@ -301,7 +301,7 @@ beads_viewer/
 - **Division safety** — always guard against division by zero before computing averages/ratios
 - **Nil checks** — always check for nil before dereferencing pointers, especially in graph traversal
 - **Concurrency** — use `sync.RWMutex` for shared state; capture channels before unlock to avoid races
-- **Browser safety** — all browser-opening functions gated by `BV_NO_BROWSER` / `BV_TEST_MODE` env vars
+- **Browser safety** — all browser-opening functions gated by `TKV_NO_BROWSER` / `TKV_TEST_MODE` env vars
 
 ### Logging & Console Output
 
@@ -330,9 +330,9 @@ tkv --search "login oauth" --search-mode hybrid --robot-search
 ```
 
 Env defaults:
-- `BV_SEARCH_MODE` (text|hybrid)
-- `BV_SEARCH_PRESET` (default|bug-hunting|sprint-planning|impact-first|text-only)
-- `BV_SEARCH_WEIGHTS` (JSON string, overrides preset)
+- `TKV_SEARCH_MODE` (text|hybrid)
+- `TKV_SEARCH_PRESET` (default|bug-hunting|sprint-planning|impact-first|text-only)
+- `TKV_SEARCH_WEIGHTS` (JSON string, overrides preset)
 
 ### Static Site Export for Stakeholder Reporting
 

@@ -3,7 +3,7 @@ package ui
 import (
 	"testing"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/model"
 
 	tea "github.com/charmbracelet/bubbletea"
 )

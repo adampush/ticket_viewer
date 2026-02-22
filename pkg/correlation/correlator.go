@@ -308,7 +308,7 @@ func ValidateRepository(repoPath string) error {
 		return fmt.Errorf("not a git repository: %s", repoPath)
 	}
 
-	// Check if any beads file exists (multiple possible names)
+	// Check if any issue data file exists (multiple possible names)
 	beadsFiles := []string{
 		filepath.Join(repoPath, ".beads", "issues.jsonl"),
 		filepath.Join(repoPath, ".beads", "beads.jsonl"),
@@ -324,7 +324,7 @@ func ValidateRepository(repoPath string) error {
 	}
 
 	if !found {
-		return fmt.Errorf("no beads file found in %s/.beads/", repoPath)
+		return fmt.Errorf("no issue data file found in %s/.beads/", repoPath)
 	}
 
 	return nil

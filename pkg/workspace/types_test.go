@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/workspace"
+	"github.com/adampush/ticket_viewer/pkg/workspace"
 )
 
 func TestRepoConfigGetPrefix(t *testing.T) {

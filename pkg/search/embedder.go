@@ -21,9 +21,9 @@ const (
 const DefaultEmbeddingDim = 384
 
 const (
-	EnvSemanticEmbedder = "BV_SEMANTIC_EMBEDDER"
-	EnvSemanticModel    = "BV_SEMANTIC_MODEL"
-	EnvSemanticDim      = "BV_SEMANTIC_DIM"
+	EnvSemanticEmbedder = "TKV_SEMANTIC_EMBEDDER"
+	EnvSemanticModel    = "TKV_SEMANTIC_MODEL"
+	EnvSemanticDim      = "TKV_SEMANTIC_DIM"
 )
 
 // EmbeddingConfig captures embedder selection/configuration.
