@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/ui"
+	"github.com/adampush/ticket_viewer/pkg/ui"
 )
 
 func TestRenderSparkline(t *testing.T) {

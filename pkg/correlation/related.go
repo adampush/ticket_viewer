@@ -23,7 +23,7 @@ const (
 
 // RelatedWorkBead represents a bead that's related to a target bead
 type RelatedWorkBead struct {
-	BeadID        string       `json:"bead_id"`
+	BeadID        string       `json:"issue_id"`
 	Title         string       `json:"title"`
 	Status        string       `json:"status"`
 	RelationType  RelationType `json:"relation_type"`
@@ -35,7 +35,7 @@ type RelatedWorkBead struct {
 
 // RelatedWorkResult contains all related beads grouped by relationship type
 type RelatedWorkResult struct {
-	TargetBeadID      string            `json:"target_bead_id"`
+	TargetBeadID      string            `json:"target_issue_id"`
 	TargetTitle       string            `json:"target_title"`
 	FileOverlap       []RelatedWorkBead `json:"file_overlap"`
 	CommitOverlap     []RelatedWorkBead `json:"commit_overlap"`

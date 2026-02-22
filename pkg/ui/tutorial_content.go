@@ -575,7 +575,7 @@ func structuredTutorialPages() []StructuredTutorialPage {
 				Paragraph{Text: "The index uses a weighted issue document (ID/title emphasized) so quick searches are precise. Short queries get a literal-match boost so you can type a single word and still land on the right issue."},
 				Spacer{Lines: 1},
 				Section{Title: "Tuning"},
-				Code{Text: "BV_SEARCH_MODE=hybrid\nBV_SEARCH_PRESET=impact-first\nBV_SEARCH_WEIGHTS='{\"text\":0.4,\"pagerank\":0.2,\"status\":0.15,\"impact\":0.1,\"priority\":0.1,\"recency\":0.05}'"},
+				Code{Text: "TKV_SEARCH_MODE=hybrid\nTKV_SEARCH_PRESET=impact-first\nTKV_SEARCH_WEIGHTS='{\"text\":0.4,\"pagerank\":0.2,\"status\":0.15,\"impact\":0.1,\"priority\":0.1,\"recency\":0.05}'"},
 				Spacer{Lines: 1},
 				Tip{Text: "Use natural language for semantic search and switch to hybrid when you want the most important matches surfaced."},
 			},

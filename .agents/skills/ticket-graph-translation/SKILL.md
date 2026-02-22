@@ -65,18 +65,14 @@ Heuristic target:
 - usually 1-3 commits
 - one main subsystem or interface boundary
 
-A ticket is likely too big if it:
+## Ticket Types
 
-- spans multiple independent outcomes
-- touches many unrelated subsystems
-- requires unresolved product decisions
-- cannot be validated with a single acceptance checklist
+To support different kinds of work, use these explicit types:
 
-A ticket is likely too small if it:
-
-- has no independently testable outcome
-- is a fragment that cannot stand alone
-- exists only to move tiny code pieces without functional value
+- **Feature:** User-facing value. Requires Product Validation (e.g., UAT).
+- **Task:** Technical enablement or refactor. Requires Technical Verification.
+- **Spike:** Time-boxed investigation. Outcome is knowledge/decision/doc. Code is throwaway.
+- **Integration:** Wiring components together. Focus on interface testing and end-to-end flow.
 
 ## Required Ticket Content (Per Ticket)
 
@@ -88,35 +84,37 @@ Every ticket produced by this skill must include:
 2. Scope
    - explicit in-scope items
    - explicit out-of-scope items
-3. Assumptions
-   - allowed assumptions for implementer
-   - constraints (performance, compatibility, data guarantees, etc.)
-4. Open Questions
-   - known unknowns
-   - decision owner and required resolution timing
-   - blocking vs non-blocking status
-5. Implementation Spec
-   - concrete design steps
-   - files/modules likely affected
-   - data contracts/schema details as needed
+3. Ticket Type & Granularity
+   - Feature, Task, Spike, or Integration
+4. Prerequisites & Dev State
+   - Required local state (e.g., "Requires DB seed v2", "API must be running")
+   - Access requirements
+5. Implementation Guidance
+   - High-level approach or design steps
+   - Files/modules likely affected
+   - NFR Inheritance (Must maintain X latency, Y security constraint)
 6. Acceptance Criteria
    - observable pass/fail outcomes
    - edge cases and failure handling
-7. Validation Plan
+7. Deployment & State
+   - Breaking/Non-breaking change
+   - Migration requirements
+   - Safe to deploy independently?
+8. Validation Plan
    - unit/integration/manual checks as applicable
    - exact commands/checks and expected evidence
-8. Dependencies
+9. Dependencies
    - upstream prerequisites
    - downstream tickets unlocked
-9. Artifacts
-   - required docs/config/session note updates
-   - migration/versioning requirements
+10. Artifacts
+    - required docs/config/session note updates
+    - migration/versioning requirements
 
 ## Definition of Ready (DoR)
 
 A ticket is ready only if all are true:
 
-- purpose and scope are explicit
+- purpose, scope, and type are explicit
 - acceptance criteria are complete and testable
 - testing plan is complete and mapped to acceptance criteria
 - dependencies are linked in `tk`
@@ -133,6 +131,14 @@ A ticket is done only if all are true:
 - required docs/config/session notes are updated
 - `tk` notes capture key implementation decisions
 - ticket is closed with completion evidence
+
+## Kickback Protocol (Handling Plan Divergence)
+
+If implementation reveals the plan is flawed or impossible:
+1. Do NOT hack a solution that violates the plan.
+2. Mark the ticket as `BLOCKED`.
+3. Create a `Plan Deviation` ticket linked to the original Plan.
+4. Trigger a Dual-Lens re-evaluation for that specific section.
 
 ## Testing Requirements (Per Ticket)
 
@@ -176,7 +182,7 @@ Evidence requirements:
 1. Parse the approved plan into execution units.
 2. Identify dependency edges (`blocks`/`depends on`) from architecture and rollout constraints.
 3. Create ticket candidates with:
-   - title, type, priority
+   - title, type (Feature/Task/Spike/Integration), priority
    - all fields required by "Required Ticket Content (Per Ticket)"
    - explicit link back to source plan section(s)
 4. Build the graph with explicit dependencies and critical path.
@@ -203,7 +209,7 @@ Evidence requirements:
 1. Source Plan Reference
 2. Ticket Mapping Table (plan section -> ticket IDs)
 3. Proposed Ticket Set (full ticket content for each ticket)
-4. Dependency Graph Summary (critical path + parallel tracks)
+4. Dependency Graph Summary (critical path + parallel tracks) (Use ASCII or Mermaid)
 5. Validation Coverage Map (which tickets satisfy which checks)
 6. Ticket DoR Checklist Results
 7. Identified Risks and Mitigations
@@ -227,6 +233,7 @@ Graph is PASS only if all are true:
 - dependencies match true execution constraints
 - tickets are atomic and independently verifiable
 - every ticket includes all required ticket content fields
+- ticket types (Feature/Task/Spike/Integration) are explicitly defined
 - every ready ticket passes DoR
 - acceptance criteria are measurable
 - test requirements are complete and mapped to acceptance criteria

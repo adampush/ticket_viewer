@@ -21,10 +21,10 @@ func TestExportContextToEnv(t *testing.T) {
 	env := ctx.ToEnv()
 
 	expected := map[string]string{
-		"BV_EXPORT_PATH":   "/tmp/export.md",
-		"BV_EXPORT_FORMAT": "markdown",
-		"BV_ISSUE_COUNT":   "42",
-		"BV_TIMESTAMP":     "2025-11-30T10:30:00Z",
+		"TKV_EXPORT_PATH":   "/tmp/export.md",
+		"TKV_EXPORT_FORMAT": "markdown",
+		"TKV_ISSUE_COUNT":   "42",
+		"TKV_TIMESTAMP":     "2025-11-30T10:30:00Z",
 	}
 
 	for _, e := range env {
@@ -294,7 +294,7 @@ func TestExecutorEnvironmentVariables(t *testing.T) {
 			PreExport: []Hook{
 				{
 					Name:    "env-test",
-					Command: "echo $BV_EXPORT_PATH $BV_ISSUE_COUNT",
+					Command: "echo $TKV_EXPORT_PATH $TKV_ISSUE_COUNT",
 					Timeout: 5 * time.Second,
 					OnError: "fail",
 				},

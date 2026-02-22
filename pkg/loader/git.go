@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/model"
 )
 
 // GitLoader loads beads from git history
@@ -219,7 +219,7 @@ func (g *GitLoader) loadFromGit(sha string) ([]model.Issue, error) {
 		lastErr = err
 	}
 
-	return nil, fmt.Errorf("no beads file found at %s: %w", sha, lastErr)
+	return nil, fmt.Errorf("no issue data file found at %s: %w", sha, lastErr)
 }
 
 // loadFileFromGit loads a specific file from git at a commit

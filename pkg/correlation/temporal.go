@@ -196,7 +196,7 @@ func (t *TemporalCorrelator) calculateTemporalConfidence(window TemporalWindow, 
 // generateTemporalReason creates a human-readable explanation for the correlation
 func (t *TemporalCorrelator) generateTemporalReason(window TemporalWindow, files []FileChange, pathHints []string) string {
 	parts := []string{
-		fmt.Sprintf("Commit by %s during bead's active window", window.Author),
+		fmt.Sprintf("Commit by %s during issue's active window", window.Author),
 	}
 
 	windowDuration := window.End.Sub(window.Start)
@@ -208,13 +208,13 @@ func (t *TemporalCorrelator) generateTemporalReason(window TemporalWindow, files
 
 	activeBeads := t.activeByAuth[window.AuthorEmail]
 	if activeBeads <= 1 {
-		parts = append(parts, "author had only this bead active")
+		parts = append(parts, "author had only this issue active")
 	} else if activeBeads > 3 {
-		parts = append(parts, fmt.Sprintf("author had %d beads active", activeBeads))
+		parts = append(parts, fmt.Sprintf("author had %d issues active", activeBeads))
 	}
 
 	if len(pathHints) > 0 && pathsMatchHints(files, pathHints) {
-		parts = append(parts, "file paths match bead title keywords")
+		parts = append(parts, "file paths match issue title keywords")
 	}
 
 	return strings.Join(parts, "; ")

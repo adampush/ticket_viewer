@@ -94,7 +94,7 @@ tkv --robot-next
 
 # 3) Token-optimized output (TOON)
 tkv --robot-triage --format toon
-export BV_OUTPUT_FORMAT=toon
+export TKV_OUTPUT_FORMAT=toon
 
 # 4) Full robot help
 tkv --robot-help
@@ -158,7 +158,7 @@ Don't just read the title. `tkv` gives you the full picture:
 *   **Time-Travel:** Press `t` to compare against any git revision, or `T` for quick HEAD~5 comparison. Combined with History view (`h`), you can navigate to any commit and see exactly what changed.
 
 ### 🔌 Automation Hooks
-Configure pre- and post-export hooks in `.bv/hooks.yaml` to run validations, notifications, or uploads. Defaults: pre-export hooks fail fast on errors (`on_error: fail`), post-export hooks log and continue (`on_error: continue`). Empty commands are ignored with a warning for safety. Hook env includes `BV_EXPORT_PATH`, `BV_EXPORT_FORMAT`, `BV_ISSUE_COUNT`, `BV_TIMESTAMP`, plus any custom `env` entries.
+Configure pre- and post-export hooks in `.bv/hooks.yaml` to run validations, notifications, or uploads. Defaults: pre-export hooks fail fast on errors (`on_error: fail`), post-export hooks log and continue (`on_error: continue`). Empty commands are ignored with a warning for safety. Hook env includes `TKV_EXPORT_PATH`, `TKV_EXPORT_FORMAT`, `TKV_ISSUE_COUNT`, `TKV_TIMESTAMP`, plus any custom `env` entries.
 
 ---
 
@@ -188,7 +188,7 @@ tkv --robot-next         # Minimal: just the single top pick + claim command
 
 # Token-optimized output (TOON) for lower LLM context usage:
 tkv --robot-triage --format toon
-export BV_OUTPUT_FORMAT=toon
+export TKV_OUTPUT_FORMAT=toon
 tkv --robot-next
 
 #### Other Commands
@@ -2732,7 +2732,7 @@ For very large datasets, you can build an optional WASM scorer used by the stati
 ./scripts/build_hybrid_wasm.sh
 
 # Or build during export
-BV_BUILD_HYBRID_WASM=1 bv --export-pages ./bv-pages
+TKV_BUILD_HYBRID_WASM=1 bv --export-pages ./bv-pages
 ```
 
 If the `wasm/` assets are missing, the viewer automatically falls back to the JS scorer.
@@ -3132,9 +3132,9 @@ Hybrid mode is a two-stage pipeline: it first retrieves the top candidates by se
 Short, intent-heavy queries (e.g., “benchmarks”, “oauth”) are treated differently on purpose. bv widens the candidate pool, boosts literal matches, and raises the text weight so quick lookups behave like a precise search. Longer, descriptive queries lean more on graph signals for smart tie‑breaking and prioritization.
 
 Hybrid defaults can be set via:
-- `BV_SEARCH_MODE` (text|hybrid)
-- `BV_SEARCH_PRESET` (default|bug-hunting|sprint-planning|impact-first|text-only)
-- `BV_SEARCH_WEIGHTS` (JSON string, overrides preset)
+- `TKV_SEARCH_MODE` (text|hybrid)
+- `TKV_SEARCH_PRESET` (default|bug-hunting|sprint-planning|impact-first|text-only)
+- `TKV_SEARCH_WEIGHTS` (JSON string, overrides preset)
 
 In `--robot-search` JSON, hybrid results include `mode`, `preset`, `weights`, plus per-result `text_score` and `component_scores`.
 
@@ -3510,16 +3510,16 @@ The analysis engine uses a **compact adjacency-list graph** (`compactDirectedGra
 *   Some filesystems don’t reliably deliver filesystem events. `bv` will try to auto-detect this and switch to polling.
 *   If it still misbehaves, force polling:
     ```bash
-    BV_FORCE_POLLING=1 bv
+    TKV_FORCE_POLLING=1 bv
     # or
-    BV_FORCE_POLL=1 bv
+    TKV_FORCE_POLL=1 bv
     ```
 
 **Q: I see `polling …` in the footer. Is that bad?**
 No — it just means `bv` is using polling instead of filesystem events for live reload (common on remote filesystems). Polling can add a small delay before updates appear.
 
 **Q: I see `⚠ STALE` / `✗ bg …` / `⚠ worker unresponsive` / `↻ recovered` in the footer.**
-These indicators mean the background worker hasn’t produced a fresh snapshot recently (or needed to self-heal). Try `Ctrl+R`/`F5`, check filesystem permissions/health, or temporarily disable background mode (`BV_BACKGROUND_MODE=0`) to fall back to synchronous reload.
+These indicators mean the background worker hasn’t produced a fresh snapshot recently (or needed to self-heal). Try `Ctrl+R`/`F5`, check filesystem permissions/health, or temporarily disable background mode (`TKV_BACKGROUND_MODE=0`) to fall back to synchronous reload.
 
 **Q: I see "Cycles Detected" in the dashboard. What now?**
 A: A cycle (e.g., A → B → A) means your project logic is broken; no task can be finished first. Use the Insights Dashboard (`i`) to find the specific cycle members, then use `br` to remove one of the dependency links (e.g., `br unblock A --from B`).
@@ -3670,21 +3670,21 @@ bv has a comprehensive built-in help system:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `BEADS_DIR` | Custom beads directory path. When set, overrides the default `.beads` directory lookup. | `.beads` in cwd |
-| `BV_BACKGROUND_MODE` | Experimental: enable background snapshot loading for live reload in the TUI (`1`/`0`). | (disabled) |
-| `BV_FORCE_POLLING` | Force polling-based live reload (useful on NFS/SMB/SSHFS/FUSE or any setup where filesystem events are unreliable) (`1`/`0`). | (auto) |
-| `BV_FORCE_POLL` | Alias for `BV_FORCE_POLLING`. | (auto) |
-| `BV_DEBOUNCE_MS` | Debounce window (milliseconds) for live reload events in background mode. | `200` |
-| `BV_CHANNEL_BUFFER` | Background worker message buffer size (worker → UI). | `8` |
-| `BV_HEARTBEAT_INTERVAL_S` | Background worker heartbeat interval (seconds). | `5` |
-| `BV_WATCHDOG_INTERVAL_S` | Background worker watchdog interval (seconds). | `10` |
-| `BV_FRESHNESS_WARN_S` | Snapshot staleness warning threshold (seconds). | `30` |
-| `BV_FRESHNESS_STALE_S` | Snapshot staleness critical threshold (seconds). | `120` |
-| `BV_MAX_LINE_SIZE_MB` | Max JSONL line size in MB (lines larger than this are skipped with a warning). | `10` |
-| `BV_SKIP_PHASE2` | Skip Phase 2 graph metrics (centrality, cycles, critical path) (`1`/`0`). | (disabled) |
-| `BV_PHASE2_TIMEOUT_S` | Override per-metric Phase 2 timeouts (seconds). | (size-based) |
-| `BV_SEMANTIC_EMBEDDER` | Semantic embedding provider for `bv --search` and TUI semantic mode. | `hash` |
-| `BV_SEMANTIC_DIM` | Embedding dimension for semantic search index. | `384` |
-| `BV_SEMANTIC_MODEL` | Provider-specific model name for semantic search (optional). | (empty) |
+| `TKV_BACKGROUND_MODE` | Experimental: enable background snapshot loading for live reload in the TUI (`1`/`0`). | (disabled) |
+| `TKV_FORCE_POLLING` | Force polling-based live reload (useful on NFS/SMB/SSHFS/FUSE or any setup where filesystem events are unreliable) (`1`/`0`). | (auto) |
+| `TKV_FORCE_POLL` | Alias for `TKV_FORCE_POLLING`. | (auto) |
+| `TKV_DEBOUNCE_MS` | Debounce window (milliseconds) for live reload events in background mode. | `200` |
+| `TKV_CHANNEL_BUFFER` | Background worker message buffer size (worker → UI). | `8` |
+| `TKV_HEARTBEAT_INTERVAL_S` | Background worker heartbeat interval (seconds). | `5` |
+| `TKV_WATCHDOG_INTERVAL_S` | Background worker watchdog interval (seconds). | `10` |
+| `TKV_FRESHNESS_WARN_S` | Snapshot staleness warning threshold (seconds). | `30` |
+| `TKV_FRESHNESS_STALE_S` | Snapshot staleness critical threshold (seconds). | `120` |
+| `TKV_MAX_LINE_SIZE_MB` | Max JSONL line size in MB (lines larger than this are skipped with a warning). | `10` |
+| `TKV_SKIP_PHASE2` | Skip Phase 2 graph metrics (centrality, cycles, critical path) (`1`/`0`). | (disabled) |
+| `TKV_PHASE2_TIMEOUT_S` | Override per-metric Phase 2 timeouts (seconds). | (size-based) |
+| `TKV_SEMANTIC_EMBEDDER` | Semantic embedding provider for `bv --search` and TUI semantic mode. | `hash` |
+| `TKV_SEMANTIC_DIM` | Embedding dimension for semantic search index. | `384` |
+| `TKV_SEMANTIC_MODEL` | Provider-specific model name for semantic search (optional). | (empty) |
 
 **Use cases for `BEADS_DIR`:**
 - **Monorepos**: Single beads directory shared across multiple packages
@@ -3706,28 +3706,28 @@ The TUI can run live reload using an **experimental background snapshot worker**
 
 **Enable (opt-in):**
 ```bash
-BV_BACKGROUND_MODE=1 bv
+TKV_BACKGROUND_MODE=1 bv
 bv --background-mode
 ```
 
 **Disable / rollback:**
 ```bash
-BV_BACKGROUND_MODE=0 bv
+TKV_BACKGROUND_MODE=0 bv
 bv --no-background-mode
 ```
 
-**User config file (when neither CLI flags nor `BV_BACKGROUND_MODE` are set):**
+**User config file (when neither CLI flags nor `TKV_BACKGROUND_MODE` are set):**
 ```yaml
 # ~/.config/bv/config.yaml
 experimental:
   background_mode: true
 ```
 
-**Precedence:** CLI flags → `BV_BACKGROUND_MODE` → `~/.config/bv/config.yaml`.
+**Precedence:** CLI flags → `TKV_BACKGROUND_MODE` → `~/.config/bv/config.yaml`.
 
 **Migration plan (high level):**
 - Phase A (now): opt-in background mode, sync remains default.
-- Phase B: broaden rollout; keep explicit rollback (`--no-background-mode` / `BV_BACKGROUND_MODE=0`).
+- Phase B: broaden rollout; keep explicit rollback (`--no-background-mode` / `TKV_BACKGROUND_MODE=0`).
 - Phase C: flip default when stable; keep sync as fallback for a period.
 - Phase D: remove legacy sync reload path after deprecation window.
 
@@ -3819,7 +3819,7 @@ Copyright (c) 2025 Jeffrey Emanuel
 - Direction: “increase” or “decrease” priority derived from score vs current priority; confidence blends signal count, strength, and score delta.
 
 ## 🔍 Diff & Time-Travel Safety Notes
-- When stdout is non-TTY or `BV_ROBOT=1`, `--diff-since` auto-emits JSON (or requires `--robot-diff` in strict setups); resolved revision is echoed in the payload.
+- When stdout is non-TTY or `TKV_ROBOT=1`, `--diff-since` auto-emits JSON (or requires `--robot-diff` in strict setups); resolved revision is echoed in the payload.
 - TUI time-travel badges: `[NEW]`, `[CLOSED]`, `[MODIFIED]`, `[REOPENED]`, matching the robot diff summary.
 
 ## 🛡️ Performance Guardrails
@@ -3933,7 +3933,7 @@ SOFTWARE.
 - `as_of` / `as_of_commit`: present when using `--as-of`; contains the ref you specified and the resolved commit SHA for reproducibility.
 
 **Schemas in 5 seconds (jq-friendly)**
-- `bv --robot-insights` → `.status`, `.analysis_config`, metric maps (capped by `BV_INSIGHTS_MAP_LIMIT`), `Bottlenecks`, `CriticalPath`, `Cycles`, plus advanced signals: `Cores` (k-core), `Articulation` (cut vertices), `Slack` (longest-path slack).
+- `bv --robot-insights` → `.status`, `.analysis_config`, metric maps (capped by `TKV_INSIGHTS_MAP_LIMIT`), `Bottlenecks`, `CriticalPath`, `Cycles`, plus advanced signals: `Cores` (k-core), `Articulation` (cut vertices), `Slack` (longest-path slack).
 - `bv --robot-plan` → `.plan.tracks[].items[].{id,unblocks}` for downstream unlocks; `.plan.summary.highest_impact`.
 - `bv --robot-priority` → `.recommendations[].{id,current_priority,suggested_priority,confidence,reasoning}`.
 - `bv --robot-suggest` → `.suggestions.suggestions[]` (ranked suggestions) + `.suggestions.stats` (counts) + `.usage_hints`.

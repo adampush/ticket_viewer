@@ -4,7 +4,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/model"
 )
 
 // SuggestAllConfig configures the unified suggestion generator
@@ -134,7 +134,7 @@ type RobotSuggestOutput struct {
 type SuggestFilter struct {
 	Type          string  `json:"type,omitempty"`
 	MinConfidence float64 `json:"min_confidence,omitempty"`
-	BeadID        string  `json:"bead_id,omitempty"`
+	BeadID        string  `json:"issue_id,omitempty"`
 }
 
 // GenerateRobotSuggestOutput creates the full robot-suggest output
@@ -158,7 +158,7 @@ func GenerateRobotSuggestOutput(issues []model.Issue, config SuggestAllConfig, d
 			"jq '.suggestions.suggestions[].action_command' - All action commands",
 			"--suggest-type=dependency - Filter to dependency suggestions",
 			"--suggest-confidence=0.7 - Minimum confidence threshold",
-			"--suggest-bead=<id> - Suggestions for specific bead",
+			"--suggest-issue=<id> - Suggestions for specific issue",
 		},
 	}
 }

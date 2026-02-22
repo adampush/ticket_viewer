@@ -592,10 +592,10 @@ func DeleteRepository(repoFullName string, confirm bool) error {
 }
 
 // OpenInBrowser opens a URL in the default browser.
-// Set BV_NO_BROWSER=1 to suppress browser opening (useful for tests).
+// Set TKV_NO_BROWSER=1 to suppress browser opening (useful for tests).
 func OpenInBrowser(url string) error {
 	// Skip browser opening in test mode or when explicitly disabled
-	if os.Getenv("BV_NO_BROWSER") != "" || os.Getenv("BV_TEST_MODE") != "" {
+	if os.Getenv("TKV_NO_BROWSER") != "" || os.Getenv("TKV_TEST_MODE") != "" {
 		return nil
 	}
 
@@ -702,10 +702,10 @@ func WriteGitHubActionsWorkflow(bundlePath string) error {
 
 // GitHubActionsStatus represents the status of GitHub Actions for a repository.
 type GitHubActionsStatus struct {
-	WorkflowRunning  bool
-	WorkflowQueued   bool
-	LastRunStatus    string
-	LastRunCreatedAt string
+	WorkflowRunning     bool
+	WorkflowQueued      bool
+	LastRunStatus       string
+	LastRunCreatedAt    string
 	PossiblyRateLimited bool
 }
 
@@ -726,9 +726,9 @@ func CheckGitHubActionsStatus(repoFullName string) (*GitHubActionsStatus, error)
 
 	// Parse the JSON output
 	var run struct {
-		Status    string `json:"status"`
+		Status     string `json:"status"`
 		Conclusion string `json:"conclusion"`
-		CreatedAt string `json:"created_at"`
+		CreatedAt  string `json:"created_at"`
 	}
 	if err := json.Unmarshal(output, &run); err != nil {
 		return status, nil // Can't parse, assume OK

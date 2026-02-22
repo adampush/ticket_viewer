@@ -604,7 +604,7 @@ func generateUltimateHTML(title, dataHash, graphDataJSON string, nodeCount, edge
         <div class="toolbar">
             <div class="search-container">
                 <span class="search-icon">🔍</span>
-                <input type="text" class="search-input" id="search-input" placeholder="Search beads... (full text)">
+				<input type="text" class="search-input" id="search-input" placeholder="Search issues... (full text)">
                 <div class="search-results" id="search-results"></div>
             </div>
             <div class="toolbar-group">
@@ -616,14 +616,14 @@ func generateUltimateHTML(title, dataHash, graphDataJSON string, nodeCount, edge
                 </select>
             </div>
             <div class="toolbar-group">
-                <select id="filter-status" title="Filter nodes by status. Shows only beads matching the selected status.">
+				<select id="filter-status" title="Filter nodes by status. Shows only issues matching the selected status.">
                     <option value="">All Status</option>
                     <option value="open">Open</option>
                     <option value="in_progress">In Progress</option>
                     <option value="blocked">Blocked</option>
                     <option value="closed">Closed</option>
                 </select>
-                <select id="filter-type" title="Filter nodes by type. Shows only beads matching the selected type.">
+				<select id="filter-type" title="Filter nodes by type. Shows only issues matching the selected type.">
                     <option value="">All Types</option>
                     <option value="feature">Feature</option>
                     <option value="bug">Bug</option>
@@ -860,7 +860,7 @@ func generateUltimateHTML(title, dataHash, graphDataJSON string, nodeCount, edge
     </main>
     <footer>
         <div>Generated %s | Hash: %s</div>
-        <div>Project: %s | <a href="https://github.com/Dicklesworthstone/beads_viewer">bv</a></div>
+        <div>Project: %s | <a href="https://github.com/adampush/ticket_viewer">bv</a></div>
     </footer>
     <div class="toast" id="toast"></div>
     <div class="context-menu" id="context-menu">

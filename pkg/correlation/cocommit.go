@@ -285,10 +285,10 @@ func (c *CoCommitExtractor) calculateConfidence(event BeadEvent, files []FileCha
 func (c *CoCommitExtractor) generateReason(event BeadEvent, files []FileChange, confidence float64) string {
 	var parts []string
 
-	parts = append(parts, fmt.Sprintf("Co-committed with bead status change to %s", event.EventType))
+	parts = append(parts, fmt.Sprintf("Co-committed with issue status change to %s", event.EventType))
 
 	if containsBeadID(event.CommitMsg, event.BeadID) {
-		parts = append(parts, "commit message references bead ID")
+		parts = append(parts, "commit message references issue ID")
 	}
 
 	if len(files) > 20 {

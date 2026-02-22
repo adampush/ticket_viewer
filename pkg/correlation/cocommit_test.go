@@ -292,9 +292,9 @@ func TestGenerateReason(t *testing.T) {
 		t.Errorf("reason should mention event type, got: %s", reason)
 	}
 
-	// Should mention bead ID reference
-	if !strings.Contains(reason, "bead ID") {
-		t.Errorf("reason should mention bead ID reference, got: %s", reason)
+	// Should mention issue ID reference
+	if !strings.Contains(reason, "issue ID") {
+		t.Errorf("reason should mention issue ID reference, got: %s", reason)
 	}
 }
 

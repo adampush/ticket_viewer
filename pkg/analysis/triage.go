@@ -7,8 +7,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/correlation"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/correlation"
+	"github.com/adampush/ticket_viewer/pkg/model"
 )
 
 func isClosedLikeStatus(status model.Status) bool {
@@ -304,7 +304,7 @@ type TriageOptions struct {
 	// History report for staleness analysis
 	History *correlation.HistoryReport
 
-	// TrackerMode controls command helper output. Supported values: "tk", "beads".
+	// TrackerMode controls command helper output. Supported values: "tk", "br" (legacy).
 	TrackerMode string
 }
 

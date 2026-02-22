@@ -9,7 +9,7 @@ import (
 
 	_ "modernc.org/sqlite"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/model"
 )
 
 // SQLiteReader provides read access to a beads SQLite database
@@ -33,7 +33,7 @@ func NewSQLiteReader(source DataSource) (*SQLiteReader, error) {
 
 	// Set pragmas for read performance
 	pragmas := []string{
-		"PRAGMA cache_size = -64000",  // 64MB cache
+		"PRAGMA cache_size = -64000",   // 64MB cache
 		"PRAGMA mmap_size = 268435456", // 256MB mmap
 		"PRAGMA temp_store = MEMORY",
 	}

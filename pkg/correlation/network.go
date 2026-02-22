@@ -5,7 +5,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/model"
 )
 
 // NetworkEdgeType categorizes the types of connections between beads.
@@ -22,8 +22,8 @@ const (
 
 // NetworkEdge represents a connection between two beads.
 type NetworkEdge struct {
-	FromBead string          `json:"from_bead"`
-	ToBead   string          `json:"to_bead"`
+	FromBead string          `json:"from_issue"`
+	ToBead   string          `json:"to_issue"`
 	EdgeType NetworkEdgeType `json:"edge_type"`
 	Weight   int             `json:"weight"`  // Number of shared commits/files
 	Details  []string        `json:"details"` // Sample commit SHAs or file paths
@@ -31,7 +31,7 @@ type NetworkEdge struct {
 
 // NetworkNode represents a bead in the impact network.
 type NetworkNode struct {
-	BeadID       string    `json:"bead_id"`
+	BeadID       string    `json:"issue_id"`
 	Title        string    `json:"title"`
 	Status       string    `json:"status"`
 	Priority     int       `json:"priority"`
@@ -46,12 +46,12 @@ type NetworkNode struct {
 // BeadCluster represents a group of tightly connected beads.
 type BeadCluster struct {
 	ClusterID            int      `json:"cluster_id"`
-	BeadIDs              []string `json:"bead_ids"`
+	BeadIDs              []string `json:"issue_ids"`
 	Label                string   `json:"label"`                 // Auto-generated or user-provided label
 	InternalEdges        int      `json:"internal_edges"`        // Edges within cluster
 	ExternalEdges        int      `json:"external_edges"`        // Edges to other clusters
 	InternalConnectivity float64  `json:"internal_connectivity"` // internal_edges / max_possible
-	CentralBead          string   `json:"central_bead"`          // Bead with highest degree in cluster
+	CentralBead          string   `json:"central_issue"`         // Bead with highest degree in cluster
 	SharedFiles          []string `json:"shared_files"`          // Common files across cluster beads
 	TotalCommits         int      `json:"total_commits"`         // Sum of commits across cluster
 }
@@ -759,9 +759,9 @@ func (network *ImpactNetwork) GetSubNetwork(beadID string, depth int) *ImpactNet
 type ImpactNetworkResult struct {
 	GeneratedAt  time.Time      `json:"generated_at"`
 	DataHash     string         `json:"data_hash"`
-	BeadID       string         `json:"bead_id,omitempty"` // Set if queried for specific bead
-	Depth        int            `json:"depth,omitempty"`   // Set if using subnetwork
-	Network      *ImpactNetwork `json:"network,omitempty"` // Full or sub network
+	BeadID       string         `json:"issue_id,omitempty"` // Set if queried for specific bead
+	Depth        int            `json:"depth,omitempty"`    // Set if using subnetwork
+	Network      *ImpactNetwork `json:"network,omitempty"`  // Full or sub network
 	Stats        NetworkStats   `json:"stats"`
 	TopClusters  []BeadCluster  `json:"top_clusters,omitempty"`  // Top 5 clusters
 	TopConnected []NetworkNode  `json:"top_connected,omitempty"` // Top 10 most connected beads

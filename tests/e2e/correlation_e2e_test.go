@@ -106,7 +106,7 @@ func createCorrelationRepo(t *testing.T) string {
 	return repoDir
 }
 
-// TestCorrelationExplicitMentions verifies that commits mentioning bead IDs create correlations.
+// TestCorrelationExplicitMentions verifies that commits mentioning issue IDs create correlations.
 func TestCorrelationExplicitMentions(t *testing.T) {
 	bv := buildBvBinary(t)
 	repoDir := createCorrelationRepo(t)
@@ -120,8 +120,8 @@ func TestCorrelationExplicitMentions(t *testing.T) {
 
 	var payload struct {
 		Stats struct {
-			TotalBeads         int            `json:"total_beads"`
-			BeadsWithCommits   int            `json:"beads_with_commits"`
+			TotalIssues        int            `json:"total_issues"`
+			IssuesWithCommits  int            `json:"issues_with_commits"`
 			MethodDistribution map[string]int `json:"method_distribution"`
 		} `json:"stats"`
 		Histories map[string]struct {
@@ -136,12 +136,12 @@ func TestCorrelationExplicitMentions(t *testing.T) {
 		t.Fatalf("json decode: %v\nout=%s", err, out)
 	}
 
-	// All 3 beads should have correlations
-	if payload.Stats.TotalBeads != 3 {
-		t.Errorf("expected 3 total_beads, got %d", payload.Stats.TotalBeads)
+	// All 3 issues should have correlations
+	if payload.Stats.TotalIssues != 3 {
+		t.Errorf("expected 3 total_issues, got %d", payload.Stats.TotalIssues)
 	}
-	if payload.Stats.BeadsWithCommits < 3 {
-		t.Errorf("expected at least 3 beads_with_commits, got %d", payload.Stats.BeadsWithCommits)
+	if payload.Stats.IssuesWithCommits < 3 {
+		t.Errorf("expected at least 3 issues_with_commits, got %d", payload.Stats.IssuesWithCommits)
 	}
 
 	// CORR-1 should have explicit mention from "feat(CORR-1)" commit
@@ -213,7 +213,7 @@ func TestCorrelationCommitIndex(t *testing.T) {
 	}
 }
 
-// TestCorrelationRobotRelated verifies --robot-related finds related beads.
+// TestCorrelationRobotRelated verifies --robot-related finds related issues.
 func TestCorrelationRobotRelated(t *testing.T) {
 	bv := buildBvBinary(t)
 	repoDir := createCorrelationRepo(t)
@@ -226,14 +226,14 @@ func TestCorrelationRobotRelated(t *testing.T) {
 	}
 
 	var payload struct {
-		TargetBeadID string `json:"target_bead_id"`
-		TargetTitle  string `json:"target_title"`
-		FileOverlap  []struct {
-			BeadID    string `json:"bead_id"`
+		TargetIssueID string `json:"target_issue_id"`
+		TargetTitle   string `json:"target_title"`
+		FileOverlap   []struct {
+			IssueID   string `json:"issue_id"`
 			Relevance int    `json:"relevance"`
 		} `json:"file_overlap"`
 		CommitOverlap []struct {
-			BeadID    string `json:"bead_id"`
+			IssueID   string `json:"issue_id"`
 			Relevance int    `json:"relevance"`
 		} `json:"commit_overlap"`
 		TotalRelated int `json:"total_related"`
@@ -243,8 +243,8 @@ func TestCorrelationRobotRelated(t *testing.T) {
 		t.Fatalf("json decode: %v\nout=%s", err, out)
 	}
 
-	if payload.TargetBeadID != "CORR-1" {
-		t.Errorf("expected target_bead_id=CORR-1, got %s", payload.TargetBeadID)
+	if payload.TargetIssueID != "CORR-1" {
+		t.Errorf("expected target_issue_id=CORR-1, got %s", payload.TargetIssueID)
 	}
 
 	// Log what we got for debugging
@@ -257,27 +257,27 @@ func TestCorrelationRobotRelated(t *testing.T) {
 	}
 }
 
-// TestCorrelationRobotFileBeads verifies --robot-file-beads finds beads that touched a file.
-func TestCorrelationRobotFileBeads(t *testing.T) {
+// TestCorrelationRobotFileIssues verifies --robot-file-issues finds issues that touched a file.
+func TestCorrelationRobotFileIssues(t *testing.T) {
 	bv := buildBvBinary(t)
 	repoDir := createCorrelationRepo(t)
 
-	cmd := exec.Command(bv, "--robot-file-beads", "pkg/auth/session.go")
+	cmd := exec.Command(bv, "--robot-file-issues", "pkg/auth/session.go")
 	cmd.Dir = repoDir
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		t.Fatalf("--robot-file-beads failed: %v\n%s", err, out)
+		t.Fatalf("--robot-file-issues failed: %v\n%s", err, out)
 	}
 
 	var payload struct {
-		FilePath   string `json:"file_path"`
-		TotalBeads int    `json:"total_beads"`
-		OpenBeads  []struct {
-			BeadID string `json:"bead_id"`
-		} `json:"open_beads"`
-		ClosedBeads []struct {
-			BeadID string `json:"bead_id"`
-		} `json:"closed_beads"`
+		FilePath    string `json:"file_path"`
+		TotalIssues int    `json:"total_issues"`
+		OpenIssues  []struct {
+			IssueID string `json:"issue_id"`
+		} `json:"open_issues"`
+		ClosedIssues []struct {
+			IssueID string `json:"issue_id"`
+		} `json:"closed_issues"`
 	}
 
 	if err := json.Unmarshal(out, &payload); err != nil {
@@ -289,13 +289,13 @@ func TestCorrelationRobotFileBeads(t *testing.T) {
 	}
 
 	// Multiple beads touched session.go
-	if payload.TotalBeads < 2 {
-		t.Errorf("expected at least 2 beads touching session.go, got %d", payload.TotalBeads)
+	if payload.TotalIssues < 2 {
+		t.Errorf("expected at least 2 issues touching session.go, got %d", payload.TotalIssues)
 	}
 
-	// All beads should be closed in this test repo
-	if len(payload.OpenBeads)+len(payload.ClosedBeads) == 0 {
-		t.Error("expected file-beads payload to include at least one bead entry")
+	// All issues should be closed in this test repo
+	if len(payload.OpenIssues)+len(payload.ClosedIssues) == 0 {
+		t.Error("expected file-issues payload to include at least one issue entry")
 	}
 }
 
@@ -319,13 +319,13 @@ func TestCorrelationRobotOrphans(t *testing.T) {
 			OrphanRatio     float64 `json:"orphan_ratio"`
 		} `json:"stats"`
 		Candidates []struct {
-			SHA           string `json:"sha"`
-			Message       string `json:"message"`
-			ProbableBeads []struct {
-				BeadID     string   `json:"bead_id"`
+			SHA            string `json:"sha"`
+			Message        string `json:"message"`
+			ProbableIssues []struct {
+				IssueID    string   `json:"issue_id"`
 				Confidence int      `json:"confidence"`
 				Reasons    []string `json:"reasons"`
-			} `json:"probable_beads"`
+			} `json:"probable_issues"`
 		} `json:"candidates"`
 	}
 
@@ -343,13 +343,13 @@ func TestCorrelationRobotOrphans(t *testing.T) {
 		t.Error("expected correlated_count > 0 (explicit mentions)")
 	}
 
-	// If there are orphans, they should have probable_beads suggestions
+	// If there are orphans, they should have probable_issues suggestions
 	for _, candidate := range payload.Candidates {
-		if len(candidate.ProbableBeads) > 0 {
-			// Verify probable beads have valid structure
-			for _, pb := range candidate.ProbableBeads {
-				if pb.BeadID == "" {
-					t.Errorf("orphan candidate %s has empty bead_id", candidate.SHA)
+		if len(candidate.ProbableIssues) > 0 {
+			// Verify probable issues have valid structure
+			for _, pb := range candidate.ProbableIssues {
+				if pb.IssueID == "" {
+					t.Errorf("orphan candidate %s has empty issue_id", candidate.SHA)
 				}
 				if pb.Confidence < 0 || pb.Confidence > 100 {
 					t.Errorf("orphan candidate %s has invalid confidence %d", candidate.SHA, pb.Confidence)
@@ -470,33 +470,33 @@ func TestCorrelationSharedFileRelations(t *testing.T) {
 	git("commit", "-m", "feat(SHARE-2): add Two function")
 
 	// Both beads should show in file-beads for shared.go
-	cmd := exec.Command(bv, "--robot-file-beads", "src/shared.go")
+	cmd := exec.Command(bv, "--robot-file-issues", "src/shared.go")
 	cmd.Dir = repoDir
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		t.Fatalf("--robot-file-beads failed: %v\n%s", err, out)
+		t.Fatalf("--robot-file-issues failed: %v\n%s", err, out)
 	}
 
 	var payload struct {
-		TotalBeads int `json:"total_beads"`
-		OpenBeads  []struct {
-			BeadID string `json:"bead_id"`
-		} `json:"open_beads"`
-		ClosedBeads []struct {
-			BeadID string `json:"bead_id"`
-		} `json:"closed_beads"`
+		TotalIssues int `json:"total_issues"`
+		OpenIssues  []struct {
+			IssueID string `json:"issue_id"`
+		} `json:"open_issues"`
+		ClosedIssues []struct {
+			IssueID string `json:"issue_id"`
+		} `json:"closed_issues"`
 	}
 
 	if err := json.Unmarshal(out, &payload); err != nil {
 		t.Fatalf("json decode: %v", err)
 	}
 
-	if payload.TotalBeads < 2 {
-		t.Errorf("expected at least 2 beads for shared.go, got %d", payload.TotalBeads)
+	if payload.TotalIssues < 2 {
+		t.Errorf("expected at least 2 issues for shared.go, got %d", payload.TotalIssues)
 	}
 
-	if len(payload.OpenBeads)+len(payload.ClosedBeads) == 0 {
-		t.Error("expected file-beads payload entries for shared.go")
+	if len(payload.OpenIssues)+len(payload.ClosedIssues) == 0 {
+		t.Error("expected file-issues payload entries for shared.go")
 	}
 }
 
@@ -566,8 +566,8 @@ func TestCorrelationEmptyRepo(t *testing.T) {
 
 	var payload struct {
 		Stats struct {
-			TotalBeads       int `json:"total_beads"`
-			BeadsWithCommits int `json:"beads_with_commits"`
+			TotalIssues       int `json:"total_issues"`
+			IssuesWithCommits int `json:"issues_with_commits"`
 		} `json:"stats"`
 	}
 
@@ -575,12 +575,12 @@ func TestCorrelationEmptyRepo(t *testing.T) {
 		t.Fatalf("json decode: %v", err)
 	}
 
-	// Should have bead but no commits
-	if payload.Stats.TotalBeads != 1 {
-		t.Errorf("expected 1 total_beads, got %d", payload.Stats.TotalBeads)
+	// Should have issue but no commits
+	if payload.Stats.TotalIssues != 1 {
+		t.Errorf("expected 1 total_issues, got %d", payload.Stats.TotalIssues)
 	}
-	if payload.Stats.BeadsWithCommits != 0 {
-		t.Errorf("expected 0 beads_with_commits without git, got %d", payload.Stats.BeadsWithCommits)
+	if payload.Stats.IssuesWithCommits != 0 {
+		t.Errorf("expected 0 issues_with_commits without git, got %d", payload.Stats.IssuesWithCommits)
 	}
 }
 
@@ -640,7 +640,7 @@ func TestCorrelationManyBeads(t *testing.T) {
 
 	var payload struct {
 		Stats struct {
-			TotalBeads int `json:"total_beads"`
+			TotalIssues int `json:"total_issues"`
 		} `json:"stats"`
 	}
 
@@ -648,7 +648,7 @@ func TestCorrelationManyBeads(t *testing.T) {
 		t.Fatalf("json decode: %v", err)
 	}
 
-	if payload.Stats.TotalBeads != 50 {
-		t.Errorf("expected 50 total_beads, got %d", payload.Stats.TotalBeads)
+	if payload.Stats.TotalIssues != 50 {
+		t.Errorf("expected 50 total_issues, got %d", payload.Stats.TotalIssues)
 	}
 }

@@ -17,7 +17,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/version"
+	"github.com/adampush/ticket_viewer/pkg/version"
 )
 
 const (

@@ -18,15 +18,15 @@ type CommitBeadResult struct {
 	Author       string        `json:"author"`
 	AuthorEmail  string        `json:"author_email"`
 	Timestamp    time.Time     `json:"timestamp"`
-	RelatedBeads []RelatedBead `json:"related_beads"`
+	RelatedBeads []RelatedBead `json:"related_issues"`
 	IsOrphan     bool          `json:"is_orphan"` // True if no beads found
 }
 
 // RelatedBead represents a bead related to a commit.
 type RelatedBead struct {
-	BeadID     string            `json:"bead_id"`
-	BeadTitle  string            `json:"bead_title"`
-	BeadStatus string            `json:"bead_status"`
+	BeadID     string            `json:"issue_id"`
+	BeadTitle  string            `json:"issue_title"`
+	BeadStatus string            `json:"issue_status"`
 	Method     CorrelationMethod `json:"method"`
 	Confidence float64           `json:"confidence"`
 	Reason     string            `json:"reason"`
@@ -324,8 +324,8 @@ func (rl *ReverseLookup) GetAllBeadIDs() []string {
 
 // BeadCommitsSummary provides a summary of commits per bead.
 type BeadCommitsSummary struct {
-	BeadID      string  `json:"bead_id"`
-	BeadTitle   string  `json:"bead_title"`
+	BeadID      string  `json:"issue_id"`
+	BeadTitle   string  `json:"issue_title"`
 	CommitCount int     `json:"commit_count"`
 	AvgConfid   float64 `json:"avg_confidence"`
 	TopMethod   string  `json:"top_method"` // Most common correlation method

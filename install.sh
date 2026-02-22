@@ -275,7 +275,7 @@ select_release_asset() {
     local release_json
     release_json=$(cat) || return 1
 
-    BV_RELEASE_JSON="$release_json" "$PYTHON_CMD" - "$platform" "$BIN_NAME" <<'PY'
+    TKV_RELEASE_JSON="$release_json" "$PYTHON_CMD" - "$platform" "$BIN_NAME" <<'PY'
 import json
 import os
 import sys
@@ -308,7 +308,7 @@ def main():
         return 1
     platform = sys.argv[1]
     bin_name = sys.argv[2]
-    release_json = os.environ.get("BV_RELEASE_JSON", "")
+    release_json = os.environ.get("TKV_RELEASE_JSON", "")
     if not release_json:
         sys.stderr.write("Missing release metadata\n")
         return 1

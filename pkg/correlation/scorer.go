@@ -21,19 +21,19 @@ var MethodRanges = map[CorrelationMethod]ConfidenceRange{
 		Method: MethodCoCommitted,
 		Min:    0.85,
 		Max:    0.99,
-		Desc:   "Changed in same commit as bead update (direct causation)",
+		Desc:   "Changed in same commit as issue update (direct causation)",
 	},
 	MethodExplicitID: {
 		Method: MethodExplicitID,
 		Min:    0.70,
 		Max:    0.99,
-		Desc:   "Commit message explicitly references bead ID (developer intent)",
+		Desc:   "Commit message explicitly references issue ID (developer intent)",
 	},
 	MethodTemporalAuthor: {
 		Method: MethodTemporalAuthor,
 		Min:    0.20,
 		Max:    0.85,
-		Desc:   "By same author during bead's active window (temporal correlation)",
+		Desc:   "By same author during issue's active window (temporal correlation)",
 	},
 }
 
@@ -378,19 +378,19 @@ func (s *Scorer) ExtractSignals(commit CorrelatedCommit) []CorrelationSignal {
 		signals = append(signals, CorrelationSignal{
 			Type:   SignalCoCommit,
 			Weight: 50,
-			Detail: "Commit modified both code and beads file together (direct causation)",
+			Detail: "Commit modified both code and issue file together (direct causation)",
 		})
 	case MethodExplicitID:
 		signals = append(signals, CorrelationSignal{
 			Type:   SignalMessageMatch,
 			Weight: 40,
-			Detail: "Commit message contains bead ID reference",
+			Detail: "Commit message contains issue ID reference",
 		})
 	case MethodTemporalAuthor:
 		signals = append(signals, CorrelationSignal{
 			Type:   SignalTiming,
 			Weight: 25,
-			Detail: "Commit within bead's active time window",
+			Detail: "Commit within issue's active time window",
 		})
 		signals = append(signals, CorrelationSignal{
 			Type:   SignalAuthorMatch,
@@ -428,9 +428,9 @@ func (s *Scorer) buildSummary(commit CorrelatedCommit, signals []CorrelationSign
 	methodDesc := ""
 	switch commit.Method {
 	case MethodCoCommitted:
-		methodDesc = "Co-committed with bead update"
+		methodDesc = "Co-committed with issue update"
 	case MethodExplicitID:
-		methodDesc = "Explicitly references bead ID"
+		methodDesc = "Explicitly references issue ID"
 	case MethodTemporalAuthor:
 		methodDesc = "Temporal+author correlation"
 	}

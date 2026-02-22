@@ -3,8 +3,8 @@ package analysis_test
 import (
 	"testing"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/analysis"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/analysis"
+	"github.com/adampush/ticket_viewer/pkg/model"
 )
 
 // TestPlan_DiamondDependency tests a diamond graph structure

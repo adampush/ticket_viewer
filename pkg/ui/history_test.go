@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/cass"
-	"github.com/Dicklesworthstone/beads_viewer/pkg/correlation"
+	"github.com/adampush/ticket_viewer/pkg/cass"
+	"github.com/adampush/ticket_viewer/pkg/correlation"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -765,7 +765,7 @@ func TestHistoryModel_GetSearchModeName(t *testing.T) {
 		{searchModeAll, "all"},
 		{searchModeCommit, "msg"},
 		{searchModeSHA, "sha"},
-		{searchModeBead, "bead"},
+		{searchModeBead, "issue"},
 		{searchModeAuthor, "author"},
 	}
 
@@ -2007,8 +2007,8 @@ func TestHistoryModel_ModeIndicator_UsesIcons(t *testing.T) {
 	if !strings.Contains(header, "◈") {
 		t.Error("Expected ◈ icon for bead mode in header")
 	}
-	if !strings.Contains(header, "Beads") {
-		t.Error("Expected 'Beads' label in header")
+	if !strings.Contains(header, "Issues") {
+		t.Error("Expected 'Issues' label in header")
 	}
 
 	// Test git mode indicator

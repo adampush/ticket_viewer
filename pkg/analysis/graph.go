@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/model"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/network"
@@ -2326,10 +2326,11 @@ func findArticulationPoints(adj undirectedAdjacency) map[int64]bool {
 
 // GetActionableIssues returns issues that can be worked on immediately.
 // An issue is actionable if:
-// 1. It is not closed or tombstone
-// 2. All its blocking dependencies (type "blocks") are closed or tombstone
-// 3. None of its parent issues (via "parent-child" deps) are themselves blocked
-//    (transitive parent-blocked propagation, matching br's behavior)
+//  1. It is not closed or tombstone
+//  2. All its blocking dependencies (type "blocks") are closed or tombstone
+//  3. None of its parent issues (via "parent-child" deps) are themselves blocked
+//     (transitive parent-blocked propagation, matching br's behavior)
+//
 // Missing blockers don't block (graceful degradation).
 // Returns list sorted by ID for determinism.
 func (a *Analyzer) GetActionableIssues() []model.Issue {

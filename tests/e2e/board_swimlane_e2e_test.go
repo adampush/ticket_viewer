@@ -398,7 +398,7 @@ func TestSwimlaneEmptyCategoriesHandling(t *testing.T) {
 }
 
 // TestSwimlaneTUIStartsWithMixedData verifies the TUI launches in board mode with mixed data.
-// Uses BV_TUI_AUTOCLOSE_MS to prevent hanging.
+// Uses TKV_TUI_AUTOCLOSE_MS to prevent hanging.
 func TestSwimlaneTUIStartsWithMixedData(t *testing.T) {
 	skipIfNoScript(t)
 	bv := buildBvBinary(t)
@@ -431,7 +431,7 @@ func TestSwimlaneTUIStartsWithMixedData(t *testing.T) {
 	cmd.Dir = tempDir
 	cmd.Env = append(os.Environ(),
 		"TERM=xterm-256color",
-		"BV_TUI_AUTOCLOSE_MS=1500",
+		"TKV_TUI_AUTOCLOSE_MS=1500",
 	)
 
 	ensureCmdStdinCloses(t, ctx, cmd, 3*time.Second)

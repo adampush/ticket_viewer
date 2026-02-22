@@ -30,10 +30,10 @@ type Suggestion struct {
 	Type SuggestionType `json:"type"`
 
 	// TargetBead is the primary bead this suggestion applies to
-	TargetBead string `json:"target_bead"`
+	TargetBead string `json:"target_issue"`
 
 	// RelatedBead is an optional secondary bead (e.g., for duplicates or dependencies)
-	RelatedBead string `json:"related_bead,omitempty"`
+	RelatedBead string `json:"related_issue,omitempty"`
 
 	// Summary is a concise description of the suggestion
 	Summary string `json:"summary"`

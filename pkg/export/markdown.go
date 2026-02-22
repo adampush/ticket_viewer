@@ -10,7 +10,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/model"
+	"github.com/adampush/ticket_viewer/pkg/model"
 )
 
 // Package-level compiled regex for slug creation (avoids recompilation per call)

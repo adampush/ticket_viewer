@@ -18,8 +18,8 @@ func TestShouldSuppressTTYQueries_RobotFlag(t *testing.T) {
 	if !shouldSuppressTTYQueries([]string{"bv", "--robot-triage"}, false, false) {
 		t.Fatal("expected --robot-triage to suppress TTY queries")
 	}
-	if !shouldSuppressTTYQueries([]string{"bv", "--robot-file-beads=path/to/file.go"}, false, false) {
-		t.Fatal("expected --robot-file-beads=... to suppress TTY queries")
+	if !shouldSuppressTTYQueries([]string{"bv", "--robot-file-issues=path/to/file.go"}, false, false) {
+		t.Fatal("expected --robot-file-issues=... to suppress TTY queries")
 	}
 }
 

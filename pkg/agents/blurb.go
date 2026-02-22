@@ -26,7 +26,7 @@ const AgentBlurb = `<!-- bv-agent-instructions-v1 -->
 
 ## Beads Workflow Integration
 
-This project uses [beads_viewer](https://github.com/Dicklesworthstone/beads_viewer) for issue tracking. Issues are stored in ` + "`" + `.beads/` + "`" + ` and tracked in git.
+This project uses [beads_viewer](https://github.com/adampush/ticket_viewer) for issue tracking. Issues are stored in ` + "`" + `.beads/` + "`" + ` and tracked in git.
 
 ### Essential Commands
 

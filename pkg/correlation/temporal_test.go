@@ -275,10 +275,10 @@ func TestGenerateTemporalReason(t *testing.T) {
 			},
 			files:          []FileChange{{Path: "file.go"}},
 			authActive:     map[string]int{"dev@test.com": 1},
-			expectContains: []string{"short window", "only this bead active"},
+			expectContains: []string{"short window", "only this issue active"},
 		},
 		{
-			name: "long window with many beads",
+			name: "long window with many issues",
 			window: TemporalWindow{
 				Author:      "Test Dev",
 				AuthorEmail: "dev@test.com",
@@ -287,7 +287,7 @@ func TestGenerateTemporalReason(t *testing.T) {
 			},
 			files:          []FileChange{{Path: "file.go"}},
 			authActive:     map[string]int{"dev@test.com": 5},
-			expectContains: []string{"long window", "5 beads active"},
+			expectContains: []string{"long window", "5 issues active"},
 		},
 		{
 			name: "path hint match",
@@ -300,7 +300,7 @@ func TestGenerateTemporalReason(t *testing.T) {
 			files:          []FileChange{{Path: "pkg/auth/login.go"}},
 			pathHints:      []string{"auth"},
 			authActive:     map[string]int{"dev@test.com": 1},
-			expectContains: []string{"file paths match bead title keywords"},
+			expectContains: []string{"file paths match issue title keywords"},
 		},
 	}
 

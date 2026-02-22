@@ -15,7 +15,7 @@ func TestRobotSuggestContract(t *testing.T) {
 		Suggestions struct {
 			Suggestions []struct {
 				Type       string  `json:"type"`
-				TargetBead string  `json:"target_bead"`
+				TargetBead string  `json:"target_issue"`
 				Confidence float64 `json:"confidence"`
 			} `json:"suggestions"`
 			Stats struct {

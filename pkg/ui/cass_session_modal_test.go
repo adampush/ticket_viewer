@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/cass"
+	"github.com/adampush/ticket_viewer/pkg/cass"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -349,7 +349,7 @@ func TestCassSessionModal_FormatMatchReason(t *testing.T) {
 		{
 			name:     "ID mention",
 			session:  cass.ScoredResult{Strategy: cass.StrategyIDMention},
-			contains: "bead ID mentioned",
+			contains: "issue ID mentioned",
 		},
 		{
 			name: "Keywords with list",

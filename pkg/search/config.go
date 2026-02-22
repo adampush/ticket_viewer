@@ -11,9 +11,9 @@ import (
 // EmbeddingConfigFromEnv reads semantic embedding configuration from environment variables.
 //
 // Supported variables:
-//   - BV_SEMANTIC_EMBEDDER: embedding provider (default: "hash")
-//   - BV_SEMANTIC_MODEL: model identifier (provider-specific, optional)
-//   - BV_SEMANTIC_DIM: embedding dimension (default: DefaultEmbeddingDim)
+//   - TKV_SEMANTIC_EMBEDDER: embedding provider (default: "hash")
+//   - TKV_SEMANTIC_MODEL: model identifier (provider-specific, optional)
+//   - TKV_SEMANTIC_DIM: embedding dimension (default: DefaultEmbeddingDim)
 func EmbeddingConfigFromEnv() EmbeddingConfig {
 	provider := strings.ToLower(strings.TrimSpace(os.Getenv(EnvSemanticEmbedder)))
 	cfg := EmbeddingConfig{
@@ -55,9 +55,9 @@ const (
 )
 
 const (
-	EnvSearchMode    = "BV_SEARCH_MODE"
-	EnvSearchPreset  = "BV_SEARCH_PRESET"
-	EnvSearchWeights = "BV_SEARCH_WEIGHTS"
+	EnvSearchMode    = "TKV_SEARCH_MODE"
+	EnvSearchPreset  = "TKV_SEARCH_PRESET"
+	EnvSearchWeights = "TKV_SEARCH_WEIGHTS"
 )
 
 // SearchConfig captures hybrid search configuration from env or flags.

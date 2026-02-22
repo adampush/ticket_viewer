@@ -3,7 +3,7 @@ package ui
 import (
 	"strings"
 
-	"github.com/Dicklesworthstone/beads_viewer/pkg/agents"
+	"github.com/adampush/ticket_viewer/pkg/agents"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
