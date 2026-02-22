@@ -61,15 +61,3 @@ brews:
       For AI agent integration, use --robot-* flags:
         tkv --robot-triage     # Get prioritized recommendations
         tkv --robot-next       # Get single next action
-
-# Scoop bucket publishing
-scoops:
-  - name: tkv
-    repository:
-      owner: adampush
-      name: scoop-bucket
-      branch: main
-      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    homepage: https://github.com/adampush/ticket_viewer
-    description: "Graph-aware task management TUI for tk ticket projects"
-    license: MIT
