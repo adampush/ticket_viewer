@@ -50,8 +50,8 @@ If an input is missing, infer conservatively and record it as an explicit assump
 Always reason through both lenses:
 
 1. Product/Program Manager
-   - What user outcome improves?
-   - How will success be observed and measured?
+   - What user outcome improves? Is the value worth the effort?
+   - How will success be observed and measured (Product Metrics)?
    - What is the rollout/migration/communication plan?
    - Who owns each phase and checkpoint?
 
@@ -59,31 +59,37 @@ Always reason through both lenses:
    - What boundaries/interfaces change?
    - How is blast radius minimized?
    - What are edge-case and failure semantics?
-   - How will correctness be validated deterministically?
+   - How will correctness be verified (Tests)?
+   - What are the NFRs (Security, Performance, Scale)?
+   - How will we observe this in production (Telemetry)?
 
 A plan is complete only when both lenses are satisfied.
 
 ## Procedure (Author Mode)
 
-1. Define user/business outcomes and measurable success criteria.
+1. Define user/business outcomes and measurable product success metrics (e.g., adoption, latency).
 2. Build assumptions register (confidence + validation + what changes if wrong).
-3. Lock defaults and precedence decisions; resolve open questions.
-4. Specify file/package-level architecture and interface contracts.
-5. Define blast-radius controls and non-goals.
-6. Specify edge cases and failure semantics (skip, warn, retry, hard-fail).
-7. Create validation plan with exact commands and expected pass signals.
-8. Define rollout, migration, and recovery strategy.
-9. Define documentation and communication deliverables plus parity checks.
-10. Assign ownership, sequencing, and phase gates.
-11. Run consistency check across all sections; resolve contradictions.
+3. Draft high-level architecture and scope. **Checkpoint:** Does estimated complexity align with value? (Go/No-Go Decision).
+4. Lock defaults and precedence decisions; resolve open questions.
+5. Specify component/module-level architecture, interface contracts, and data model changes.
+6. Define blast-radius controls and non-goals.
+7. Define non-functional requirements (security, performance, scale).
+8. Specify edge cases and failure semantics (skip, warn, retry, hard-fail).
+9. Define observability strategy (logs, metrics, alerts).
+10. Create verification plan (automated tests) and validation plan (user acceptance).
+11. Define rollout, migration, and recovery strategy.
+12. Define documentation and communication deliverables plus parity checks.
+13. Assign ownership, sequencing, and phase gates.
+14. Run consistency check across all sections; resolve contradictions.
 
 ## Procedure (Review Mode)
 
 1. Verify required sections exist and are complete.
 2. Score each quality-gate criterion as PASS/FAIL with evidence.
-3. Identify contradictions, missing defaults, weak acceptance criteria, and vague wording.
-4. Produce a numbered list of required revisions ordered by risk.
-5. Return overall status:
+3. Check specifically for NFRs, Telemetry, and Data Model evolution.
+4. Identify contradictions, missing defaults, weak acceptance criteria, and vague wording.
+5. Produce a numbered list of required revisions ordered by risk.
+6. Return overall status:
    - `PASS`: ready for ticket-graph translation.
    - `FAIL`: must revise and re-review.
 
@@ -92,19 +98,21 @@ A plan is complete only when both lenses are satisfied.
 Every plan must include these sections in order:
 
 1. Goal
-2. User Outcomes and Success Criteria
+2. User Outcomes and Success Metrics (Product Value)
 3. Scope (In/Out)
 4. Assumptions Register
-5. Locked Defaults and Decision Log
-6. Architecture and Interface Contracts
-7. Blast Radius Controls
-8. Edge Cases and Failure Semantics
-9. Validation Plan (global and targeted checks)
-10. Rollout, Migration, and Recovery
-11. Documentation and Communication Deliverables
-12. Ownership, Sequencing, and Checkpoints
-13. Done Definition
-14. Open Risks and Follow-up Tickets (if any)
+5. Go/No-Go Value Checkpoint (Decision Record)
+6. Architecture, Interface Contracts, and Data Models
+7. Non-Functional Requirements (Security, Performance, Scale)
+8. Observability and Telemetry Plan
+9. Blast Radius Controls
+10. Edge Cases and Failure Semantics
+11. Verification (Engineering) and Validation (Product) Plan
+12. Rollout, Migration, and Recovery
+13. Documentation and Communication Deliverables
+14. Ownership, Sequencing, and Checkpoints
+15. Done Definition
+16. Open Risks and Follow-up Tickets (if any)
 
 ## Required Output Template (Review Mode)
 
@@ -118,14 +126,15 @@ Every plan must include these sections in order:
 
 Plan is PASS only if all are true:
 
-- success criteria are measurable and observable
+- product success metrics are measurable (e.g., latency target, user adoption)
 - assumptions are testable and confidence-scored
+- value-vs-effort decision is explicitly recorded
 - defaults and precedence rules are explicit
-- file-level architecture and contracts are concrete
+- architecture includes data model and schema evolution plans
 - edge-case behavior is deterministic
-- validation commands are explicit and sufficient
-- testing requirements are defined with minimum coverage by change type
-- unchanged behavior/non-regression checks are explicitly listed where applicable
+- NFRs (security, performance) are defined or explicitly marked n/a
+- observability strategy (logs/metrics) is defined
+- verification commands are explicit and sufficient
 - rollout and rollback are actionable
 - documentation and communication updates are specified and verifiable
 - ownership and sequencing are clear
@@ -141,33 +150,29 @@ Otherwise status is FAIL and must be revised before implementation.
 - no phase-merging that increases risk without clear gating rationale
 - no plan approval if checklist items remain unresolved
 
-## Testing Requirements
+## Verification & Validation Requirements
 
-Every plan must define testing requirements that are concrete and auditable.
+Every plan must distinguish between Verification (Building the thing right) and Validation (Building the right thing).
+
+### Verification (Engineering)
+Does the code meet the spec?
 
 Minimum test matrix by change type:
-
 - implementation behavior change: unit + integration tests required
 - public interface change (CLI/API/schema/env/config): unit + integration + end-to-end/non-regression required
 - migration/rename/refactor: non-regression tests required for unchanged behavior plus targeted tests for changed interfaces
 
-Coverage requirements:
+### Validation (Product)
+Does the spec solve the user problem?
 
-- include happy-path, edge-case, and failure-path validation
-- include explicit unchanged-behavior checks for adjacent/stable workflows
-- map each acceptance criterion to one or more tests/checks
+Required checks:
+- Product Success Metrics (e.g., "Latency < 200ms", "Zero regression in workflow X")
+- User Acceptance Testing (UAT) criteria or Feature Flag rollout plan
 
-Evidence requirements:
-
-- specify exact commands to run
+### Evidence Requirements
+- specify exact commands to run (Verification)
 - specify expected pass signals (exit code, key output indicators, artifact updates)
 - identify what evidence must be recorded in ticket/PR notes
-
-Manual validation policy:
-
-- manual-only validation is allowed only when automation is infeasible
-- plan must include rationale and a follow-up automation ticket
-- manual steps must still have deterministic pass/fail criteria
 
 ## Deliverable Style
 
