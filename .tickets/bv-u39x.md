@@ -1,6 +1,6 @@
 ---
 id: bv-u39x
-status: open
+status: closed
 deps: [bv-4nyv, bv-dztk, bv-0qst, bv-kt62]
 links: []
 created: 2026-02-23T01:27:54Z
@@ -36,3 +36,7 @@ bd token findings: (a) mostly ticket IDs in comments/tests (e.g., cmd/bv/main.go
 **2026-02-23T01:28:45Z**
 
 Additional non-doc string hotspots where legacy bv command text is emitted/generated: pkg/analysis/triage.go (RefreshTriage: 'bv --robot-triage'), pkg/export/markdown.go (tables include 'Run bv --robot-triage'), pkg/export/github.go commit message 'Deploy static site via bv --pages', pkg/export/wizard.go preview hint uses 'bv --preview-pages', pkg/drift/config.go help reference 'bv --help'.
+
+**2026-02-23T02:27:20Z**
+
+All child cleanup tickets are complete: bv-4nyv (runtime/user-facing strings), bv-dztk (README/AGENTS cleanup), bv-0qst (scripts/CI-adjacent cleanup), and bv-kt62 (historical/compatibility terminology policy). Remaining legacy terms are now explicitly policy-scoped and/or historical-context-bound.

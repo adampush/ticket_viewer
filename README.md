@@ -135,7 +135,7 @@ No web page loads, no heavy clients. `tkv` starts instantly and lets you fly thr
 *   **Split-View Dashboard:** On wider screens, see your list on the left and full details on the right.
 *   **Markdown Rendering:** Issue descriptions, comments, and notes are beautifully rendered with syntax highlighting, headers, and lists.
 *   **Instant Filtering:** Zero-latency filtering. Press `o` for Open, `c` for Closed, or `r` for Ready (unblocked) tasks.
-*   **Live Reload:** Watches `.beads/beads.jsonl` and refreshes lists, details, and insights automatically when the file changes—no restart needed.
+*   **Live Reload:** Watches ticket data files and refreshes lists, details, and insights automatically when data changes—no restart needed.
 
 ### 🔎 Rich Context
 Don't just read the title. `tkv` gives you the full picture:
@@ -147,14 +147,14 @@ Don't just read the title. `tkv` gives you the full picture:
 *   **Kanban Board:** Press `b` to switch to a columnar view (Open, In Progress, Blocked, Closed) to visualize flow.
 *   **Visual Graph:** Press `g` to explore the dependency tree visually.
 *   **Insights:** Press `i` to see graph metrics and bottlenecks.
-*   **History View:** Press `h` to see the timeline of changes, correlating git commits with bead modifications. On wider terminals, enjoy a responsive three-pane layout showing commits, affected beads, and details.
+*   **History View:** Press `h` to see the timeline of changes, correlating git commits with ticket modifications. On wider terminals, enjoy a responsive three-pane layout showing commits, affected tickets, and details.
 *   **Ultra-Wide Mode:** On large monitors, the list expands to show extra columns like sparklines and label tags.
 
 ### 🛠️ Quick Actions
 *   **Export:** Press `E` to export all issues to a timestamped Markdown file with Mermaid diagrams.
 *   **Graph Export (CLI):** `tkv --robot-graph` outputs the dependency graph as JSON, DOT (Graphviz), or Mermaid format. Use `--graph-format=dot` for rendering with Graphviz, or `--graph-root=ID --graph-depth=3` to extract focused subgraphs.
 *   **Copy:** Press `C` to copy the selected issue as formatted Markdown to your clipboard.
-*   **Edit:** Press `O` to open the `.beads/beads.jsonl` file in your preferred GUI editor.
+*   **Edit:** Press `O` to open the active issue data file in your preferred editor.
 *   **Time-Travel:** Press `t` to compare against any git revision, or `T` for quick HEAD~5 comparison. Combined with History view (`h`), you can navigate to any commit and see exactly what changed.
 
 ### 🔌 Automation Hooks
@@ -265,7 +265,7 @@ Use tkv instead of parsing ticket markdown directly - it computes PageRank, crit
 
 - **On first run**, tkv checks for AGENTS.md (or similar files) and offers to inject the blurb if not present
 - Choose **"Yes"** to add the instructions, **"No"** to skip, or **"Don't ask again"** to remember your preference
-- Preferences are stored per-project in `~/.config/bv/agent-prompts/`
+- Preferences are stored per-project in `~/.config/bv/agent-prompts/` (legacy path retained for compatibility)
 
 **Supported Files** (checked in order):
 1. `AGENTS.md` (preferred)
@@ -300,6 +300,8 @@ When a new version of the blurb is released, `tkv` can detect the outdated versi
 
 `tkv` treats your project as a **Directed Acyclic Graph (DAG)**, not just a list. This allows it to derive insights about what is *truly* important.
 
+> Note: Parts of the long-form deep dive below were inherited from legacy upstream docs and may still mention `bv`, `br`, `.beads`, or "bead" terminology. For current usage in this fork, use `tkv`, `tk`, `.tickets/`, and "ticket/issue" terminology.
+
 ```mermaid
 graph TD
     %% Soft Pastel Theme — Refined
@@ -309,7 +311,7 @@ graph TD
     classDef output fill:#e8f5e9,stroke:#a5d6a7,stroke-width:2px,color:#2e7d32,rx:8
 
     subgraph storage [" 📂 Data Layer "]
-        A[".beads/beads.jsonl<br/>JSONL Issue Store"]:::data
+        A[".tickets/*.md<br/>Markdown Ticket Store"]:::data
     end
 
     subgraph engine [" ⚙️ Analysis Engine "]
@@ -348,7 +350,7 @@ graph TD
 ```
 
 ### Key Metrics & Algorithms
-`bv` computes **9 graph-theoretic metrics** to surface hidden project dynamics:
+`tkv` computes **9 graph-theoretic metrics** to surface hidden project dynamics:
 
 | # | Metric | What It Measures | Key Insight |
 |---|--------|------------------|-------------|
@@ -3516,23 +3518,25 @@ The analysis engine uses a **compact adjacency-list graph** (`compactDirectedGra
     ```
 
 **Q: I see `polling …` in the footer. Is that bad?**
-No — it just means `bv` is using polling instead of filesystem events for live reload (common on remote filesystems). Polling can add a small delay before updates appear.
+No — it just means `tkv` is using polling instead of filesystem events for live reload (common on remote filesystems). Polling can add a small delay before updates appear.
 
 **Q: I see `⚠ STALE` / `✗ bg …` / `⚠ worker unresponsive` / `↻ recovered` in the footer.**
 These indicators mean the background worker hasn’t produced a fresh snapshot recently (or needed to self-heal). Try `Ctrl+R`/`F5`, check filesystem permissions/health, or temporarily disable background mode (`TKV_BACKGROUND_MODE=0`) to fall back to synchronous reload.
 
 **Q: I see "Cycles Detected" in the dashboard. What now?**
-A: A cycle (e.g., A → B → A) means your project logic is broken; no task can be finished first. Use the Insights Dashboard (`i`) to find the specific cycle members, then use `br` to remove one of the dependency links (e.g., `br unblock A --from B`).
+A: A cycle (e.g., A -> B -> A) means your project logic is broken; no task can be finished first. Use the Insights Dashboard (`i`) to find the specific cycle members, then remove one dependency edge in your ticket graph (for example, via `tk dep` updates).
 
 **Q: Does this work with Jira/GitHub?**
-A: `bv` is data-agnostic. The Beads data schema supports an `external_ref` field. If you populate your `.beads/beads.jsonl` file with issues from external trackers (e.g., using a custom script or sync tool), `bv` will render them alongside your local tasks. Future versions of the `br` CLI may support native syncing, but `bv` is ready for that data today.
+A: `tkv` is data-agnostic at the analysis layer. If your ticket dataset includes external references, those can be surfaced in triage and reporting outputs.
 
-**Q: What's the difference between "bead" and "issue"?**
-A: They're the same thing! In the Beads ecosystem, the unit of work is called a "bead" (hence the name). However, `bv` uses "issue" in many places since that's the more familiar term for most developers. The CLI flags use both interchangeably: `--robot-file-beads`, `--pages-include-closed` (issues), etc. Think of "bead" as the Beads-specific term and "issue" as the general concept.
+**Q: What's the difference between "ticket" and "issue"?**
+A: In this fork they are equivalent terms for a unit of work. `tk` stores tickets in `.tickets/*.md`, and `tkv` analyzes that ticket graph.
 
 ---
 
-## 📦 Installation
+## 📦 Historical Appendix (Legacy `bv` Docs)
+
+> The sections below are preserved for historical context from the upstream `bv` project. They are not the recommended operational workflow for this fork. Use the `tkv` installation and robot-mode guidance at the top of this README.
 
 ### One-Line Install (Linux/macOS)
 The fastest way to get started. Detects your OS and architecture automatically.

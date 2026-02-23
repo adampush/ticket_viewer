@@ -1,4 +1,4 @@
-# AGENTS.md — beads_viewer
+# AGENTS.md — ticket_viewer
 
 > Guidelines for AI coding agents working in this Go codebase.
 
@@ -204,7 +204,7 @@ go test -run TestSpecificName ./pkg/...
 |---------|-------------|
 | `pkg/analysis` | Graph metrics (PageRank, betweenness, HITS, eigenvector, k-core), triage, planning, priority detection |
 | `pkg/search` | Hybrid semantic search (text + graph metrics), FTS5, ranking, presets |
-| `pkg/correlation` | Bead-to-commit correlation, orphan detection, history tracking |
+| `pkg/correlation` | Ticket-to-commit correlation, orphan detection, history tracking |
 | `pkg/export` | Static site export, HTML bundle generation, GitHub Pages deployment |
 | `pkg/loader` | JSONL parsing, bead loading, validation |
 | `pkg/ui` | TUI views, robot output formatting, lipgloss styling |
@@ -229,9 +229,9 @@ If you aren't 100% sure how to use a third-party library, **SEARCH ONLINE** to f
 
 ---
 
-## beads_viewer — This Project
+## ticket_viewer — This Project
 
-**This is the project you're working on.** beads_viewer (`bv`) is a graph-aware triage engine for ticket graphs. It targets `tk` sources (`.tickets/*.md`). It computes PageRank, betweenness, critical path, cycles, HITS, eigenvector, and k-core metrics deterministically. It provides both an interactive TUI and machine-readable `--robot-*` JSON outputs for AI agent consumption.
+**This is the project you're working on.** ticket_viewer (`tkv`) is a graph-aware triage engine for ticket graphs. It targets `tk` sources (`.tickets/*.md`). It computes PageRank, betweenness, critical path, cycles, HITS, eigenvector, and k-core metrics deterministically. It provides both an interactive TUI and machine-readable `--robot-*` JSON outputs for AI agent consumption.
 
 ### What It Does
 
@@ -258,16 +258,16 @@ Analyzes issue graphs to produce actionable triage recommendations, parallel exe
 ### Project Structure
 
 ```
-beads_viewer/
+ticket_viewer/
 ├── go.mod                          # Module root (Go 1.25+)
 ├── cmd/bv/                         # CLI entry point (cobra)
 ├── pkg/
 │   ├── analysis/                   # Graph metrics, triage, planning, priority, forecasting
 │   ├── search/                     # Hybrid semantic search (text + graph, FTS5)
-│   ├── correlation/                # Bead-to-commit correlation, orphan detection
+│   ├── correlation/                # Ticket-to-commit correlation, orphan detection
 │   ├── export/                     # Static site export (HTML/JS bundle, GitHub Pages)
-│   ├── loader/                     # JSONL parsing, bead loading, validation
-│   ├── model/                      # Core data types (Bead, Dependency, etc.)
+│   ├── loader/                     # JSONL parsing, ticket loading, validation
+│   ├── model/                      # Core data types (Issue, Dependency, etc.)
 │   ├── ui/                         # TUI views (bubbletea), lipgloss styling, robot output
 │   ├── watcher/                    # Filesystem watching, daemon mode, debouncing
 │   ├── hooks/                      # Git hooks integration
@@ -360,8 +360,8 @@ The output is a self-contained HTML/JS bundle that:
 
 **For CI/CD integration:**
 ```bash
-tkv --export-pages ./bv-pages --pages-title "Nightly Build"
-# Then deploy ./bv-pages to your hosting of choice
+tkv --export-pages ./tkv-pages --pages-title "Nightly Build"
+# Then deploy ./tkv-pages to your hosting of choice
 ```
 
 ### Go Best Practices
@@ -445,7 +445,7 @@ A mail-like layer that lets coding agents coordinate asynchronously via MCP tool
 
 3. **Communicate with threads:**
    ```
-   send_message(..., thread_id="bv-123")
+   send_message(..., thread_id="tkv-123")
    fetch_inbox(project_key, agent_name)
    acknowledge_message(project_key, agent_name, message_id)
    ```
@@ -473,13 +473,30 @@ A mail-like layer that lets coding agents coordinate asynchronously via MCP tool
 
 This project originally used Beads/`br` for task tracking. Current implementation workflow is `tk`-canonical.
 
+## Legacy Terminology Policy
+
+Use `tkv`/`tk`/ticket terminology in all active user-facing and implementation surfaces. Legacy `beads`/`bv`/`br` terms are only allowed in explicitly historical or compatibility-bound contexts.
+
+Allowed legacy contexts:
+- Historical documentation sections that are clearly labeled as archive/reference material (for example migration plans and historical appendices)
+- Test fixtures and compatibility tests that intentionally exercise legacy `.beads` inputs or legacy ID samples (for example `bd-*` data)
+- Compatibility markers and identifiers that are part of persisted format/contracts (`<!-- bv-agent-instructions-v1 -->`, ticket IDs with `bv-` prefix)
+- Repository/layout names that are intentionally retained for compatibility (`cmd/bv`, `bv-graph-wasm`)
+
+Disallowed legacy contexts:
+- New or updated operational instructions in README/AGENTS
+- New runtime/user-facing strings in `cmd/`, `pkg/`, `internal/`, scripts, or CI messaging
+- New examples for agent workflows and robot command usage
+
+When touching a file that intentionally keeps legacy terms, add a short "historical/compatibility" note nearby so future cleanups can distinguish intentional retention from regressions.
+
 ---
 
-## bv — Graph-Aware Triage Engine
+## tkv — Graph-Aware Triage Engine
 
-bv is a graph-aware triage engine for ticket graphs. It currently targets `tk` sources (`.tickets/*.md`) and computes PageRank, betweenness, critical path, cycles, HITS, eigenvector, and k-core metrics deterministically.
+tkv is a graph-aware triage engine for ticket graphs. It currently targets `tk` sources (`.tickets/*.md`) and computes PageRank, betweenness, critical path, cycles, HITS, eigenvector, and k-core metrics deterministically.
 
-**Scope boundary:** bv handles *what to work on* (triage, priority, planning). For agent-to-agent coordination (messaging, work claiming, file reservations), use MCP Agent Mail.
+**Scope boundary:** tkv handles *what to work on* (triage, priority, planning). For agent-to-agent coordination (messaging, work claiming, file reservations), use MCP Agent Mail.
 
 **CRITICAL: Use ONLY `--robot-*` flags. Bare `tkv` launches an interactive TUI that blocks your session.**
 
@@ -517,7 +534,7 @@ tkv --robot-next         # Minimal: just the single top pick + claim command
 **History & Change Tracking:**
 | Command | Returns |
 |---------|---------|
-| `--robot-history` | Bead-to-commit correlations |
+| `--robot-history` | Ticket-to-commit correlations |
 | `--robot-diff --diff-since <ref>` | Changes since ref: new/closed/modified issues, cycles |
 
 **Other:**
@@ -692,7 +709,7 @@ rg -l -t go 'sync.Mutex' | xargs ast-grep run -l Go -p 'mu.Lock()'
 
 ```
 mcp__morph-mcp__warp_grep(
-  repoPath: "/dp/beads_viewer",
+  repoPath: "/dp/ticket_viewer",
   query: "How does the correlation package detect orphan commits?"
 )
 ```
@@ -719,7 +736,7 @@ This project uses `tk` as the canonical task tracker for implementation workflow
 
 ```bash
 # View issues (launches TUI - avoid in automated sessions)
-bv
+tkv
 
 # CLI commands for agents (use these instead)
 tk ready                               # Show tickets ready to work (no blockers)
