@@ -325,7 +325,7 @@ func (m TutorialModel) renderHeader(page TutorialPage, totalPages int) string {
 			Render(strings.Repeat("░", barWidth-filledWidth))
 
 	// Title
-	title := titleStyle.Render("📚 beads_viewer Tutorial")
+	title := titleStyle.Render("📚 Ticket Viewer Tutorial")
 
 	// Calculate spacing to align progress to the right
 	headerContent := title + "  " + progressText + " " + progressBar
@@ -1030,11 +1030,11 @@ func defaultTutorialPages() []TutorialPage {
 // =============================================================================
 
 // introWelcomeContent is Page 1 of the Introduction section.
-const introWelcomeContent = `## Welcome to beads_viewer
+const introWelcomeContent = `## Welcome to Ticket Viewer
 
 ` + "```" + `
     ╭──────────────────────────────────────╮
-    │      beads_viewer (bv)               │
+    │      Ticket Viewer (tkv)             │
     │  Issue tracking that lives in code   │
     ╰──────────────────────────────────────╯
 ` + "```" + `
@@ -1043,7 +1043,7 @@ const introWelcomeContent = `## Welcome to beads_viewer
 You switch to a browser, navigate to your issue tracker, lose context,
 and break your concentration.
 
-**The solution:** ` + "`bv`" + ` brings issue tracking *into your terminal*, where you already work.
+**The solution:** ` + "`tkv`" + ` brings issue tracking *into your terminal*, where you already work.
 No browser tabs. No context switching. No cloud dependencies.
 
 ### The 30-Second Value Proposition
@@ -1056,19 +1056,18 @@ No browser tabs. No context switching. No cloud dependencies.
 > Press **→** or **Space** to continue.`
 
 // introPhilosophyContent is Page 2 of the Introduction section.
-const introPhilosophyContent = `## The Beads Philosophy
+const introPhilosophyContent = `## Issue-First Philosophy
 
-Why "beads"? Think of git commits as **beads on a string** — each one a
-discrete, meaningful step in your project's history.
+Think of git commits as discrete, meaningful steps in your project's history.
 
-Issues are beads too. They're snapshots of work: what needs doing, what's
+Issues are snapshots of work: what needs doing, what's
 in progress, what's complete. They belong *with your code*, not in some
 external system.
 
 ### Core Principles
 
 **1. Issues as First-Class Citizens**
-Your ` + "`.beads/`" + ` directory is just as important as your ` + "`src/`" + `.
+Your issue data is just as important as your ` + "`src/`" + `.
 Issues get the same git treatment as code: branching, merging, history.
 
 **2. No External Dependencies**
@@ -1080,7 +1079,7 @@ Issues are stored as plain JSONL. You can ` + "`git diff`" + ` your backlog.
 You can ` + "`grep`" + ` for patterns across all issues.
 
 **4. Human and Agent Readable**
-The same data works for both humans (via ` + "`bv`" + `) and AI agents (via ` + "`--robot-*`" + ` flags).
+The same data works for both humans (via ` + "`tkv`" + `) and AI agents (via ` + "`--robot-*`" + ` flags).
 
 > Press **→** to continue.`
 
@@ -1096,21 +1095,21 @@ backs up with your code, and travels wherever you push.
 ### Small Teams
 
 Want lightweight issue tracking without the subscription fees?
-Share your ` + "`.beads/`" + ` directory through git. Everyone sees the same
+Share your issue data through git. Everyone sees the same
 state. No sync issues. No "who has the latest?"
 
 ### AI Coding Agents
 
-This is where bv shines. AI agents like Claude, Cursor, and Codex
+This is where tkv shines. AI agents like Claude, Cursor, and Codex
 need structured task management. The ` + "`--robot-*`" + ` flags output
 machine-readable formats perfect for agent consumption:
 
-` + "```bash\nbv --robot-triage    # What should I work on?\nbv --robot-plan      # How can work be parallelized?\n```" + `
+` + "```bash\ntkv --robot-triage    # What should I work on?\ntkv --robot-plan      # How can work be parallelized?\n```" + `
 
 ### Anyone Tired of Context-Switching
 
 If you've ever lost your train of thought switching between your
-editor and a web-based issue tracker, bv is for you. Stay in the
+editor and a web-based issue tracker, tkv is for you. Stay in the
 terminal. Stay in flow.
 
 > Press **→** to continue.`
@@ -1118,7 +1117,7 @@ terminal. Stay in flow.
 // introQuickstartContent is Page 4 of the Introduction section.
 const introQuickstartContent = `## Quick Start
 
-You're already running ` + "`bv`" + ` — you're ahead of the game!
+You're already running ` + "`tkv`" + ` — you're ahead of the game!
 
 ### Basic Navigation
 
@@ -1127,7 +1126,7 @@ You're already running ` + "`bv`" + ` — you're ahead of the game!
 | **j / k** | Move down / up |
 | **Enter** | Open issue details |
 | **Esc** | Close overlay / go back |
-| **q** | Quit bv |
+| **q** | Quit tkv |
 
 ### Switching Views
 
@@ -1198,9 +1197,9 @@ the complete picture.
 | **chore** | Maintenance, cleanup, tech debt |
 | **docs** | Documentation work |
 
-### How Beads Are Stored
+### How Issues Are Stored
 
-Your issues live in ` + "`.beads/issues.jsonl`" + ` — a simple JSON Lines file:
+Your issues live in your project issue dataset in git:
 
 ` + "```" + `json
 {"id":"bv-abc123","title":"Fix auth","type":"bug","priority":1,...}
@@ -1256,13 +1255,13 @@ Press **r** in List view to filter to **ready** issues only:
 This is your **actionable work queue**. These issues have no dependencies
 blocking them — you can start any of them right now.
 
-> **Tip:** Start your day with ` + "`br ready`" + ` to see what you can tackle.
+> **Tip:** Start your day with ` + "`tk ready`" + ` to see what you can tackle.
 
 ### Adding Dependencies
 
 From the command line:
 
-` + "```bash\nbr dep add bv-def2 bv-abc1   # def2 depends on abc1\n```" + `
+` + "```bash\ntk dep bv-def2 bv-abc1   # def2 depends on abc1\n```" + `
 
 This creates the blocking relationship shown above.
 
@@ -1382,7 +1381,7 @@ This surfaces issues that are both important AND blocking other work.
 
 Or from the command line:
 
-` + "```bash\nbr update bv-abc123 --priority=P1\nbr update bv-abc123 --status=in_progress\n```" + `
+` + "```bash\ntk update bv-abc123 --priority=P1\ntk start bv-abc123\n```" + `
 
 > Press **→** to continue.`
 
@@ -1452,7 +1451,7 @@ The graph reveals:
 - **Parallel tracks**: Independent work streams
 - **Priority inversions**: Low-priority blocking high-priority
 
-> **Tip:** Use ` + "`br blocked`" + ` to quickly see all blocked issues.
+> **Tip:** Use ` + "`tk blocked`" + ` to quickly see all blocked issues.
 
 > Press **→** to continue to Views & Navigation.`
 
@@ -1493,7 +1492,7 @@ These work in every view:
 | **?** | Help overlay |
 | **Esc** | Close overlay / go back |
 | **Enter** | Select / open |
-| **q** | Quit bv |
+| **q** | Quit tkv |
 
 ### The Shortcuts Sidebar
 
@@ -1770,7 +1769,7 @@ Press **h** to see the git-integrated timeline of your project.
 ### History Features
 
 - **Git commits** with associated bead changes
-- **Bead-only changes** from ` + "`br`" + ` commands
+- **Issue-only changes** from ` + "`tk`" + ` commands
 - **Time-travel preview**: See project state at any point
 
 ### History Navigation
@@ -2027,7 +2026,7 @@ Manage multiple repositories as a single unified project.
 
 ### Setting Up a Workspace
 
-Create a ` + "`.beads/workspace.json`" + `:
+Create a workspace config:
 
 ` + "```json\n{\n  \"name\": \"My Product\",\n  \"repos\": [\n    { \"path\": \"../frontend\", \"prefix\": \"fe\" },\n    { \"path\": \"../backend\", \"prefix\": \"be\" },\n    { \"path\": \"../shared\", \"prefix\": \"sh\" }\n  ]\n}\n```" + `
 
@@ -2056,7 +2055,7 @@ In workspace mode, all views aggregate across repos:
 
 Issues can depend on issues in other repos:
 
-` + "```bash\nbr dep add fe-abc1 be-def2   # Frontend blocked by backend\n```" + `
+` + "```bash\ntk dep fe-abc1 be-def2   # Frontend blocked by backend\n```" + `
 
 The graph view shows these cross-repo relationships.
 
@@ -2073,7 +2072,7 @@ Press **w** to open the repo picker, then:
 
 ### Robot Mode
 
-` + "```bash\nbv --robot-triage              # Workspace-wide triage\nbv --robot-plan               # Cross-repo execution plan\n```" + `
+` + "```bash\ntkv --robot-triage              # Workspace-wide triage\ntkv --robot-plan               # Cross-repo execution plan\n```" + `
 
 > **Note:** Workspace mode requires all repos to be accessible locally.
 
@@ -2118,7 +2117,7 @@ Press **R** (capital R) to open recipes:
 
 ### Creating Custom Recipes
 
-Recipes are stored in ` + "`.beads/recipes.json`" + `:
+Recipes are stored in your project recipe config:
 
 ` + "```json\n{\n  \"recipes\": [\n    {\n      \"name\": \"My Team's Work\",\n      \"filter\": {\n        \"labels\": [\"team-alpha\"],\n        \"status\": [\"open\", \"in_progress\"],\n        \"priority_max\": 2\n      },\n      \"sort\": \"priority\"\n    }\n  ]\n}\n```" + `
 
@@ -2138,7 +2137,7 @@ Available filter options:
 
 ### Sharing Recipes
 
-Since recipes live in ` + "`.beads/`" + `, they're version controlled:
+Since recipes live in your project issue data, they're version controlled:
 
 - Commit your recipes to share with team
 - Different branches can have different recipes
@@ -2146,7 +2145,7 @@ Since recipes live in ` + "`.beads/`" + `, they're version controlled:
 
 ### Robot Mode
 
-` + "```bash\nbv --recipe \"Sprint Ready\" --robot-triage\n```" + `
+` + "```bash\ntkv --recipe \"Sprint Ready\" --robot-triage\n```" + `
 
 Apply any recipe as a pre-filter for robot commands.
 
@@ -2180,20 +2179,20 @@ Regular bv is for humans. **Robot mode** is for agents:
 ` + "```" + `
 1. Agent calls: tkv --robot-next
 2. Receives: { "id": "bv-abc1", "title": "Fix auth" }
-3. Agent runs: br update bv-abc1 --status=in_progress
+3. Agent runs: tk start bv-abc1
 4. Agent does the work...
-5. Agent runs: br close bv-abc1
+5. Agent runs: tk close bv-abc1 -r "Completed"
 6. Agent calls: tkv --robot-next (repeat)
 ` + "```" + `
 
-### The br CLI (for Agents)
+### The tk CLI (for Agents)
 
 | Command | Purpose |
 |---------|---------|
-| ` + "`br ready`" + ` | List actionable issues |
-| ` + "`br update <id> --status=in_progress`" + ` | Claim work |
-| ` + "`br close <id>`" + ` | Complete work |
-| ` + "`br sync`" + ` | Commit changes to git |
+| ` + "`tk ready`" + ` | List actionable issues |
+| ` + "`tk start <id>`" + ` | Claim work |
+| ` + "`tk close <id> -r \"Completed\"`" + ` | Complete work |
+| ` + "`git commit`" + ` | Commit changes to git |
 
 ### AGENTS.md Integration
 
@@ -2233,7 +2232,7 @@ Check: Is anything blocking this? Are there related tasks?
 
 ### Step 3: Claim the Work
 
-` + "```bash\nbr update bv-xyz1 --status=in_progress\n```" + `
+` + "```bash\ntk start bv-xyz1\n```" + `
 
 The issue moves to "In Progress" — other agents/devs know it's claimed.
 
@@ -2241,19 +2240,19 @@ The issue moves to "In Progress" — other agents/devs know it's claimed.
 
 As you work, you realize there are sub-tasks:
 
-` + "```bash\nbr create --title=\"Implement auth logic\" --type=task --priority=2\nbr create --title=\"Add API endpoint\" --type=task --priority=2\nbr create --title=\"Write tests\" --type=task --priority=2\n\n# Set dependencies\nbr dep add bv-tests bv-endpoint   # Tests depend on endpoint\nbr dep add bv-endpoint bv-auth    # Endpoint depends on auth\n```" + `
+` + "```bash\ntk create \"Implement auth logic\" -t task -p 2\ntk create \"Add API endpoint\" -t task -p 2\ntk create \"Write tests\" -t task -p 2\n\n# Set dependencies\ntk dep bv-tests bv-endpoint   # Tests depend on endpoint\ntk dep bv-endpoint bv-auth    # Endpoint depends on auth\n```" + `
 
 ### Step 5: Work Through Sub-Tasks
 
-` + "```bash\n# Start first sub-task\nbr update bv-auth --status=in_progress\n# ... do the work ...\nbr close bv-auth\n\n# Endpoint is now unblocked!\nbr update bv-endpoint --status=in_progress\n# ... continue ...\n```" + `
+` + "```bash\n# Start first sub-task\ntk start bv-auth\n# ... do the work ...\ntk close bv-auth -r \"Completed\"\n\n# Endpoint is now unblocked!\ntk start bv-endpoint\n# ... continue ...\n```" + `
 
 ### Step 6: Complete and Sync
 
-` + "```bash\nbr close bv-xyz1              # Close parent feature\nbr sync                        # Commit all changes to git\n```" + `
+` + "```bash\ntk close bv-xyz1 -r \"Completed\"  # Close parent feature\n# then commit all code changes\n```" + `
 
 ### Pro Tips
 
-- **Check ` + "`br ready`" + `** after each close — new work may have unblocked
+- **Check ` + "`tk ready`" + `** after each close — new work may have unblocked
 - **Use ` + "`g`" + ` (graph view)** to visualize the sub-task structure
 - **Set realistic priorities** — P2 for standard work, P1 only for blockers
 
@@ -2269,11 +2268,11 @@ When a bug comes in, here's how to triage it efficiently.
 Bug arrives (from user, agent, or monitoring):
 - "Login fails for users with special characters in email"
 
-` + "```bash\nbr create --title=\"Login fails with special chars in email\" \\\n  --type=bug --priority=2\n```" + `
+` + "```bash\ntk create \"Login fails with special chars in email\" -t bug -p 2\n```" + `
 
 ### Step 2: Assess Severity
 
-In bv, select the new issue and press **S** for triage suggestions:
+In tkv, select the new issue and press **S** for triage suggestions:
 
 ` + "```" + `
 ┌─────────────────────────────────────────────────────┐
@@ -2294,7 +2293,7 @@ In bv, select the new issue and press **S** for triage suggestions:
 | Medium | P2 | Feature degraded |
 | Low | P3-P4 | Minor, cosmetic |
 
-` + "```bash\nbr update bv-bug1 --priority=1   # This is P1 - blocks logins\n```" + `
+` + "```bash\ntk update bv-bug1 --priority=1   # This is P1 - blocks logins\n```" + `
 
 ### Step 4: Add Labels for Categorization
 
@@ -2307,17 +2306,17 @@ Press **L** to open label picker, select:
 
 Does this bug block other work?
 
-` + "```bash\nbr dep add bv-feature1 bv-bug1  # Feature is blocked by this bug\n```" + `
+` + "```bash\ntk dep bv-feature1 bv-bug1  # Feature is blocked by this bug\n```" + `
 
-Now bv-feature1 won't show in ` + "`br ready`" + ` until the bug is fixed.
+Now bv-feature1 won't show in ` + "`tk ready`" + ` until the bug is fixed.
 
 ### Step 6: Assign or Leave for Pickup
 
 Option A: Assign to someone
-` + "```bash\nbr update bv-bug1 --assignee=@alice\n```" + `
+` + "```bash\ntk update bv-bug1 --assignee=@alice\n```" + `
 
 Option B: Leave unassigned
-- High-priority bugs surface in ` + "`br ready`" + ` automatically
+- High-priority bugs surface in ` + "`tk ready`" + ` automatically
 - The triage system will recommend them
 
 ### Summary Checklist
@@ -2434,7 +2433,7 @@ Tell them about the help system:
 
 Find a good starter issue:
 
-` + "```bash\n# In bv: press L, select \"good-first-issue\" label\nbr list --label=good-first-issue --status=open\n```" + `
+` + "```bash\n# In tkv: press L, select \"good-first-issue\" label\ntk list --label=good-first-issue --status open\n```" + `
 
 Starter issues should:
 - Have clear scope
@@ -2448,10 +2447,10 @@ Guide them through:
 1. **Find the issue**: Use filters (o/r) and search (/)
 2. **Review details**: Press Enter to see full description
 3. **Check dependencies**: Press g for graph view
-4. **Claim it**: ` + "`br update ID --status=in_progress`" + `
+4. **Claim it**: ` + "`tk start ID`" + `
 5. **Do the work**: Regular development process
-6. **Close it**: ` + "`br close ID`" + `
-7. **Sync**: ` + "`br sync`" + ` commits everything
+6. **Close it**: ` + "`tk close ID -r \"Completed\"`" + `
+7. **Commit**: commit code and ticket notes together
 
 ### Step 5: Explain the Mental Model
 
@@ -2465,11 +2464,11 @@ Key concepts for new team members:
 ### Onboarding Checklist
 
 ` + "```" + `
-[ ] Clone repo, verify bv runs
+[ ] Clone repo, verify tkv runs
 [ ] Complete tutorial (or at least Quick Start)
 [ ] Assign first issue (good-first-issue label)
 [ ] Walk through claim → work → close cycle
-[ ] Verify br sync works
+[ ] Verify tk workflow works
 ` + "```" + `
 
 > Press **→** to continue.`

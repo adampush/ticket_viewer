@@ -1,5 +1,5 @@
 /**
- * Beads Viewer - Static SQL.js WASM-based issue viewer
+ * Ticket Viewer - Static SQL.js WASM-based issue viewer
  *
  * Follows mcp_agent_mail's architecture for client-side sql.js querying with:
  * - OPFS caching for offline support
@@ -597,7 +597,7 @@ async function loadDatabase(updateStatus) {
     showError({
       title: 'Database Not Found',
       message: 'Could not load the issues database.',
-      details: `${err.message}\n\nThe beads.sqlite3 file may be missing or corrupted.`,
+      details: `${err.message}\n\nThe issue database file may be missing or corrupted.`,
       actions: [
         { label: 'Reload Page', action: () => location.reload() },
       ],

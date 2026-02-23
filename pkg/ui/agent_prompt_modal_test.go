@@ -211,8 +211,8 @@ func TestGetBlurbPreview(t *testing.T) {
 	}
 
 	// Should contain some key content
-	if !strings.Contains(preview, "Beads") {
-		t.Error("Preview should contain 'Beads'")
+	if !strings.Contains(preview, "Ticket") {
+		t.Error("Preview should contain 'Ticket'")
 	}
 
 	// Should not contain HTML comments (markers)

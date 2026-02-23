@@ -15,14 +15,14 @@ import (
 // Note: WriteGitHubActionsWorkflow is defined in github.go
 
 // ViewerAssetsFS embeds the viewer_assets directory for static site export.
-// This allows the bv binary to include all necessary HTML/JS/CSS assets
+// This allows the tkv binary to include all necessary HTML/JS/CSS assets
 // without requiring them to exist on the filesystem.
 //
 //go:embed viewer_assets
 var ViewerAssetsFS embed.FS
 
 // CopyEmbeddedAssets copies all embedded viewer assets to the specified output directory.
-// If title is provided, it replaces "Beads Viewer" in index.html.
+// If title is provided, it replaces "Ticket Viewer" in index.html.
 func CopyEmbeddedAssets(outputDir, title string) error {
 	// Walk the embedded filesystem and copy all files
 	err := fs.WalkDir(ViewerAssetsFS, "viewer_assets", func(path string, d fs.DirEntry, err error) error {
@@ -97,10 +97,11 @@ func replaceTitle(content, title string) string {
 	safeTitle := html.EscapeString(title)
 
 	// Replace title in <title> tag
-	content = strings.Replace(content, "<title>Beads Viewer</title>", "<title>"+safeTitle+"</title>", 1)
+	content = strings.Replace(content, "<title>Ticket Viewer</title>", "<title>"+safeTitle+"</title>", 1)
 
-	// Replace title in h1 header
-	content = strings.Replace(content, `<h1 class="text-xl font-semibold">Beads Viewer</h1>`, `<h1 class="text-xl font-semibold">`+safeTitle+`</h1>`, 1)
+	// Replace title in h1 header (support both legacy and current class variants)
+	content = strings.Replace(content, `<h1 class="text-xl font-semibold">Ticket Viewer</h1>`, `<h1 class="text-xl font-semibold">`+safeTitle+`</h1>`, 1)
+	content = strings.Replace(content, `<h1 class="text-lg sm:text-xl font-semibold">Ticket Viewer</h1>`, `<h1 class="text-lg sm:text-xl font-semibold">`+safeTitle+`</h1>`, 1)
 
 	return content
 }

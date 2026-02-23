@@ -316,7 +316,7 @@ func GetLatestRelease() (*Release, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "beads-viewer-updater")
+	req.Header.Set("User-Agent", "tkv-updater")
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -341,7 +341,7 @@ func getAssetName(version string) string {
 	ver := strings.TrimPrefix(version, "v")
 	goos := runtime.GOOS
 	goarch := runtime.GOARCH
-	return fmt.Sprintf("bv_%s_%s_%s.tar.gz", ver, goos, goarch)
+	return fmt.Sprintf("tkv_%s_%s_%s.tar.gz", ver, goos, goarch)
 }
 
 // FindPlatformAsset finds the appropriate asset for the current OS/arch
@@ -375,7 +375,7 @@ func downloadFile(url, destPath string, expectedSize int64) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("User-Agent", "beads-viewer-updater")
+	req.Header.Set("User-Agent", "tkv-updater")
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -465,7 +465,7 @@ func verifyChecksum(filePath, expectedHash string) error {
 	return nil
 }
 
-// extractBinary extracts the bv binary from a .tar.gz archive
+// extractBinary extracts the tkv binary from a .tar.gz archive.
 func extractBinary(archivePath, destPath string) error {
 	f, err := os.Open(archivePath)
 	if err != nil {
@@ -489,9 +489,9 @@ func extractBinary(archivePath, destPath string) error {
 			return fmt.Errorf("tar read error: %w", err)
 		}
 
-		// Look for the bv binary (might be ./bv, bv, or just bv)
+		// Look for the tkv binary; accept legacy bv name for older archives.
 		name := filepath.Base(header.Name)
-		if name == "bv" || name == "bv.exe" {
+		if name == "tkv" || name == "tkv.exe" || name == "bv" || name == "bv.exe" {
 			out, err := os.OpenFile(destPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0755)
 			if err != nil {
 				return fmt.Errorf("failed to create binary: %w", err)
@@ -521,7 +521,7 @@ func GetBackupPath(binaryPath string) string {
 	return binaryPath + ".backup"
 }
 
-// PerformUpdate downloads and installs a new version of bv
+// PerformUpdate downloads and installs a new version of tkv.
 // Returns an UpdateResult with details about the operation
 func PerformUpdate(release *Release, skipConfirm bool) (*UpdateResult, error) {
 	result := &UpdateResult{
@@ -550,7 +550,7 @@ func PerformUpdate(release *Release, skipConfirm bool) (*UpdateResult, error) {
 
 	// Check write permissions
 	binaryDir := filepath.Dir(binaryPath)
-	testFile := filepath.Join(binaryDir, ".bv-update-test")
+	testFile := filepath.Join(binaryDir, ".tkv-update-test")
 	if f, err := os.Create(testFile); err != nil {
 		result.RequireRoot = true
 		return nil, fmt.Errorf("no write permission to %s (try running with sudo)", binaryDir)
@@ -560,7 +560,7 @@ func PerformUpdate(release *Release, skipConfirm bool) (*UpdateResult, error) {
 	}
 
 	// Create temp directory for download
-	tmpDir, err := os.MkdirTemp("", "bv-update-*")
+	tmpDir, err := os.MkdirTemp("", "tkv-update-*")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create temp directory: %w", err)
 	}
@@ -598,7 +598,7 @@ func PerformUpdate(release *Release, skipConfirm bool) (*UpdateResult, error) {
 	}
 
 	// Extract binary to temp location
-	newBinaryPath := filepath.Join(tmpDir, "bv-new")
+	newBinaryPath := filepath.Join(tmpDir, "tkv-new")
 	if runtime.GOOS == "windows" {
 		newBinaryPath += ".exe"
 	}

@@ -1,4 +1,4 @@
-// Package ui provides the terminal user interface for beads_viewer.
+// Package ui provides the terminal user interface for ticket_viewer.
 // This file implements the DataSnapshot type for thread-safe UI rendering.
 package ui
 

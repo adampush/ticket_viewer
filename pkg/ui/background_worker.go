@@ -1,4 +1,4 @@
-// Package ui provides the terminal user interface for beads_viewer.
+// Package ui provides the terminal user interface for ticket_viewer.
 // This file implements the BackgroundWorker for off-thread data processing.
 package ui
 

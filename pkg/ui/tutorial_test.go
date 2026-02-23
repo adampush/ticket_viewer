@@ -539,8 +539,8 @@ func TestTutorialViewHeader(t *testing.T) {
 	view := m.View()
 
 	// Should contain app title
-	if !strings.Contains(view, "beads_viewer Tutorial") {
-		t.Error("View should contain app title 'beads_viewer Tutorial'")
+	if !strings.Contains(view, "Ticket Viewer Tutorial") {
+		t.Error("View should contain app title 'Ticket Viewer Tutorial'")
 	}
 
 	// Should contain separator line
@@ -643,8 +643,8 @@ func TestTutorialMarkdownContent(t *testing.T) {
 
 	// Should contain rendered markdown elements
 	// Bold text should be rendered (though exact ANSI codes vary)
-	if !strings.Contains(view, "beads_viewer") {
-		t.Error("View should contain beads_viewer text")
+	if !strings.Contains(view, "Ticket Viewer") {
+		t.Error("View should contain Ticket Viewer text")
 	}
 
 	// Bullet points from markdown should be present

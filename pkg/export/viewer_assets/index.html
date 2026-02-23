@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
-  <title>Beads Viewer</title>
+  <title>Ticket Viewer</title>
 
   <!-- Mobile Web App Optimizations -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Beads">
+  <meta name="apple-mobile-web-app-title" content="TKV">
   <meta name="theme-color" content="#0ea5e9" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#1f2937" media="(prefers-color-scheme: dark)">
 
@@ -263,7 +263,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
               </svg>
             </div>
-            <h1 class="text-lg sm:text-xl font-semibold">Beads Viewer</h1>
+            <h1 class="text-lg sm:text-xl font-semibold">Ticket Viewer</h1>
           </div>
 
           <!-- Desktop Navigation tabs (hidden on mobile) -->
@@ -942,7 +942,7 @@
                   </svg>
                 </div>
                 <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">No issues to display</p>
-                <p class="text-gray-400 dark:text-gray-500 text-xs mt-1">Start by creating some beads</p>
+                <p class="text-gray-400 dark:text-gray-500 text-xs mt-1">Start by creating some issues</p>
               </div>
             </div>
           </div>
@@ -1829,11 +1829,11 @@
                 <div class="space-y-2.5 text-sm">
                   <div>
                     <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">What It Measures</div>
-                    <p class="text-gray-600 dark:text-gray-300">How often a bead lies on <strong class="text-gray-900 dark:text-white">shortest paths</strong> between other beads in the dependency graph.</p>
+                    <p class="text-gray-600 dark:text-gray-300">How often an issue lies on <strong class="text-gray-900 dark:text-white">shortest paths</strong> between other issues in the dependency graph.</p>
                   </div>
                   <div>
                     <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Why It Matters</div>
-                    <p class="text-gray-600 dark:text-gray-300">High-scoring beads are <strong class="text-gray-900 dark:text-white">critical junctions</strong>. Delays here ripple across the entire project.</p>
+                    <p class="text-gray-600 dark:text-gray-300">High-scoring issues are <strong class="text-gray-900 dark:text-white">critical junctions</strong>. Delays here ripple across the entire project.</p>
                   </div>
                   <div>
                     <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Take Action</div>
@@ -1854,8 +1854,8 @@
               <div x-show="expandedPanel === 'bottlenecks'" x-collapse
                    class="metric-panel-explanation bg-gradient-to-r from-orange-50/50 to-amber-50/30 dark:from-orange-950/20 dark:to-amber-950/10">
                 <div class="space-y-2">
-                  <p><strong class="text-orange-700 dark:text-orange-300">📐 What:</strong> Measures how often a bead lies on shortest paths between other beads.</p>
-                  <p><strong class="text-orange-700 dark:text-orange-300">💡 Why:</strong> High-scoring beads are critical junctions. Delays here ripple across the entire project.</p>
+                  <p><strong class="text-orange-700 dark:text-orange-300">📐 What:</strong> Measures how often an issue lies on shortest paths between other issues.</p>
+                  <p><strong class="text-orange-700 dark:text-orange-300">💡 Why:</strong> High-scoring issues are critical junctions. Delays here ripple across the entire project.</p>
                   <p><strong class="text-orange-700 dark:text-orange-300">🎯 Action:</strong> Prioritize these to unblock parallel workstreams. Consider breaking them into smaller pieces.</p>
                 </div>
               </div>
@@ -1920,7 +1920,7 @@
                 <div class="space-y-2.5 text-sm">
                   <div>
                     <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">What It Measures</div>
-                    <p class="text-gray-600 dark:text-gray-300">How <strong class="text-gray-900 dark:text-white">deep</strong> in the dependency chain a bead sits (downstream chain length).</p>
+                    <p class="text-gray-600 dark:text-gray-300">How <strong class="text-gray-900 dark:text-white">deep</strong> in the dependency chain an issue sits (downstream chain length).</p>
                   </div>
                   <div>
                     <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Why It Matters</div>
@@ -1944,7 +1944,7 @@
               <div x-show="expandedPanel === 'keystones'" x-collapse
                    class="metric-panel-explanation bg-gradient-to-r from-indigo-50/50 to-violet-50/30 dark:from-indigo-950/20 dark:to-violet-950/10">
                 <div class="space-y-2">
-                  <p><strong class="text-indigo-700 dark:text-indigo-300">📐 What:</strong> Measures how deep in the dependency chain a bead sits.</p>
+                  <p><strong class="text-indigo-700 dark:text-indigo-300">📐 What:</strong> Measures how deep in the dependency chain an issue sits.</p>
                   <p><strong class="text-indigo-700 dark:text-indigo-300">💡 Why:</strong> Keystones are foundational. Everything above them depends on their completion.</p>
                   <p><strong class="text-indigo-700 dark:text-indigo-300">🎯 Action:</strong> Complete these first. Blocking a keystone blocks the entire chain above it.</p>
                 </div>
@@ -2007,11 +2007,11 @@
                 <div class="space-y-2.5 text-sm">
                   <div>
                     <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">What It Measures</div>
-                    <p class="text-gray-600 dark:text-gray-300">Scores beads by their connections to other <strong class="text-gray-900 dark:text-white">well-connected</strong> beads.</p>
+                    <p class="text-gray-600 dark:text-gray-300">Scores issues by their connections to other <strong class="text-gray-900 dark:text-white">well-connected</strong> issues.</p>
                   </div>
                   <div>
                     <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Why It Matters</div>
-                    <p class="text-gray-600 dark:text-gray-300">Influencers are connected to <strong class="text-gray-900 dark:text-white">important</strong> beads. Changes here have wide-reaching effects.</p>
+                    <p class="text-gray-600 dark:text-gray-300">Influencers are connected to <strong class="text-gray-900 dark:text-white">important</strong> issues. Changes here have wide-reaching effects.</p>
                   </div>
                   <div>
                     <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Take Action</div>
@@ -2031,8 +2031,8 @@
               <div x-show="expandedPanel === 'influencers'" x-collapse
                    class="metric-panel-explanation bg-gradient-to-r from-blue-50/50 to-sky-50/30 dark:from-blue-950/20 dark:to-sky-950/10">
                 <div class="space-y-2">
-                  <p><strong class="text-blue-700 dark:text-blue-300">📐 What:</strong> Scores beads by connections to other well-connected beads (eigenvector centrality).</p>
-                  <p><strong class="text-blue-700 dark:text-blue-300">💡 Why:</strong> Influencers are connected to important beads. Changes have wide-reaching effects.</p>
+                  <p><strong class="text-blue-700 dark:text-blue-300">📐 What:</strong> Scores issues by connections to other well-connected issues (eigenvector centrality).</p>
+                  <p><strong class="text-blue-700 dark:text-blue-300">💡 Why:</strong> Influencers are connected to important issues. Changes have wide-reaching effects.</p>
                   <p><strong class="text-blue-700 dark:text-blue-300">🎯 Action:</strong> Review carefully before changes. They're central to project structure.</p>
                 </div>
               </div>
@@ -2182,7 +2182,7 @@
                 <div class="space-y-2.5 text-sm">
                   <div>
                     <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">What It Measures</div>
-                    <p class="text-gray-600 dark:text-gray-300">Beads that <strong class="text-gray-900 dark:text-white">depend on</strong> many important authorities (aggregators).</p>
+                    <p class="text-gray-600 dark:text-gray-300">Issues that <strong class="text-gray-900 dark:text-white">depend on</strong> many important authorities (aggregators).</p>
                   </div>
                   <div>
                     <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Why It Matters</div>
@@ -2206,7 +2206,7 @@
               <div x-show="expandedPanel === 'hubs'" x-collapse
                    class="metric-panel-explanation bg-gradient-to-r from-teal-50/50 to-cyan-50/30 dark:from-teal-950/20 dark:to-cyan-950/10">
                 <div class="space-y-2">
-                  <p><strong class="text-teal-700 dark:text-teal-300">📐 What:</strong> Beads that depend on many important authorities (aggregators).</p>
+                  <p><strong class="text-teal-700 dark:text-teal-300">📐 What:</strong> Issues that depend on many important authorities (aggregators).</p>
                   <p><strong class="text-teal-700 dark:text-teal-300">💡 Why:</strong> Hubs are coordination points. They represent high-level features or epics.</p>
                   <p><strong class="text-teal-700 dark:text-teal-300">🎯 Action:</strong> Track for milestones. Their completion signals major project progress.</p>
                 </div>
@@ -2269,7 +2269,7 @@
                 <div class="space-y-2.5 text-sm">
                   <div>
                     <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">What It Measures</div>
-                    <p class="text-gray-600 dark:text-gray-300">Beads that are <strong class="text-gray-900 dark:text-white">depended upon</strong> by many important hubs (providers).</p>
+                    <p class="text-gray-600 dark:text-gray-300">Issues that are <strong class="text-gray-900 dark:text-white">depended upon</strong> by many important hubs (providers).</p>
                   </div>
                   <div>
                     <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Why It Matters</div>
@@ -2293,7 +2293,7 @@
               <div x-show="expandedPanel === 'authorities'" x-collapse
                    class="metric-panel-explanation bg-gradient-to-r from-purple-50/50 to-fuchsia-50/30 dark:from-purple-950/20 dark:to-fuchsia-950/10">
                 <div class="space-y-2">
-                  <p><strong class="text-purple-700 dark:text-purple-300">📐 What:</strong> Beads depended upon by many important hubs (providers).</p>
+                  <p><strong class="text-purple-700 dark:text-purple-300">📐 What:</strong> Issues depended upon by many important hubs (providers).</p>
                   <p><strong class="text-purple-700 dark:text-purple-300">💡 Why:</strong> Authorities are foundational services that many features need.</p>
                   <p><strong class="text-purple-700 dark:text-purple-300">🎯 Action:</strong> Stabilize early. Breaking an authority breaks many dependent hubs.</p>
                 </div>
@@ -3811,7 +3811,7 @@
                 </div>
                 <div>
                   <h2 class="text-base sm:text-xl font-bold text-white">Help & Shortcuts</h2>
-                  <p class="text-xs sm:text-sm text-white/80 hidden sm:block">Master the Beads Viewer</p>
+                  <p class="text-xs sm:text-sm text-white/80 hidden sm:block">Master Ticket Viewer</p>
                 </div>
               </div>
               <button @click="showKeyboardHelp = false"

@@ -8,7 +8,7 @@ import (
 )
 
 func TestReplaceTitle_Basic(t *testing.T) {
-	html := `<html><head><title>Beads Viewer</title></head><body><h1 class="text-xl font-semibold">Beads Viewer</h1></body></html>`
+	html := `<html><head><title>Ticket Viewer</title></head><body><h1 class="text-xl font-semibold">Ticket Viewer</h1></body></html>`
 
 	result := replaceTitle(html, "My Project")
 	if !strings.Contains(result, "<title>My Project</title>") {
@@ -20,7 +20,7 @@ func TestReplaceTitle_Basic(t *testing.T) {
 }
 
 func TestReplaceTitle_Empty(t *testing.T) {
-	html := `<title>Beads Viewer</title>`
+	html := `<title>Ticket Viewer</title>`
 	result := replaceTitle(html, "")
 	if result != html {
 		t.Errorf("Empty title should return content unchanged, got: %s", result)
@@ -28,7 +28,7 @@ func TestReplaceTitle_Empty(t *testing.T) {
 }
 
 func TestReplaceTitle_XSSPrevention(t *testing.T) {
-	html := `<title>Beads Viewer</title>`
+	html := `<title>Ticket Viewer</title>`
 	result := replaceTitle(html, `<script>alert("xss")</script>`)
 	if strings.Contains(result, "<script>") {
 		t.Errorf("XSS not prevented: %s", result)
@@ -39,7 +39,7 @@ func TestReplaceTitle_XSSPrevention(t *testing.T) {
 }
 
 func TestReplaceTitle_SpecialChars(t *testing.T) {
-	html := `<title>Beads Viewer</title>`
+	html := `<title>Ticket Viewer</title>`
 	result := replaceTitle(html, `Tom & Jerry's "Project"`)
 	if !strings.Contains(result, "Tom &amp; Jerry") {
 		t.Errorf("Ampersand not escaped, got: %s", result)
@@ -138,7 +138,7 @@ func TestCopyEmbeddedAssets(t *testing.T) {
 	contentStr := string(content)
 
 	// Verify title was replaced
-	if strings.Contains(contentStr, "<title>Beads Viewer</title>") {
+	if strings.Contains(contentStr, "<title>Ticket Viewer</title>") {
 		t.Error("Title should have been replaced")
 	}
 	if !strings.Contains(contentStr, "<title>Test Project</title>") {
@@ -167,7 +167,7 @@ func TestCopyEmbeddedAssets_NoTitle(t *testing.T) {
 		t.Fatalf("Failed to read index.html: %v", err)
 	}
 
-	if !strings.Contains(string(content), "<title>Beads Viewer</title>") {
+	if !strings.Contains(string(content), "<title>Ticket Viewer</title>") {
 		t.Error("Default title should be preserved when no custom title provided")
 	}
 }

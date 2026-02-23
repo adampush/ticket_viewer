@@ -1,6 +1,6 @@
 // Package agents provides AGENTS.md integration for AI coding agents.
 // It handles detection, content injection, and preference storage for
-// automatically adding beads_viewer usage instructions to agent configuration files.
+// automatically adding ticket workflow instructions to agent configuration files.
 package agents
 
 import (
@@ -24,41 +24,41 @@ const AgentBlurb = `<!-- bv-agent-instructions-v1 -->
 
 ---
 
-## Beads Workflow Integration
+## Ticket Workflow Integration
 
-This project uses [beads_viewer](https://github.com/adampush/ticket_viewer) for issue tracking. Issues are stored in ` + "`" + `.beads/` + "`" + ` and tracked in git.
+This project uses [ticket_viewer](https://github.com/adampush/ticket_viewer) for issue tracking. Ticket files in ` + "`" + `.tickets/` + "`" + ` are tracked in git.
 
 ### Essential Commands
 
 ` + "```" + `bash
 # View issues (launches TUI - avoid in automated sessions)
-bv
+tkv
 
 # CLI commands for agents (use these instead)
-br ready              # Show issues ready to work (no blockers)
-br list --status=open # All open issues
-br show <id>          # Full issue details with dependencies
-br create --title="..." --type=task --priority=2
-br update <id> --status=in_progress
-br close <id> --reason="Completed"
-br close <id1> <id2>  # Close multiple issues at once
-br sync               # Commit and push changes
+tk ready                               # Show tickets ready to work (no blockers)
+tk list --status open                  # All open tickets
+tk show <id>                           # Full ticket details
+tk create "<title>" -t task -p 2      # Create a new task
+tk start <id>                          # Move ticket to in_progress
+tk close <id> -r "Completed"          # Close ticket with reason
+tk dep <ticket-id> <depends-on-id>     # Add dependency
+tk add-note <id> "Implementation ..." # Add implementation notes
 ` + "```" + `
 
 ### Workflow Pattern
 
-1. **Start**: Run ` + "`" + `br ready` + "`" + ` to find actionable work
-2. **Claim**: Use ` + "`" + `br update <id> --status=in_progress` + "`" + `
+1. **Start**: Run ` + "`" + `tk ready` + "`" + ` to find actionable work
+2. **Claim**: Use ` + "`" + `tk start <id>` + "`" + `
 3. **Work**: Implement the task
-4. **Complete**: Use ` + "`" + `br close <id>` + "`" + `
-5. **Sync**: Always run ` + "`" + `br sync` + "`" + ` at session end
+4. **Document**: Add notes with ` + "`" + `tk add-note <id> "..."` + "`" + `
+5. **Complete**: Use ` + "`" + `tk close <id> -r "Completed"` + "`" + `
 
 ### Key Concepts
 
-- **Dependencies**: Issues can block other issues. ` + "`" + `br ready` + "`" + ` shows only unblocked work.
+- **Dependencies**: Tickets can block other tickets. ` + "`" + `tk ready` + "`" + ` shows only unblocked work.
 - **Priority**: P0=critical, P1=high, P2=medium, P3=low, P4=backlog (use numbers, not words)
 - **Types**: task, bug, feature, epic, question, docs
-- **Blocking**: ` + "`" + `br dep add <issue> <depends-on>` + "`" + ` to add dependencies
+- **Blocking**: ` + "`" + `tk dep <ticket> <depends-on>` + "`" + ` to add dependencies
 
 ### Session Protocol
 
@@ -67,19 +67,18 @@ br sync               # Commit and push changes
 ` + "```" + `bash
 git status              # Check what changed
 git add <files>         # Stage code changes
-br sync                 # Commit beads changes
-git commit -m "..."     # Commit code
-br sync                 # Commit any new beads changes
+tk add-note <id> "..."  # Record implementation decisions + validation
+git commit -m "(tk: <id>) ..."  # Atomic ticket-aligned commit
 git push                # Push to remote
 ` + "```" + `
 
 ### Best Practices
 
-- Check ` + "`" + `br ready` + "`" + ` at session start to find available work
-- Update status as you work (in_progress → closed)
-- Create new issues with ` + "`" + `br create` + "`" + ` when you discover tasks
+- Check ` + "`" + `tk ready` + "`" + ` at session start to find available work
+- Update status as you work (` + "`" + `start` + "`" + ` -> ` + "`" + `close` + "`" + `)
+- Create new tickets with ` + "`" + `tk create` + "`" + ` when you discover tasks
 - Use descriptive titles and set appropriate priority/type
-- Always ` + "`" + `br sync` + "`" + ` before ending session
+- Keep commits atomic and ticket-scoped
 
 <!-- end-bv-agent-instructions -->`
 
@@ -113,7 +112,7 @@ var legacyBlurbEndPattern = regexp.MustCompile(`(?m)bv already computes the hard
 // Used as fallback when the end pattern isn't found.
 var legacyBlurbNextSectionPattern = regexp.MustCompile(`(?m)^#{1,2}\s+[^#]`)
 
-// ContainsBlurb checks if the content already contains a beads_viewer agent blurb.
+// ContainsBlurb checks if the content already contains an agent workflow blurb.
 func ContainsBlurb(content string) bool {
 	return strings.Contains(content, "<!-- bv-agent-instructions-v")
 }
