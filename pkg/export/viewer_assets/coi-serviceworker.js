@@ -10,7 +10,7 @@
  * License: MIT
  */
 
-const CACHE_NAME = 'beads-viewer-coi-v2';
+const CACHE_NAME = 'tkv-viewer-coi-v2';
 
 // Headers needed for cross-origin isolation
 // Using 'credentialless' instead of 'require-corp' to allow CDN resources

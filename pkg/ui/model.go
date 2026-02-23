@@ -2228,7 +2228,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.statusMsg = "Failed to update " + filepath.Base(filePath) + ": " + err.Error()
 					m.statusIsError = true
 				} else {
-					m.statusMsg = "✓ Added beads instructions to " + filepath.Base(filePath)
+					m.statusMsg = "✓ Added ticket workflow instructions to " + filepath.Base(filePath)
 					// Record acceptance
 					_ = agents.RecordAccept(m.workDir)
 				}
@@ -4553,7 +4553,7 @@ func (m Model) renderQuitConfirm() string {
 		Foreground(t.Primary).
 		Bold(true)
 
-	content := titleStyle.Render("Quit bv?") + "\n\n" +
+	content := titleStyle.Render("Quit tkv?") + "\n\n" +
 		textStyle.Render("Press ") + keyStyle.Render("Esc") + textStyle.Render(" or ") + keyStyle.Render("Y") + textStyle.Render(" to quit\n") +
 		textStyle.Render("Press any other key to cancel")
 
@@ -7221,7 +7221,7 @@ func (m *Model) exportToMarkdown() {
 // generateExportFilename creates a smart filename based on project and date
 func (m *Model) generateExportFilename() string {
 	// Get project name from current directory
-	projectName := "beads"
+	projectName := "tickets"
 	if cwd, err := os.Getwd(); err == nil {
 		projectName = filepath.Base(cwd)
 		// Sanitize: replace spaces and special chars with underscores
@@ -7233,9 +7233,9 @@ func (m *Model) generateExportFilename() string {
 		}, projectName)
 	}
 
-	// Format: beads_report_<project>_YYYY-MM-DD.md
+	// Format: ticket_report_<project>_YYYY-MM-DD.md
 	timestamp := time.Now().Format("2006-01-02")
-	return fmt.Sprintf("beads_report_%s_%s.md", projectName, timestamp)
+	return fmt.Sprintf("ticket_report_%s_%s.md", projectName, timestamp)
 }
 
 // renderTimeTravelPrompt renders the time-travel revision input overlay

@@ -299,7 +299,7 @@ func (m UpdateModal) View() string {
 			b.WriteString(subtextStyle.Render("Run 'tkv --rollback' to restore if needed"))
 			b.WriteString("\n\n")
 		}
-		b.WriteString(successStyle.Render("Restart bv to use the new version."))
+		b.WriteString(successStyle.Render("Restart tkv to use the new version."))
 		b.WriteString("\n\n")
 		b.WriteString(subtextStyle.Render("[Enter] Close"))
 

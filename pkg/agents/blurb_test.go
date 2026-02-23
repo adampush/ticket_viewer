@@ -96,8 +96,8 @@ func TestAppendBlurb(t *testing.T) {
 	}
 
 	// Should contain key content
-	if !strings.Contains(result, "br ready") {
-		t.Error("AppendBlurb() result missing 'br ready' command")
+	if !strings.Contains(result, "tk ready") {
+		t.Error("AppendBlurb() result missing 'tk ready' command")
 	}
 
 	// Should preserve original content
@@ -154,7 +154,7 @@ func TestUpdateBlurb(t *testing.T) {
 	}
 
 	// Should have current blurb content
-	if !strings.Contains(result, "br ready") {
+	if !strings.Contains(result, "tk ready") {
 		t.Error("UpdateBlurb() result missing current blurb content")
 	}
 
@@ -195,14 +195,14 @@ func TestNeedsUpdate(t *testing.T) {
 func TestAgentBlurbContent(t *testing.T) {
 	// Verify blurb contains essential commands
 	essentials := []string{
-		"br ready",
-		"br list",
-		"br show",
-		"br create",
-		"br update",
-		"br close",
-		"br sync",
-		"br dep add",
+		"tk ready",
+		"tk list",
+		"tk show",
+		"tk create",
+		"tk start",
+		"tk close",
+		"tk dep",
+		"tk add-note",
 	}
 
 	for _, cmd := range essentials {
@@ -417,7 +417,7 @@ func TestUpdateBlurbFromLegacy(t *testing.T) {
 	}
 
 	// Should have current blurb content
-	if !strings.Contains(result, "br ready") {
+	if !strings.Contains(result, "tk ready") {
 		t.Error("UpdateBlurb() from legacy missing current blurb content")
 	}
 

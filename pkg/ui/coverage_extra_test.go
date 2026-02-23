@@ -1168,7 +1168,7 @@ func TestOverlaysAndWorkspaceHelpers(t *testing.T) {
 
 	// Quit confirm overlay
 	m.showQuitConfirm = true
-	if !strings.Contains(m.View(), "Quit bv?") {
+	if !strings.Contains(m.View(), "Quit tkv?") {
 		t.Fatalf("quit overlay should render")
 	}
 	m.showQuitConfirm = false
@@ -1190,7 +1190,7 @@ func TestOverlaysAndWorkspaceHelpers(t *testing.T) {
 
 	// Export filename helper (no filesystem writes)
 	name := m.generateExportFilename()
-	if !strings.HasPrefix(name, "beads_report_") || !strings.HasSuffix(name, ".md") {
+	if !strings.HasPrefix(name, "ticket_report_") || !strings.HasSuffix(name, ".md") {
 		t.Fatalf("generateExportFilename unexpected: %s", name)
 	}
 }

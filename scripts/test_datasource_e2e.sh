@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# E2E tests for bv datasource smart selection
+# E2E tests for tkv datasource smart selection
 # Tests: source discovery, validation, fallback, inconsistency detection
 
-LOG_FILE="/tmp/bv_datasource_test_$(date +%Y%m%d_%H%M%S).log"
+LOG_FILE="/tmp/tkv_datasource_test_$(date +%Y%m%d_%H%M%S).log"
 
 PASS=0
 FAIL=0
@@ -14,13 +14,13 @@ fail() { ((FAIL++)) || true; log "✗ FAIL: $*"; }
 # Get the directory where the script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-BV_BIN="${PROJECT_DIR}/bv"
+TKV_BIN="${PROJECT_DIR}/tkv"
 
-# Check if bv binary exists
-if [[ ! -x "$BV_BIN" ]]; then
-    log "Building bv..."
-    cd "$PROJECT_DIR" && go build -o bv ./cmd/bv/ || {
-        log "Failed to build bv"
+# Check if tkv binary exists
+if [[ ! -x "$TKV_BIN" ]]; then
+    log "Building tkv..."
+    cd "$PROJECT_DIR" && go build -o tkv ./cmd/bv/ || {
+        log "Failed to build tkv"
         exit 1
     }
 fi
@@ -118,7 +118,7 @@ test_sqlite_preferred() {
 
     cd "$dir"
     local output
-    output=$("$BV_BIN" --robot-list 2>&1) || true
+    output=$("$TKV_BIN" --robot-list 2>&1) || true
 
     # Check if the issue is visible (basic functionality test)
     if echo "$output" | grep -q 'TEST-1'; then
@@ -139,7 +139,7 @@ test_fallback_on_corruption() {
 
     cd "$dir"
     local output
-    output=$("$BV_BIN" --robot-list 2>&1) || true
+    output=$("$TKV_BIN" --robot-list 2>&1) || true
 
     if echo "$output" | grep -q 'TEST-1'; then
         pass "Fallback to JSONL when SQLite corrupted"
@@ -158,7 +158,7 @@ test_empty_file_valid() {
 
     cd "$dir"
     local output
-    output=$("$BV_BIN" --robot-list 2>&1) || true
+    output=$("$TKV_BIN" --robot-list 2>&1) || true
 
     # Empty file should not cause panic
     if echo "$output" | grep -qi "panic"; then
@@ -195,7 +195,7 @@ EOF
 
     cd "$dir"
     local output
-    output=$("$BV_BIN" --robot-list 2>&1) || true
+    output=$("$TKV_BIN" --robot-list 2>&1) || true
 
     # Check if multiple issues are loaded
     if echo "$output" | grep -q 'TEST-1'; then
@@ -207,8 +207,8 @@ EOF
 
 # Run all tests
 log "========================================="
-log "Starting bv datasource E2E tests"
-log "BV binary: $BV_BIN"
+log "Starting tkv datasource E2E tests"
+log "TKV binary: $TKV_BIN"
 log "========================================="
 
 test_unit_tests

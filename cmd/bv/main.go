@@ -1079,7 +1079,7 @@ func main() {
 	if *feedbackAccept != "" || *feedbackIgnore != "" || *feedbackReset || *feedbackShow {
 		beadsDir, err := loader.GetBeadsDir("")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error getting beads directory: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error getting issue data directory: %v\n", err)
 			os.Exit(1)
 		}
 
@@ -3264,12 +3264,12 @@ func main() {
 		// Resolve beads file path (bv-history fix, respects BEADS_DIR)
 		beadsDir, err := loader.GetBeadsDir("")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error getting beads directory: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error getting issue data directory: %v\n", err)
 			os.Exit(1)
 		}
 		beadsPath, err := loader.FindJSONLPath(beadsDir)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error finding beads file: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error finding issue data file: %v\n", err)
 			os.Exit(1)
 		}
 
@@ -3344,7 +3344,7 @@ func main() {
 	if *robotExplainCorrelation != "" || *robotConfirmCorrelation != "" || *robotRejectCorrelation != "" || *robotCorrelationStats {
 		beadsDir, err := loader.GetBeadsDir("")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error getting beads directory: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error getting issue data directory: %v\n", err)
 			os.Exit(1)
 		}
 
@@ -3390,7 +3390,7 @@ func main() {
 			}
 			beadsPath, err := loader.FindJSONLPath(beadsDir)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error finding beads file: %v\n", err)
+				fmt.Fprintf(os.Stderr, "Error finding issue data file: %v\n", err)
 				os.Exit(1)
 			}
 			correlator := correlation.NewCorrelator(cwd, beadsPath)
@@ -3469,7 +3469,7 @@ func main() {
 			}
 			beadsPath, err := loader.FindJSONLPath(beadsDir)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error finding beads file: %v\n", err)
+				fmt.Fprintf(os.Stderr, "Error finding issue data file: %v\n", err)
 				os.Exit(1)
 			}
 			correlator := correlation.NewCorrelator(cwd, beadsPath)
@@ -3539,7 +3539,7 @@ func main() {
 			}
 			beadsPath, err := loader.FindJSONLPath(beadsDir)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error finding beads file: %v\n", err)
+				fmt.Fprintf(os.Stderr, "Error finding issue data file: %v\n", err)
 				os.Exit(1)
 			}
 			correlator := correlation.NewCorrelator(cwd, beadsPath)
@@ -3606,12 +3606,12 @@ func main() {
 		// Get beads path
 		beadsDir, err := loader.GetBeadsDir("")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error getting beads directory: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error getting issue data directory: %v\n", err)
 			os.Exit(1)
 		}
 		beadsPath, err := loader.FindJSONLPath(beadsDir)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error finding beads file: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error finding issue data file: %v\n", err)
 			os.Exit(1)
 		}
 
@@ -3704,12 +3704,12 @@ func main() {
 		// Resolve beads file path
 		beadsDir, err := loader.GetBeadsDir("")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error getting beads directory: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error getting issue data directory: %v\n", err)
 			os.Exit(1)
 		}
 		beadsPath, err := loader.FindJSONLPath(beadsDir)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error finding beads file: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error finding issue data file: %v\n", err)
 			os.Exit(1)
 		}
 
@@ -3805,12 +3805,12 @@ func main() {
 
 		beadsDir, err := loader.GetBeadsDir("")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error getting beads directory: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error getting issue data directory: %v\n", err)
 			os.Exit(1)
 		}
 		beadsPath, err := loader.FindJSONLPath(beadsDir)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error finding beads file: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error finding issue data file: %v\n", err)
 			os.Exit(1)
 		}
 
@@ -3883,18 +3883,18 @@ func main() {
 
 		issues, err := datasource.LoadIssues(cwd)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error loading beads: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error loading issue data: %v\n", err)
 			os.Exit(1)
 		}
 
 		beadsDir, err := loader.GetBeadsDir("")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error getting beads directory: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error getting issue data directory: %v\n", err)
 			os.Exit(1)
 		}
 		beadsPath, err := loader.FindJSONLPath(beadsDir)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error finding beads file: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error finding issue data file: %v\n", err)
 			os.Exit(1)
 		}
 
@@ -3958,18 +3958,18 @@ func main() {
 
 		issues, err := datasource.LoadIssues(cwd)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error loading beads: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error loading issue data: %v\n", err)
 			os.Exit(1)
 		}
 
 		beadsDir, err := loader.GetBeadsDir("")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error getting beads directory: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error getting issue data directory: %v\n", err)
 			os.Exit(1)
 		}
 		beadsPath, err := loader.FindJSONLPath(beadsDir)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error finding beads file: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error finding issue data file: %v\n", err)
 			os.Exit(1)
 		}
 
@@ -4047,7 +4047,7 @@ func main() {
 
 		issues, err := datasource.LoadIssues(cwd)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error loading beads: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error loading issue data: %v\n", err)
 			os.Exit(1)
 		}
 
@@ -4092,19 +4092,19 @@ func main() {
 		// Find beads path
 		beadsDir, err := loader.GetBeadsDir("")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error getting beads directory: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error getting issue data directory: %v\n", err)
 			os.Exit(1)
 		}
 		beadsPath, err := loader.FindJSONLPath(beadsDir)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error finding beads file: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error finding issue data file: %v\n", err)
 			os.Exit(1)
 		}
 
 		// Load issues
 		issues, err := datasource.LoadIssues(cwd)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error loading beads: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error loading issue data: %v\n", err)
 			os.Exit(1)
 		}
 
@@ -4184,18 +4184,18 @@ func main() {
 
 		issues, err := datasource.LoadIssues(cwd)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error loading beads: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error loading issue data: %v\n", err)
 			os.Exit(1)
 		}
 
 		beadsDir, err := loader.GetBeadsDir("")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error getting beads directory: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error getting issue data directory: %v\n", err)
 			os.Exit(1)
 		}
 		beadsPath, err := loader.FindJSONLPath(beadsDir)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error finding beads file: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error finding issue data file: %v\n", err)
 			os.Exit(1)
 		}
 
@@ -4829,7 +4829,7 @@ func main() {
 		m := ui.NewModel(issues, activeRecipe, "")
 		defer m.Stop()
 		if err := runTUIProgram(m); err != nil {
-			fmt.Printf("Error running beads viewer: %v\n", err)
+			fmt.Printf("Error running tkv: %v\n", err)
 			os.Exit(1)
 		}
 		return
@@ -4941,7 +4941,7 @@ func main() {
 
 	// Run Program
 	if err := runTUIProgram(m); err != nil {
-		fmt.Printf("Error running beads viewer: %v\n", err)
+		fmt.Printf("Error running tkv: %v\n", err)
 		os.Exit(1)
 	}
 }
@@ -5939,8 +5939,8 @@ func copyFileWithTitleAndCacheBusting(src, dst, title string) error {
 	// Replace title in <title> tag and in the h1 header (if title provided)
 	if title != "" {
 		safeTitle := html.EscapeString(title)
-		result = strings.Replace(result, "<title>Beads Viewer</title>", "<title>"+safeTitle+"</title>", 1)
-		result = strings.Replace(result, `<h1 class="text-xl font-semibold">Beads Viewer</h1>`, `<h1 class="text-xl font-semibold">`+safeTitle+`</h1>`, 1)
+		result = strings.Replace(result, "<title>Ticket Viewer</title>", "<title>"+safeTitle+"</title>", 1)
+		result = strings.Replace(result, `<h1 class="text-xl font-semibold">Ticket Viewer</h1>`, `<h1 class="text-xl font-semibold">`+safeTitle+`</h1>`, 1)
 	}
 
 	// Always add cache-busting to script tags to prevent CDN from serving stale JS files
@@ -6214,7 +6214,7 @@ func generateREADME(bundlePath, title, pagesURL string, issues []model.Issue, tr
 
 	// Footer with timestamp and links
 	b.WriteString("---\n\n")
-	b.WriteString(fmt.Sprintf("*Generated %s by [bv](https://github.com/adampush/ticket_viewer)*\n\n", time.Now().Format("Jan 2, 2006 at 3:04 PM MST")))
+	b.WriteString(fmt.Sprintf("*Generated %s by [tkv](https://github.com/adampush/ticket_viewer)*\n\n", time.Now().Format("Jan 2, 2006 at 3:04 PM MST")))
 
 	if pagesURL != "" {
 		b.WriteString(fmt.Sprintf("**[Open Interactive Dashboard](%s)** for full details, dependency graph, search, and time-travel.\n", pagesURL))
@@ -6307,7 +6307,7 @@ func runPagesWizard(beadsPath string) error {
 	wizard.PerformExport(bundlePath)
 
 	if source.BeadsDir != "" {
-		fmt.Printf("  -> Using beads source: %s (%s)\n", source.BeadsDir, source.Reason)
+		fmt.Printf("  -> Using legacy .beads source: %s (%s)\n", source.BeadsDir, source.Reason)
 	}
 
 	fmt.Println("Exporting static site...")
@@ -6531,7 +6531,7 @@ func resolvePagesSource(config *export.WizardConfig, beadsPath string) (pagesSou
 	if lastErr != nil {
 		return pagesSource{}, lastErr
 	}
-	return pagesSource{}, fmt.Errorf("no valid beads source found for pages export")
+	return pagesSource{}, fmt.Errorf("no valid issue data source found for pages export")
 }
 
 func isSuspiciousIssueCount(current, expected int) bool {
@@ -7848,7 +7848,7 @@ func generateRobotSchemas() RobotSchemas {
 			},
 			"data_hash": map[string]interface{}{
 				"type":        "string",
-				"description": "Fingerprint of source beads.jsonl for cache validation",
+				"description": "Fingerprint of source issue dataset for cache validation",
 			},
 			"output_format": map[string]interface{}{
 				"type":        "string",
@@ -7857,7 +7857,7 @@ func generateRobotSchemas() RobotSchemas {
 			},
 			"version": map[string]interface{}{
 				"type":        "string",
-				"description": "bv version that generated this output",
+				"description": "tkv version that generated this output",
 			},
 		},
 		"required": []string{"generated_at", "data_hash"},

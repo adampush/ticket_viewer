@@ -54,7 +54,7 @@ func LoadIssuesDetailed(repoPath string) ([]model.Issue, *LoadMetadata, error) {
 	return nil, meta, smartErr
 }
 
-// LoadIssuesFromDir performs smart source detection within a known beads directory.
+// LoadIssuesFromDir performs smart source detection within a known data directory.
 // This is useful when the caller already knows the .beads path.
 func LoadIssuesFromDir(beadsDir string) ([]model.Issue, error) {
 	issues, _, smartErr := loadSmart(beadsDir, "")
@@ -206,10 +206,10 @@ func BuildMixedSourceUsageHint(meta *LoadMetadata) string {
 		return ""
 	}
 	if meta.SelectedSource.Type == SourceTypeTicketsMarkdown {
-		return "Both .tickets and Beads sources were detected; tk tickets were selected by precedence."
+		return "Both .tickets and legacy .beads sources were detected; tk tickets were selected by precedence."
 	}
 	if strings.TrimSpace(meta.SelectedSource.Path) == "" {
-		return "Both .tickets and Beads sources were detected; Beads source was selected."
+		return "Both .tickets and legacy .beads sources were detected; legacy source was selected."
 	}
-	return fmt.Sprintf("Both .tickets and Beads sources were detected; selected source: %s.", meta.SelectedSource.Path)
+	return fmt.Sprintf("Both .tickets and legacy .beads sources were detected; selected source: %s.", meta.SelectedSource.Path)
 }

@@ -1,5 +1,5 @@
 // Package datasource provides intelligent multi-source data detection and selection
-// for beads_viewer. It discovers, validates, and selects the freshest valid source
+// for ticket_viewer. It discovers, validates, and selects the freshest valid source
 // from SQLite databases, worktree JSONL files, and local JSONL files.
 package datasource
 
@@ -19,7 +19,7 @@ type SourceType string
 const (
 	// SourceTypeTicketsMarkdown is a tk .tickets markdown directory.
 	SourceTypeTicketsMarkdown SourceType = "tickets_markdown"
-	// SourceTypeSQLite is a SQLite database (beads.db)
+	// SourceTypeSQLite is a SQLite database (beads.db legacy format)
 	SourceTypeSQLite SourceType = "sqlite"
 	// SourceTypeJSONLWorktree is a JSONL file from a git worktree
 	SourceTypeJSONLWorktree SourceType = "jsonl_worktree"
@@ -35,7 +35,7 @@ const (
 	PriorityJSONLLocal      = 50
 )
 
-// DataSource represents a potential source of beads data
+// DataSource represents a potential issue-data source
 type DataSource struct {
 	// Type identifies the source type
 	Type SourceType `json:"type"`
@@ -83,7 +83,7 @@ type DiscoveryOptions struct {
 	Logger func(msg string)
 }
 
-// DiscoverSources finds all potential data sources in the beads directory
+// DiscoverSources finds all potential data sources in configured directories.
 func DiscoverSources(opts DiscoveryOptions) ([]DataSource, error) {
 	if opts.Logger == nil {
 		opts.Logger = func(string) {}
